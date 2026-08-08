@@ -1,5 +1,5 @@
 import JwtUtils from '../utils/jwt-utils';
-import constant from '../const/constant';
+import { getAuthToken } from './auth-cookie';
 
 const userContext = {
 	getUserId(c) {
@@ -11,9 +11,9 @@ const userContext = {
 	},
 
 	async getToken(c) {
-		const jwt = c.req.header(constant.TOKEN_HEADER);
+		const jwt = getAuthToken(c);
 		const result = await JwtUtils.verifyToken(c,jwt);
-		return result?.token;
+		return result?.sessionId;
 	},
 };
 export default userContext;

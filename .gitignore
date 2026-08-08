@@ -26,3 +26,9 @@ mail-vue/dist
 .wrangler
 .venv
 git-tools.js
+.dev.vars
+.dev.vars.*
+!.dev.vars.example
+.env
+.env.*
+!.env.example

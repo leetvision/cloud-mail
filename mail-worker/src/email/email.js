@@ -169,12 +169,12 @@ export async function email(message, env, ctx) {
 
 		}
 
-		//转发到TG
+		// Forward to Telegram.
 		if (tgBotStatus === settingConst.tgBotStatus.OPEN && tgChatId) {
 			await telegramService.sendEmailToBot({ env }, emailRow)
 		}
 
-		//转发到其他邮箱
+		// Forward to another email address.
 		if (forwardStatus === settingConst.forwardStatus.OPEN && forwardEmail) {
 
 			const emails = forwardEmail.split(',');
@@ -184,20 +184,20 @@ export async function email(message, env, ctx) {
 				try {
 					await message.forward(email);
 				} catch (e) {
-					console.error(`转发邮箱 ${email} 失败：`, e);
+					console.error(`Failed to forward email to ${email}:`, e);
 				}
 
 			}));
 
 		}
 
-		//转发到 Webhook
+		// Forward the message to the configured webhook.
 		if (webhookStatus === settingConst.webhookStatus.OPEN && webhookUrl) {
 			await webhookService.sendEmail({ env }, emailRow, webhookUrl, webhookRetry, webhookSecret);
 		}
 
 	} catch (e) {
-		console.error('邮件接收异常: ', e);
+		console.error('Email receiving failed:', e);
 		throw e
 	}
 }

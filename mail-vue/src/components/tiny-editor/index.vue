@@ -6,11 +6,9 @@
 </template>
 
 <script setup>
-import {ref, onMounted, onBeforeUnmount, watch, nextTick, shallowRef, defineEmits, computed} from 'vue';
+import {ref, onMounted, onBeforeUnmount, watch, nextTick, shallowRef, defineEmits} from 'vue';
 import loading from "@/components/loading/index.vue";
-import {useI18n} from 'vue-i18n'
 import {useUiStore} from '@/store/ui.js'
-import {useSettingStore} from '@/store/setting.js'
 
 defineExpose({
   clearEditor,
@@ -30,14 +28,12 @@ const props = defineProps({
 });
 
 
-const {locale} = useI18n()
 const emit = defineEmits(['change','focus']);
 const editor = shallowRef(null);
 const isInitialized = ref(false);
 const editorRef = ref(null);
 const showLoading = ref(false);
 const uiStore = useUiStore();
-const settingStore = useSettingStore();
 
 onMounted(() => {
   initTinyMCE();
@@ -53,18 +49,10 @@ watch(() => props.defValue, (newValue) => {
   }
 });
 
-watch(() => [uiStore.dark, settingStore.lang], () => {
+watch(() => uiStore.dark, () => {
   destroyEditor();
   initEditor();
 });
-
-const language = computed(() => {
-  if (locale.value === 'zh') {
-    return 'zh_CN'
-  }
-
-  return 'en'
-})
 
 function clearEditor() {
   if (editor.value) {
@@ -91,8 +79,8 @@ function initEditor() {
     statusbar: false,
     height: "100%",
     auto_focus: true,
-    //relative_urls: false,  //阻止 img标签域名和网站域名相同 自动把链接转换相对路径
-    //remove_script_host: false, // 阻止删除 URL 中的域名
+    //relative_urls: false,  // Prevent image URLs on the same domain from being converted to relative paths.
+    //remove_script_host: false, // Preserve the domain in URLs.
     forced_root_block: 'div',
     skin: `${uiStore.dark ? 'oxide-dark' : 'oxide'}`,
     content_css: `/tinymce/css/index.css,${uiStore.dark ? 'dark' : 'default'}`,
@@ -105,7 +93,7 @@ function initEditor() {
     toolbar_mode: 'scrolling',
     font_size_formats: '8px 10px 12px 14px 16px 18px 24px 36px',
     emoticons_search: false,
-    language: language.value,
+    language: 'en',
     language_load: true,
     menubar: false,
     license_key: 'gpl',

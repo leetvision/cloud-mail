@@ -5,7 +5,6 @@ import user from '../entity/user';
 import { and, asc, count, desc, eq, inArray, sql } from 'drizzle-orm';
 import { emailConst, isDel, roleConst, settingConst, userConst } from '../const/entity-const';
 import kvConst from '../const/kv-const';
-import KvConst from '../const/kv-const';
 import cryptoUtils from '../utils/crypto-utils';
 import emailService from './email-service';
 import dayjs from 'dayjs';
@@ -20,6 +19,7 @@ import {oauth} from "../entity/oauth";
 import oauthService from "./oauth-service";
 import settingService from './setting-service';
 import starService from './star-service';
+import sessionService from './session-service';
 
 const userService = {
 
@@ -60,11 +60,19 @@ const userService = {
 
 		const { password } = params;
 
-		if (password.length < 6) {
+		if (!password || password.length < constant.PASSWORD_MIN_LENGTH) {
 			throw new BizError(t('pwdMinLength'));
+		}
+		if (password.length > constant.PASSWORD_MAX_LENGTH) {
+			throw new BizError(t('pwdLengthLimit'));
 		}
 		const { salt, hash } = await cryptoUtils.hashPassword(password);
 		await orm(c).update(user).set({ password: hash, salt: salt }).where(eq(user.userId, userId)).run();
+		await sessionService.deleteByUserId(c, userId);
+	},
+
+	async updatePasswordHash(c, userId, hash, salt) {
+		await orm(c).update(user).set({ password: hash, salt }).where(eq(user.userId, userId)).run();
 	},
 
 	selectByEmail(c, email) {
@@ -104,7 +112,7 @@ const userService = {
 			return;
 		}
 		await orm(c).update(user).set({ isDel: isDel.DELETE }).where(eq(user.userId, userId)).run();
-		await c.env.kv.delete(kvConst.AUTH_INFO + userId)
+		await sessionService.deleteByUserId(c, userId);
 	},
 
 	async physicsDelete(c, params) {
@@ -113,6 +121,7 @@ const userService = {
 		await starService.removeByUserIds(c, userIds);
 		await accountService.physicsDeleteByUserIds(c, userIds);
 		await oauthService.deleteByUserIds(c, userIds);
+		await sessionService.deleteByUserIds(c, userIds);
 		await orm(c).delete(user).where(inArray(user.userId, userIds)).run();
 	},
 
@@ -269,7 +278,6 @@ const userService = {
 
 		const { password, userId } = params;
 		await this.resetPassword(c, { password }, userId);
-		await c.env.kv.delete(KvConst.AUTH_INFO + userId);
 	},
 
 	async setStatus(c, params) {
@@ -283,7 +291,7 @@ const userService = {
 			.run();
 
 		if (status === userConst.status.BAN) {
-			await c.env.kv.delete(KvConst.AUTH_INFO + userId);
+			await sessionService.deleteByUserId(c, userId);
 		}
 	},
 
@@ -329,8 +337,11 @@ const userService = {
 			throw new BizError(t('notEmailDomain'));
 		}
 
-		if (password.length < 6) {
+		if (!password || password.length < constant.PASSWORD_MIN_LENGTH) {
 			throw new BizError(t('pwdMinLength'));
+		}
+		if (password.length > constant.PASSWORD_MAX_LENGTH) {
+			throw new BizError(t('pwdLengthLimit'));
 		}
 
 		const accountRow = await accountService.selectByEmailIncludeDel(c, email);
@@ -365,7 +376,7 @@ const userService = {
 	},
 
 	async resetDaySendCount(c) {
-		// 仅 UTC 0 点执行，便于配合每小时 cron
+		// Run only at 00:00 UTC so this remains safe with the hourly cron.
 		if (new Date().getUTCHours() !== 0) {
 			return;
 		}

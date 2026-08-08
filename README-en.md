@@ -3,9 +3,6 @@
     <h1 align="center">Cloud Mail</h1>
     <p align="center">A simple, responsive email service designed to run on Cloudflare Workers 🎉</p> 
     <p align="center">
-       <a href="/README.md" style="margin-left: 5px">简体中文</a> | English 
-    </p>
-    <p align="center">
         <a href="https://github.com/maillab/cloud-mail/tree/main?tab=MIT-1-ov-file" target="_blank" >
             <img src="https://img.shields.io/badge/license-MIT-green" />
         </a>    
@@ -36,10 +33,6 @@ With only one domain, you can create multiple different email addresses, similar
 - [Live Demo](https://skymail.ink)<br>
 - [Deployment Guide](https://doc.skymail.ink/en/)<br>
 
-
-| ![](/doc/demo/demo1.png) | ![](/doc/demo/demo2.png) |
-|--------------------------|--------------------------|
-| ![](/doc/demo/demo3.png) | ![](/doc/demo/demo4.png) |
 
 ## Features
 
@@ -109,7 +102,7 @@ cloud-mail
 │   │   ├── utils			    # Utility functions
 │   │   └── index.js			# Entry point
 │   ├── package.json			# Project dependencies
-│   └── wrangler.toml			# Project configuration
+│   └── wrangler.jsonc			# Project configuration
 │
 ├─ mail-vue				        # Frontend Vue project
 │   ├── src
@@ -135,9 +128,7 @@ cloud-mail
 
 ## Sponsor
 
-<a href="https://doc.skymail.ink/support.html">
-<img width="170px" src="./doc/images/support.png" alt="">
-</a>
+[Support the project](https://doc.skymail.ink/support.html)
 
 ## License
 

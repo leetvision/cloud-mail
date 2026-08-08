@@ -183,8 +183,8 @@ async function copyEmail(email) {
 }
 
 function changeLang(lang) {
-  setExtend(lang === 'en' ? 'en' : 'zh-cn')
-  settingStore.lang = lang
+  setExtend('en')
+  settingStore.lang = 'en'
 }
 
 function openNotice() {
@@ -208,7 +208,7 @@ function openDark(e) {
   const maxY = Math.max(y, window.innerHeight - y)
   const endRadius = Math.hypot(maxX, maxY)
 
-  // 标记切换目标，供 CSS 选择器使用
+  // Mark the transition target for CSS selectors.
   root.setAttribute('data-theme-to', nextIsDark ? 'dark' : 'light')
   root.style.setProperty('--vt-x', `${x}px`)
   root.style.setProperty('--vt-y', `${y}px`)
@@ -219,7 +219,7 @@ function openDark(e) {
   })
 
   transition.finished.finally(() => {
-    // 清理标记
+    // Clear the transition marker.
     root.removeAttribute('data-theme-to')
   })
 }
@@ -243,7 +243,7 @@ function changeAside() {
 function clickLogout() {
   logoutLoading.value = true
   logout().then(() => {
-    localStorage.removeItem("token")
+		localStorage.removeItem('authenticated')
     router.replace('/login')
   }).finally(() => {
     logoutLoading.value = false

@@ -535,7 +535,7 @@
                  @closed="oauthForm.clientId = ''; oauthForm.clientSecret = ''; oauthForm.switch = 1">
         <div class="dialog-content">
           <el-input type="text" :placeholder="$t('clientId')" v-model="oauthForm.clientId"/>
-          <el-input type="text" style="margin-top: 15px" :placeholder="$t('clientSecret')" v-model="oauthForm.clientSecret"/>
+          <el-input type="password" show-password style="margin-top: 15px" :placeholder="$t('clientSecret')" v-model="oauthForm.clientSecret"/>
         </div>
         <template #footer>
           <div class="dialog-footer">
@@ -1183,7 +1183,7 @@ function getUpdate() {
     setTimeout(() => {
       getUpdate()
     }, 2000)
-    console.error('检查更新失败：', e)
+    console.error('Failed to check for updates:', e)
   })
 }
 

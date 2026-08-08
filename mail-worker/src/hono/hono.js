@@ -2,36 +2,29 @@ import { Hono } from 'hono';
 const app = new Hono();
 
 import result from '../model/result';
-import { cors } from 'hono/cors';
+import { bodyLimit } from 'hono/body-limit';
 
-app.use('*', cors());
+app.use('*', bodyLimit({
+	maxSize: 50 * 1024 * 1024,
+	onError: (c) => c.json(result.fail('Request body is too large', 413), 413),
+}));
+
+app.use('*', async (c, next) => {
+	await next();
+	c.header('X-Content-Type-Options', 'nosniff');
+	c.header('Referrer-Policy', 'strict-origin-when-cross-origin');
+	c.header('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+	c.header('X-Frame-Options', 'DENY');
+	if (!c.res.headers.has('Cache-Control')) c.header('Cache-Control', 'no-store');
+});
 
 app.onError((err, c) => {
 	if (err.name === 'BizError') {
-		console.log(err.message);
-	} else {
-		console.error(err);
+		return c.json(result.fail(err.message, err.code), err.code);
 	}
 
-	if (err.message === `Cannot read properties of undefined (reading 'get')`) {
-		return c.json(result.fail('KV数据库未绑定<br/>KV database not bound',502));
-	}
-
-	if (err.message === `Cannot read properties of undefined (reading 'put')`) {
-		return c.json(result.fail('KV数据库未绑定<br/>KV database not bound',502));
-	}
-
-	if (err.message === `Cannot read properties of undefined (reading 'prepare')`) {
-		return c.json(result.fail('D1数据库未绑定<br/>D1 database not bound',502));
-	}
-
-	if (err.message?.includes('D1_ERROR: no such column')) {
-		return c.json(result.fail('请按照文档更新数据库<br/>Please update the database as documented',502));
-	}
-
-	return c.json(result.fail(err.message, err.code));
+	console.error(err);
+	return c.json(result.fail('Internal server error', 500), 500);
 });
 
 export default app;
-
-

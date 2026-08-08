@@ -1,6 +1,5 @@
 import BizError from '../error/biz-error';
 import orm from '../entity/orm';
-import { v4 as uuidv4 } from 'uuid';
 import { and, asc, desc, eq, sql } from 'drizzle-orm';
 import saltHashUtils from '../utils/crypto-utils';
 import cryptoUtils from '../utils/crypto-utils';
@@ -13,7 +12,8 @@ import dayjs from 'dayjs';
 import { isDel, roleConst } from '../const/entity-const';
 import email from '../entity/email';
 import userService from './user-service';
-import KvConst from '../const/kv-const';
+import JwtUtils from '../utils/jwt-utils';
+import constant from '../const/constant';
 
 const publicService = {
 
@@ -43,8 +43,8 @@ const publicService = {
 			num = 1
 		}
 
-		size = Number(size);
-		num = Number(num);
+		size = Math.min(Math.max(Number(size) || 20, 1), 100);
+		num = Math.max(Number(num) || 1, 1);
 
 		num = (num - 1) * size;
 
@@ -97,7 +97,8 @@ const publicService = {
 	async addUser(c, params) {
 		const { list } = params;
 
-		if (list.length === 0) return;
+		if (!Array.isArray(list) || list.length === 0) return;
+		if (list.length > 100) throw new BizError('A maximum of 100 users can be added per request', 400);
 
 		for (const emailRow of list) {
 			if (!verifyUtils.isEmail(emailRow.email)) {
@@ -108,9 +109,11 @@ const publicService = {
 				throw new BizError(t('notEmailDomain'));
 			}
 
-			const { salt, hash } = await saltHashUtils.hashPassword(
-				emailRow.password || cryptoUtils.genRandomPwd()
-			);
+			const password = emailRow.password || cryptoUtils.genRandomPwd();
+			if (password.length < constant.PASSWORD_MIN_LENGTH || password.length > constant.PASSWORD_MAX_LENGTH) {
+				throw new BizError(`Passwords must be ${constant.PASSWORD_MIN_LENGTH}-${constant.PASSWORD_MAX_LENGTH} characters`, 400);
+			}
+			const { salt, hash } = await saltHashUtils.hashPassword(password);
 
 			emailRow.salt = salt;
 			emailRow.hash = hash;
@@ -124,7 +127,7 @@ const publicService = {
 		const roleList = await roleService.roleSelectUse(c);
 		const defRole = roleList.find(roleRow => roleRow.isDefault === roleConst.isDefault.OPEN);
 
-		const userList = [];
+		const statements = [];
 
 		for (const emailRow of list) {
 			let { email, hash, salt, roleName } = emailRow;
@@ -135,21 +138,19 @@ const publicService = {
 				type = roleRow ? roleRow.roleId : type;
 			}
 
-			const userSql = `INSERT INTO user (email, password, salt, type, os, browser, active_ip, create_ip, device, active_time, create_time)
-			VALUES ('${email}', '${hash}', '${salt}', '${type}', '${os}', '${browser}', '${activeIp}', '${activeIp}', '${device}', '${activeTime}', '${activeTime}')`
+			statements.push(c.env.db.prepare(`INSERT INTO user
+				(email, password, salt, type, os, browser, active_ip, create_ip, device, active_time, create_time)
+				VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+			).bind(email, hash, salt, type, os, browser, activeIp, activeIp, device, activeTime, activeTime));
 
-			const accountSql = `INSERT INTO account (email, name, user_id)
-			VALUES ('${email}', '${emailUtils.getName(email)}', 0);`;
-
-			userList.push(c.env.db.prepare(userSql));
-			userList.push(c.env.db.prepare(accountSql));
+			statements.push(c.env.db.prepare(`INSERT INTO account (email, name, user_id)
+				VALUES (?, ?, (SELECT user_id FROM user WHERE email = ?))`
+			).bind(email, emailUtils.getName(email), email));
 
 		}
 
-		userList.push(c.env.db.prepare(`UPDATE account SET user_id = (SELECT user_id FROM user WHERE user.email = account.email) WHERE user_id = 0;`))
-
 		try {
-			await c.env.db.batch(userList);
+			await c.env.db.batch(statements);
 		} catch (e) {
 			if(e.message.includes('SQLITE_CONSTRAINT')) {
 				throw new BizError(t('emailExistDatabase'))
@@ -164,11 +165,13 @@ const publicService = {
 
 		await this.verifyUser(c, params)
 
-		const uuid = uuidv4();
+		const token = await JwtUtils.generateToken(
+			c,
+			{ scope: 'public', admin: c.env.admin },
+			constant.PUBLIC_TOKEN_EXPIRE
+		);
 
-		await c.env.kv.put(KvConst.PUBLIC_KEY, uuid);
-
-		return {token: uuid}
+		return { token, expiresIn: constant.PUBLIC_TOKEN_EXPIRE };
 	},
 
 	async verifyUser(c, params) {

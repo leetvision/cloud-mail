@@ -1,5 +1,5 @@
 <template>
-  <div id="login-box" :style=" background ? 'background: var(--el-bg-color)' : ''" v-loading="oauthLoading" element-loading-text="登录中...">
+  <div id="login-box" :style=" background ? 'background: var(--el-bg-color)' : ''" v-loading="oauthLoading" element-loading-text="Signing in...">
     <div id="background-wrap" v-if="!settingStore.settings.background">
       <div class="x1 cloud"></div>
       <div class="x2 cloud"></div>
@@ -110,7 +110,7 @@
         </template>
       </div>
     </div>
-    <el-dialog class="bind-dialog" v-model="showBindForm"  title="注册邮箱" >
+    <el-dialog class="bind-dialog" v-model="showBindForm" title="Register an email address">
       <div class="bind-container">
         <el-input :class="!hideLoginDomain ? 'email-input' : ''" v-model="bindForm.email" type="text" :placeholder="$t('emailAccount')" autocomplete="off" @keyup.enter="bind">
           <template #append v-if="!hideLoginDomain">
@@ -140,7 +140,7 @@
         <el-input v-if="settingStore.settings.regKey === 2" v-model="bindForm.code"
                   :placeholder="$t('regKeyOptional')" type="text" autocomplete="off" @keyup.enter="bind"/>
         <el-button class="btn" type="primary" @click="bind" :loading="bindLoading"
-        >绑定
+        >Bind
         </el-button>
       </div>
     </el-dialog>
@@ -152,7 +152,6 @@
 
 <script setup>
 import router from "@/router";
-import {useRoute} from "vue-router";
 import {computed, nextTick, reactive, ref} from "vue";
 import {login} from "@/request/login.js";
 import {register} from "@/request/login.js";
@@ -167,14 +166,13 @@ import {cvtR2Url} from "@/utils/convert.js";
 import {loginUserInfo} from "@/request/my.js";
 import {permsToRouter} from "@/perm/perm.js";
 import {useI18n} from "vue-i18n";
-import {oauthBindUser, oauthLinuxDoLogin, oauthGithubLogin, oauthGoogleLogin} from "@/request/ouath.js";
+import {oauthAuthorize, oauthBindUser, oauthLogin as completeOauthLogin} from "@/request/ouath.js";
 
 const {t} = useI18n();
 const accountStore = useAccountStore();
 const userStore = useUserStore();
 const uiStore = useUiStore();
 const settingStore = useSettingStore();
-const route = useRoute();
 const loginLoading = ref(false)
 const bindLoading = ref(false)
 const oauthLoading = ref(false);
@@ -182,13 +180,6 @@ const showBindForm = ref(false);
 const show = ref('login')
 
 const oauthKeys = ['linuxdo', 'github', 'google']
-
-const oauthProvider = computed(() => {
-  const fromState = route.query.state
-  if (oauthKeys.includes(fromState)) return fromState
-  const fromStore = sessionStorage.getItem('oauthProvider')
-  return oauthKeys.includes(fromStore) ? fromStore : null
-})
 
 const oauthProviders = computed(() => {
   const allProviders = [
@@ -201,7 +192,7 @@ const oauthProviders = computed(() => {
 
 const bindForm = reactive({
   email: '',
-  oauthUserId: '',
+  bindToken: '',
   code: ''
 })
 
@@ -236,7 +227,7 @@ window.onTurnstileError = (e) => {
     return
   }
   verifyErrorCount++
-  console.warn('人机验加载失败', e)
+  console.warn('Failed to load human verification', e)
   setTimeout(() => {
     nextTick(() => {
       if (!turnstileId) {
@@ -285,57 +276,42 @@ const getEmailName = (email) => {
   return email.split('@')[0]
 }
 
-function oauthLogin(provider) {
-  const clientId = settingStore.settings[provider + 'ClientId']
-  const redirectUri = encodeURIComponent(window.location.origin + '/login')
-  sessionStorage.setItem('oauthProvider', provider)
-  const authorizeUrls = {
-    linuxdo: `https://connect.linux.do/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid+profile+email&state=${provider}`,
-    github: `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user:email&state=${provider}`,
-    google: `https://accounts.google.com/o/oauth2/v2/auth?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid+profile+email&state=${provider}`,
-  }
-  window.location.href = authorizeUrls[provider]
-}
-
-const loginFns = {
-  linuxdo: oauthLinuxDoLogin,
-  github: oauthGithubLogin,
-  google: oauthGoogleLogin,
+async function oauthLogin(provider) {
+  const {url} = await oauthAuthorize(provider)
+  window.location.href = url
 }
 
 oauthGetUser();
 
 async function oauthGetUser() {
-
   const params = new URLSearchParams(window.location.search)
   const code = params.get('code')
-  if (!code || !oauthProvider.value) return
+  const state = params.get('state')
+  const provider = state?.split('.', 1)[0]
+  if (!code || !state || !oauthKeys.includes(provider)) return
 
-  const provider = oauthProvider.value
   oauthLoading.value = true
-  sessionStorage.removeItem('oauthProvider')
   window.history.replaceState({}, '', window.location.origin + window.location.pathname)
 
-  loginFns[provider](code, window.location.origin + '/login').then(data => {
-
-    bindForm.oauthUserId = data.userInfo.oauthUserId;
-
-    if (!data.token) {
+  try {
+    const data = await completeOauthLogin(provider, code, state)
+    bindForm.bindToken = data.bindToken || ''
+    if (!data.authenticated) {
       showBindForm.value = true
-      oauthLoading.value = false
       ElMessage({
-        message: '请注册绑定一个邮箱',
+        message: 'Register and bind an email address.',
         type: 'warning',
         duration: 4000,
         plain: true,
       })
-      return;
+      return
     }
-
-    saveToken(data.token);
-  }).catch(() => {
+    await saveToken()
+  } catch {
+    // The request interceptor displays the server-provided error.
+  } finally {
     oauthLoading.value = false
-  })
+  }
 }
 
 function bind() {
@@ -387,11 +363,11 @@ function bind() {
 
   }
 
-  const form = {email, oauthUserId: bindForm.oauthUserId, code: bindForm.code}
+	const form = {email, bindToken: bindForm.bindToken, code: bindForm.code}
 
   bindLoading.value = true
   oauthBindUser(form).then(data => {
-    saveToken(data.token)
+		saveToken()
   }).catch(() => {
     bindLoading.value = false
   })
@@ -432,14 +408,14 @@ const submit = () => {
 
   loginLoading.value = true
   login(email, form.password).then(async data => {
-    await saveToken(data.token)
+		await saveToken()
   }).finally(() => {
     loginLoading.value = false
   })
 }
 
-async function saveToken(token) {
-  localStorage.setItem('token', token)
+async function saveToken() {
+	localStorage.setItem('authenticated', '1')
   refreshWebsiteConfig()
   const user = await loginUserInfo();
   accountStore.currentAccountId = user.account.accountId;
@@ -513,7 +489,7 @@ function submitRegister() {
     return
   }
 
-  if (registerForm.password.length < 6) {
+  if (registerForm.password.length < 12) {
     ElMessage({
       message: t('pwdLengthMsg'),
       type: 'error',
@@ -555,7 +531,7 @@ function submitRegister() {
             turnstileId = window.turnstile.render('.register-turnstile')
           } catch (e) {
             botJsError.value = true
-            console.log('人机验证js加载失败')
+            console.log('Failed to load the human-verification script')
           }
         } else {
           window.turnstile.reset('.register-turnstile')

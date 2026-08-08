@@ -241,9 +241,9 @@
       <div class="details">
         <div v-if="userDetails.platform || userDetails.username" class="oauth-details">
           <el-avatar :src="userDetails.avatar" :size="30" class="oauth-avatar"/>
-          <span>{{ $t('username') }}：{{ userDetails.username }}</span>
+          <span>{{ $t('username') }}: {{ userDetails.username }}</span>
           <span v-if="userDetails.trustLevel != null">
-            {{ $t('trustLevel') }}：<el-tag type="success">{{ userDetails.trustLevel }}</el-tag>
+            {{ $t('trustLevel') }}: <el-tag type="success">{{ userDetails.trustLevel }}</el-tag>
           </span>
         </div>
         <div v-if="!sendNumShow"><span
@@ -417,7 +417,7 @@ function oauthPlatform(row) {
   if (row?.platform && oauthPlatformMap[row.platform]) {
     return oauthPlatformMap[row.platform]
   }
-  // 旧数据可能只有 username、无 platform
+  // Legacy records may have a username without a platform.
   if (row?.username) return oauthPlatformMap.linuxdo
   return null
 }
@@ -745,7 +745,7 @@ function submit() {
     return
   }
 
-  if (addForm.password.length < 6) {
+  if (addForm.password.length < 12) {
     ElMessage({
       message: t('pwdLengthMsg'),
       type: "error",
@@ -960,7 +960,7 @@ function updatePwd() {
     return
   }
 
-  if (userForm.password.length < 6) {
+  if (userForm.password.length < 12) {
     ElMessage({
       message: t('pwdLengthMsg'),
       type: 'error',
@@ -1313,7 +1313,7 @@ function adjustWidth() {
 
 :deep(.el-table) {
   @media (pointer: coarse) {
-    /* 触屏 */
+    /* Touch screens. */
     user-select: none;
   }
 }
