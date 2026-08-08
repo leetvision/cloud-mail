@@ -38,7 +38,6 @@
           placeholder="Select"
           @change="changeLang"
       >
-        <el-option label="中文" value="zh" @pointerdown.prevent.stop="changeLang('zh')"/>
         <el-option label="English" value="en" @pointerdown.prevent.stop="changeLang('en')"/>
       </el-select>
     </div>
@@ -77,7 +76,7 @@ const userStore = useUserStore();
 const setPwdLoading = ref(false)
 const setNameShow = ref(false)
 const accountName = ref(null)
-const langSelect = ref(settingStore.lang)
+const langSelect = ref('en')
 
 defineOptions({
   name: 'setting'
@@ -129,7 +128,7 @@ function changeLang(lang) {
   } catch (e) {
     setting = {}
   }
-  localStorage.setItem('setting', JSON.stringify({...setting, lang}))
+  localStorage.setItem('setting', JSON.stringify({...setting, lang: 'en'}))
   window.location.reload()
 }
 
@@ -146,7 +145,7 @@ const deleteConfirm = () => {
     type: 'warning'
   }).then(() => {
     userDelete().then(() => {
-      localStorage.removeItem('token');
+		localStorage.removeItem('authenticated');
       router.replace('/login');
       ElMessage({
         message: t('delSuccessMsg'),
@@ -169,7 +168,7 @@ function submitPwd() {
     return
   }
 
-  if (form.password.length < 6) {
+  if (form.password.length < 12) {
     ElMessage({
       message: t('pwdLengthMsg'),
       type: 'error',
@@ -189,8 +188,9 @@ function submitPwd() {
 
   setPwdLoading.value = true
   resetPassword(form.password).then(() => {
+	localStorage.removeItem('authenticated')
     ElMessage({
-      message: t('saveSuccessMsg'),
+		message: t('saveSuccessMsg'),
       type: 'success',
       plain: true,
     })
@@ -198,6 +198,7 @@ function submitPwd() {
     setPwdLoading.value = false
     form.password = ''
     form.newPwd = ''
+	router.replace('/login')
   }).catch(() => {
     setPwdLoading.value = false
   })

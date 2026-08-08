@@ -17,7 +17,7 @@ html, body {
     height: 100%;
 }
 
-:deep(.el-input__inner:focus) {
+.el-input__inner:focus {
     background-color: transparent !important;
     border-color: #dcdfe6 !important;
 }
@@ -171,7 +171,7 @@ button, input, select, textarea {
     --el-input-text-color: var(--el-text-color-primary) !important;
 }
 
-/* 视图过渡，基于径向剪裁 */
+/* View transition based on a radial clip. */
 html.dark,
 html:not(.dark) {
     view-transition-name: root;
@@ -183,19 +183,19 @@ html:not(.dark) {
     mix-blend-mode: normal;
 }
 
-/* 层级控制，确保对应方向动画在上层可见 */
+/* Layer control keeps the animation for the active direction visible on top. */
 html[data-theme-to="dark"]::view-transition-new(root) { z-index: 2; }
 html[data-theme-to="dark"]::view-transition-old(root) { z-index: 1; }
 html[data-theme-to="light"]::view-transition-old(root) { z-index: 2; }
 html[data-theme-to="light"]::view-transition-new(root) { z-index: 1; }
 
-/* 切到暗色：新视图从点击点向外扩散 */
+/* Switch to dark mode: expand the new view outward from the click point. */
 html[data-theme-to="dark"]::view-transition-new(root) {
     clip-path: circle(0px at var(--vt-x) var(--vt-y));
     animation: vt-radial-in var(--vt-duration) var(--vt-easing) forwards;
 }
 
-/* 切到浅色：旧视图向点击点收缩 */
+/* Switch to light mode: contract the old view toward the click point. */
 html[data-theme-to="light"]::view-transition-old(root) {
     clip-path: circle(var(--vt-end-radius, 0px) at var(--vt-x) var(--vt-y));
     animation: vt-radial-out var(--vt-duration) var(--vt-easing) forwards;

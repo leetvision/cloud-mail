@@ -41,7 +41,7 @@ const resendService = {
 		const emailRow = await emailService.updateEmailStatus(c, params)
 
 		if (!emailRow) {
-			throw new BizError('更新邮件状态记录失败');
+			throw new BizError('Failed to update the email status record');
 		}
 
 	}

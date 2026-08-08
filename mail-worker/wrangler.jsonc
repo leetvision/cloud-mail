@@ -1,0 +1,89 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "cloud-mail",
+  "main": "src/index.js",
+  "compatibility_date": "2026-08-07",
+  "compatibility_flags": ["nodejs_compat"],
+
+  "observability": {
+    "enabled": true
+  },
+
+  "secrets": {
+    "required": ["jwt_secret", "init_secret"]
+  },
+
+  // D1 binding. The `db` binding name must not be changed.
+  // "d1_databases": [
+  //   {
+  //     "binding": "db",
+  //     "database_name": "",
+  //     "database_id": ""
+  //   }
+  // ],
+
+  // KV binding. The `kv` binding name must not be changed.
+  // "kv_namespaces": [
+  //   {
+  //     "binding": "kv",
+  //     "id": ""
+  //   }
+  // ],
+
+  // R2 binding. The `r2` binding name must not be changed.
+  // "r2_buckets": [
+  //   {
+  //     "binding": "r2",
+  //     "bucket_name": ""
+  //   }
+  // ],
+
+  // Cloudflare Email Sending binding. It takes priority when configured.
+  // "send_email": [
+  //   {
+  //     "name": "email"
+  //   }
+  // ],
+
+  "ai": {
+    "binding": "ai"
+  },
+
+  "ratelimits": [
+    {
+      "name": "AUTH_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 10,
+        "period": 60
+      }
+    }
+  ],
+
+  "assets": {
+    // The static-assets binding name must not be changed.
+    "binding": "assets",
+    // The Vue frontend build output directory.
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
+  },
+
+  "triggers": {
+    // Runs the daily task at midnight UTC+8 to refresh analytics caches.
+    "crons": ["0 16 * * *"]
+  },
+
+  "vars": {
+    // "ai_model": "", // Defaults to @cf/meta/llama-3.1-8b-instruct when omitted.
+    // "analysis_cache": false, // Enables analytics-data caching.
+    // "orm_log": false, // Enables SQL logging.
+    // "domain": [], // Supports multiple email domains, for example: ["example1.com", "example2.com"].
+    // "admin": "" // Administrator email, for example: admin@example.com.
+  },
+
+  // Set jwt_secret, init_secret, resend_webhook_secret, and OAuth client secrets with `wrangler secret put`.
+  "build": {
+    "command": "pnpm --prefix ../mail-vue install --frozen-lockfile && pnpm --prefix ../mail-vue run build"
+  }
+}

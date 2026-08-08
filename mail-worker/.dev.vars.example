@@ -1,0 +1,4 @@
+jwt_secret=replace-with-at-least-32-random-characters
+init_secret=replace-with-a-different-random-secret
+resend_webhook_secret=replace-with-your-resend-signing-secret
+linuxdo_client_secret=replace-with-your-linuxdo-client-secret

@@ -1,30 +1,25 @@
+import { AsyncLocalStorage } from 'node:async_hooks';
 import i18next from 'i18next';
-import zh from './zh.js'
-import en from './en.js'
+import en from './en.js';
 import app from '../hono/hono';
 
-app.use('*', async (c, next) => {
-	const lang = c.req.header('accept-language')?.split('-')[0]
-	i18next.init({
-		lng: lang,
-	});
-	return await next()
-})
-
-const resources = {
-	en: {
-		translation: en
-	},
-	zh: {
-		translation: zh,
-	},
-};
+const languageStorage = new AsyncLocalStorage();
 
 i18next.init({
-	fallbackLng: 'zh',
-	resources,
+	fallbackLng: 'en',
+	resources: {
+		en: { translation: en },
+	},
 });
 
-export const t = (key, values) => i18next.t(key, values)
+const translators = {
+	en: i18next.getFixedT('en'),
+};
+
+app.use('*', (c, next) => {
+	return languageStorage.run('en', next);
+});
+
+export const t = (key, values) => translators[languageStorage.getStore() || 'en'](key, values);
 
 export default i18next;

@@ -13,6 +13,7 @@ import emailTextTemplate from '../template/email-text';
 import emailHtmlTemplate from '../template/email-html';
 import verifyUtils from '../utils/verify-utils';
 import domainUtils from "../utils/domain-uitls";
+import constant from '../const/constant';
 
 const telegramService = {
 
@@ -22,7 +23,7 @@ const telegramService = {
 
 		const result = await jwtUtils.verifyToken(c, token);
 
-		if (!result) {
+		if (result?.scope !== 'email-view' || !result.emailId) {
 			return emailTextTemplate('Access denied')
 		}
 
@@ -31,8 +32,7 @@ const telegramService = {
 		if (emailRow) {
 
 			if (emailRow.content) {
-				const { r2Domain } = await settingService.query(c);
-				return emailHtmlTemplate(emailRow.content || '', r2Domain)
+				return emailHtmlTemplate(emailRow.content || '', token)
 			} else {
 				return emailTextTemplate(emailRow.text || '')
 			}
@@ -49,7 +49,11 @@ const telegramService = {
 
 		const tgChatIds = tgChatId.split(',');
 
-		const jwtToken = await jwtUtils.generateToken(c, { emailId: email.emailId })
+		const jwtToken = await jwtUtils.generateToken(
+			c,
+			{ emailId: email.emailId, scope: 'email-view' },
+			constant.PUBLIC_TOKEN_EXPIRE,
+		)
 
 		const webAppUrl = customDomain ? `${domainUtils.toOssDomain(customDomain)}/api/telegram/getEmail/${jwtToken}` : 'https://www.cloudflare.com/404'
 		const inlineKeyboard = [
@@ -87,10 +91,10 @@ const telegramService = {
 					})
 				});
 				if (!res.ok) {
-					console.error(`转发 Telegram 失败 status: ${res.status} response: ${await res.text()}`);
+					console.error(`Telegram forwarding failed. Status: ${res.status}; response: ${await res.text()}`);
 				}
 			} catch (e) {
-				console.error(`转发 Telegram 失败:`, e.message);
+				console.error('Telegram forwarding failed:', e.message);
 			}
 		}));
 

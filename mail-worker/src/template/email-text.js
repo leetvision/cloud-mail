@@ -17,7 +17,7 @@ export default function emailTextTemplate(text) {
         		padding: 10px 10px;
             width: 100%;
             height: 100%;
-            overflow: auto; /* 改为 auto 允许滚动 */
+            overflow: auto; /* Use auto to allow scrolling. */
         }
 
         span {

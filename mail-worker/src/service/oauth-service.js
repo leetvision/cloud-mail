@@ -5,26 +5,36 @@ import { eq, inArray } from 'drizzle-orm';
 import userService from "./user-service";
 import loginService from "./login-service";
 import cryptoUtils from "../utils/crypto-utils";
+import jwtUtils from '../utils/jwt-utils';
+import constant from '../const/constant';
 
 const oauthService = {
 
 	async bindUser(c, params) {
 
-		const { email, oauthUserId, code } = params;
+		const { email, bindToken, code } = params;
+		const bindAuth = await jwtUtils.verifyToken(c, bindToken);
+		if (bindAuth?.scope !== 'oauth-bind' || !bindAuth.oauthUserId) {
+			throw new BizError('OAuth binding authorization expired', 401);
+		}
+		const oauthUserId = bindAuth.oauthUserId;
 
 		const oauthRow = await this.getById(c, oauthUserId);
+		if (!oauthRow) {
+			throw new BizError('OAuth binding authorization expired', 401);
+		}
 
 		let userRow = await userService.selectByIdIncludeDel(c, oauthRow.userId);
 
 		if (userRow) {
-			throw new BizError('用户已绑定有邮箱')
+			throw new BizError('The user already has a bound email address')
 		}
 
 		await loginService.register(c, { email, password: cryptoUtils.genRandomPwd(), code }, true);
 
 		userRow = await userService.selectByEmail(c, email);
 
-		orm(c).update(oauth).set({ userId: userRow.userId }).where(eq(oauth.oauthUserId, oauthUserId)).run();
+		await orm(c).update(oauth).set({ userId: userRow.userId }).where(eq(oauth.oauthUserId, oauthUserId)).run();
 		const jwtToken = await loginService.login(c, { email, password: null }, true);
 
 		return { userInfo: oauthRow, token: jwtToken}
@@ -33,6 +43,12 @@ const oauthService = {
 	async linuxDoLogin(c, params) {
 
 		const { code } = params;
+		if (typeof code !== 'string' || !code || code.length > 2048) {
+			throw new BizError('Invalid OAuth authorization code', 400);
+		}
+		if (!c.env.linuxdo_client_id || !c.env.linuxdo_client_secret || !c.env.linuxdo_callback_url) {
+			throw new BizError('OAuth is not configured', 503);
+		}
 
 		let token = '';
 		let userInfo = {}
@@ -78,7 +94,12 @@ const oauthService = {
 		const userRow = await userService.selectByIdIncludeDel(c, oauthRow.userId);
 
 		if (!userRow) {
-			return { userInfo: oauthRow, token: null }
+			const bindToken = await jwtUtils.generateToken(
+				c,
+				{ scope: 'oauth-bind', oauthUserId: oauthRow.oauthUserId },
+				constant.OAUTH_BIND_TOKEN_EXPIRE
+			);
+			return { userInfo: oauthRow, token: null, bindToken }
 		}
 
 		const JwtToken = await loginService.login(c, { email: userRow.email, password: null }, true);
@@ -109,7 +130,7 @@ const oauthService = {
 		await orm(c).delete(oauth).where(inArray(oauth.userId, userIds)).run();
 	},
 
-	//定时任务凌晨清除未绑定邮箱的oauth用户
+	// Scheduled task that removes OAuth users without a bound email address overnight.
 	async clearNoBindOathUser(c) {
 		await orm(c).delete(oauth).where(eq(oauth.userId, 0)).run();
 	},

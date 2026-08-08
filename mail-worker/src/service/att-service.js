@@ -6,7 +6,6 @@ import constant from '../const/constant';
 import fileUtils from '../utils/file-utils';
 import { attConst } from '../const/entity-const';
 import { parseHTML } from 'linkedom';
-import { v4 as uuidv4 } from 'uuid';
 import domainUtils from '../utils/domain-uitls';
 import settingService from "./setting-service";
 
@@ -59,12 +58,12 @@ const attService = {
 
 		for (const img of images) {
 
-			//邮件正文base64图片转cid附件
+			// Convert Base64 images in the email body to CID attachments.
 			const src = img.getAttribute('src');
 			if (src && src.startsWith('data:image')) {
 				const file = fileUtils.base64ToFile(src);
 				const buff = await file.arrayBuffer();
-				const cid = uuidv4().replace(/-/g, '');
+				const cid = crypto.randomUUID().replace(/-/g, '');
 				const key = constant.ATTACHMENT_PREFIX + await fileUtils.getBuffHash(buff) + fileUtils.getExtFileName(file.name);
 
 				img.setAttribute('src', 'cid:' + cid);
@@ -81,10 +80,10 @@ const attService = {
 				imageDataList.push(attData);
 			}
 
-			//邮件正文站内图片转cid附件
+			// Convert internal images in the email body to CID attachments.
 			if (src && (src.startsWith(domainUtils.toOssDomain(r2Domain)) || src.startsWith('attachments/'))) {
 
-				const cid = uuidv4().replace(/-/g, '')
+				const cid = crypto.randomUUID().replace(/-/g, '')
 				img.setAttribute('src', 'cid:' + cid);
 
 				const attData = {};
@@ -113,11 +112,11 @@ const attService = {
 			}
 		}
 
-		//查询已有内嵌url图片信息
+		// Query existing embedded URL image metadata.
 		const keys = [...new Set(imageDataList.filter(item => !item.content).map(item => item.key))];
 		const dbImageList  = await this.selectOneByKeys(c, keys);
 
-		//设置给当前附件
+		// Apply the metadata to the current attachment.
 		await Promise.all(imageDataList.map(async image => {
 			if (image.content) {
 				return;
@@ -213,6 +212,9 @@ const attService = {
 	},
 
 	async removeAttByField(c, fieldName, fieldValues) {
+		if (!new Set(['user_id', 'email_id', 'account_id']).has(fieldName)) {
+			throw new Error('Invalid attachment field');
+		}
 
 		const sqlList = [];
 

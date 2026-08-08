@@ -200,7 +200,7 @@ const en = {
     notEmailMsg: 'Invalid email',
     minEmailPrefix: 'Email must be at least {msg} characters',
     emptyPwdMsg: 'Password cannot be empty',
-    pwdLengthMsg: 'Password must be at least 6 characters',
+    pwdLengthMsg: 'Password must be at least 12 characters',
     confirmPwdFailMsg: 'The two passwords do not match',
     emptyRegKeyMsg: 'Invite code cannot be empty',
     regSuccessMsg: 'Sign up successful',

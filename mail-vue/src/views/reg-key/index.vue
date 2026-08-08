@@ -195,22 +195,10 @@ function formatUserCreateTime(regKey) {
   const currentYear = dayjs().year();
   const expireYear = createTime.year();
 
-  if (settingStore.lang === 'en') {
-
-    if (expireYear === currentYear) {
-      return createTime.format('MMM D, HH:mm');
-    } else {
-      return createTime.format('MMM D, YYYY HH:mm');
-    }
-
+  if (expireYear === currentYear) {
+    return createTime.format('MMM D, HH:mm');
   } else {
-
-    if (expireYear === currentYear) {
-      return createTime.format('M月D日 HH:mm');
-    } else {
-      return createTime.format('YYYY年M月D日 HH:mm');
-    }
-
+    return createTime.format('MMM D, YYYY HH:mm');
   }
 
 }
@@ -220,19 +208,9 @@ function formatExpireTime(expireTime) {
   const currentYear = dayjs().year();
   const expireYear = expireDate.year();
 
-  if (settingStore.lang === 'en') {
-
-    return expireYear === currentYear
-        ? expireDate.format('MMM D')
-        : expireDate.format('MMM D, YYYY');
-
-  } else {
-
-    return expireYear === currentYear
-        ? expireDate.format('M月D日')
-        : expireDate.format('YYYY年M月D日');
-
-  }
+  return expireYear === currentYear
+      ? expireDate.format('MMM D')
+      : expireDate.format('MMM D, YYYY');
 }
 
 function refresh() {
@@ -267,9 +245,9 @@ async function copyCode(code) {
       plain: true,
     })
   } catch (err) {
-    console.error('复制失败:', err);
+    console.error('Copy failed:', err);
     ElMessage({
-      message: '复制失败',
+      message: 'Copy failed',
       type: 'error',
       plain: true,
     })

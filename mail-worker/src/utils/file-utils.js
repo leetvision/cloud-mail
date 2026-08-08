@@ -29,10 +29,10 @@ const fileUtils = {
 	},
 
 	/**
-	 * 将 Base64 数据转换为 File 对象（自动识别 MIME 类型和文件扩展名）
-	 * @param {string} base64Data 带有 data: 前缀的 base64 数据
-	 * @param {string} [customFilename] 可选，传入自定义文件名（不含扩展名）
-	 * @returns {File} File 对象
+	 * Convert Base64 data to a File object, automatically detecting the MIME type and file extension.
+	 * @param {string} base64Data Base64 data with a `data:` prefix.
+	 * @param {string} [customFilename] Optional custom filename without an extension.
+	 * @returns {File} The resulting File object.
 	 */
 	base64ToFile(base64Data, customFilename) {
 		const match = base64Data.match(/^data:(image|jpeg|video)\/([a-zA-Z0-9.+-]+);base64,/);
@@ -40,8 +40,8 @@ const fileUtils = {
 			throw new Error('Invalid base64 data format');
 		}
 
-		const type = match[1]; // image 或 video
-		const ext = match[2];  // jpg, png, mp4 等
+		const type = match[1]; // `image` or `video`.
+		const ext = match[2];  // For example, `jpg`, `png`, or `mp4`.
 		const mimeType = `${type}/${ext}`;
 		const cleanBase64 = base64Data.replace(/^data:(image|jpeg|video)\/[a-zA-Z0-9.+-]+;base64,/, '');
 
@@ -66,4 +66,3 @@ const fileUtils = {
 
 
 export default fileUtils;
-

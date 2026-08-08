@@ -1,5 +1,5 @@
 <template>
-  <div id="login-box" :style=" background ? 'background: var(--el-bg-color)' : ''" v-loading="oauthLoading" element-loading-text="登录中...">
+  <div id="login-box" :style=" background ? 'background: var(--el-bg-color)' : ''" v-loading="oauthLoading" element-loading-text="Signing in...">
     <div id="background-wrap" v-if="!settingStore.settings.background">
       <div class="x1 cloud"></div>
       <div class="x2 cloud"></div>
@@ -106,7 +106,7 @@
         </template>
       </div>
     </div>
-    <el-dialog class="bind-dialog" v-model="showBindForm"  title="注册邮箱" >
+    <el-dialog class="bind-dialog" v-model="showBindForm" title="Register an email address">
       <div class="bind-container">
         <el-input :class="!hideLoginDomain ? 'email-input' : ''" v-model="bindForm.email" type="text" :placeholder="$t('emailAccount')" autocomplete="off">
           <template #append v-if="!hideLoginDomain">
@@ -136,7 +136,7 @@
         <el-input v-if="settingStore.settings.regKey === 2" v-model="bindForm.code"
                   :placeholder="$t('regKeyOptional')" type="text" autocomplete="off"/>
         <el-button class="btn" type="primary" @click="bind" :loading="bindLoading"
-        >绑定
+        >Bind
         </el-button>
       </div>
     </el-dialog>
@@ -162,7 +162,7 @@ import {cvtR2Url} from "@/utils/convert.js";
 import {loginUserInfo} from "@/request/my.js";
 import {permsToRouter} from "@/perm/perm.js";
 import {useI18n} from "vue-i18n";
-import {oauthBindUser, oauthLinuxDoLogin} from "@/request/ouath.js";
+import {oauthAuthorize, oauthBindUser, oauthLinuxDoLogin} from "@/request/ouath.js";
 
 const {t} = useI18n();
 const accountStore = useAccountStore();
@@ -177,7 +177,7 @@ const show = ref('login')
 
 const bindForm = reactive({
   email: '',
-  oauthUserId: '',
+  bindToken: '',
   code: ''
 })
 
@@ -212,7 +212,7 @@ window.onTurnstileError = (e) => {
     return
   }
   verifyErrorCount++
-  console.warn('人机验加载失败', e)
+  console.warn('Failed to load human verification', e)
   setTimeout(() => {
     nextTick(() => {
       if (!turnstileId) {
@@ -261,11 +261,9 @@ const getEmailName = (email) => {
   return email.split('@')[0]
 }
 
-function linuxDoLogin() {
-  const clientId = settingStore.settings.linuxdoClientId
-  const redirectUri = encodeURIComponent(settingStore.settings.linuxdoCallbackUrl)
-  window.location.href =
-      `https://connect.linux.do/oauth2/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&response_type=code&scope=openid+profile+email`
+async function linuxDoLogin() {
+	const { url } = await oauthAuthorize()
+	window.location.href = url
 }
 
 linuxDoGetUser();
@@ -273,20 +271,21 @@ linuxDoGetUser();
 async function linuxDoGetUser() {
 
   const params = new URLSearchParams(window.location.search)
-  const code = params.get('code')
+	const code = params.get('code')
+	const state = params.get('state')
 
-  if (code) {
+	if (code && state) {
 
     oauthLoading.value = true
-    oauthLinuxDoLogin(code).then(data => {
+		oauthLinuxDoLogin(code, state).then(data => {
 
-      bindForm.oauthUserId = data.userInfo.oauthUserId;
+			bindForm.bindToken = data.bindToken;
 
-      if (!data.token) {
+		if (!data.authenticated) {
         showBindForm.value = true
         oauthLoading.value = false
         ElMessage({
-          message: '请注册绑定一个邮箱',
+          message: 'Register and bind an email address.',
           type: 'warning',
           duration: 4000,
           plain: true,
@@ -294,7 +293,7 @@ async function linuxDoGetUser() {
         return;
       }
 
-      saveToken(data.token);
+			saveToken();
     }).catch(() => {
       oauthLoading.value = false
     })
@@ -351,11 +350,11 @@ function bind() {
 
   }
 
-  const form = {email, oauthUserId: bindForm.oauthUserId, code: bindForm.code}
+	const form = {email, bindToken: bindForm.bindToken, code: bindForm.code}
 
   bindLoading.value = true
   oauthBindUser(form).then(data => {
-    saveToken(data.token)
+		saveToken()
   }).catch(() => {
     bindLoading.value = false
   })
@@ -394,14 +393,14 @@ const submit = () => {
 
   loginLoading.value = true
   login(email, form.password).then(async data => {
-    await saveToken(data.token)
+		await saveToken()
   }).finally(() => {
     loginLoading.value = false
   })
 }
 
-async function saveToken(token) {
-  localStorage.setItem('token', token)
+async function saveToken() {
+	localStorage.setItem('authenticated', '1')
   refreshWebsiteConfig()
   const user = await loginUserInfo();
   accountStore.currentAccountId = user.account.accountId;
@@ -473,7 +472,7 @@ function submitRegister() {
     return
   }
 
-  if (registerForm.password.length < 6) {
+  if (registerForm.password.length < 12) {
     ElMessage({
       message: t('pwdLengthMsg'),
       type: 'error',
@@ -515,7 +514,7 @@ function submitRegister() {
             turnstileId = window.turnstile.render('.register-turnstile')
           } catch (e) {
             botJsError.value = true
-            console.log('人机验证js加载失败')
+            console.log('Failed to load the human-verification script')
           }
         } else {
           window.turnstile.reset('.register-turnstile')

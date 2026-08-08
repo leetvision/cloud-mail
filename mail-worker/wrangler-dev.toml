@@ -1,10 +1,13 @@
 name = "cloud-mail-dev"
 main = "src/index.js"
-compatibility_date = "2025-06-04"
-keep_vars = true
+compatibility_date = "2026-08-07"
+compatibility_flags = ["nodejs_compat"]
 
 [observability]
 enabled = true
+
+[secrets]
+required = ["jwt_secret", "init_secret"]
 
 [dev]
 ip = "0.0.0.0"
@@ -25,6 +28,14 @@ id = "2io01d4b299e481b9de060ece9e7785c"
 #[ai]
 #binding = "ai"
 
+[[ratelimits]]
+name = "AUTH_RATE_LIMITER"
+namespace_id = "1001"
+
+[ratelimits.simple]
+limit = 10
+period = 60
+
 [assets]
 binding = "assets"
 directory = "./dist"
@@ -41,4 +52,3 @@ analysis_cache = false
 orm_log = false
 domain = ["example.com", "example2.com", "example3.com", "example4.com"]
 admin = "admin@example.com"
-jwt_secret = "b7f29a1d-18e2-4d3b-941f-f6b2c97c02fd"

@@ -205,7 +205,7 @@ window.onTurnstileError = (e) => {
     return
   }
   verifyErrorCount++
-  console.warn('人机验加载失败', e)
+  console.warn('Failed to load human verification', e)
   setTimeout(() => {
     nextTick(() => {
       if (!turnstileId) {
@@ -463,7 +463,7 @@ function submit() {
             turnstileId = window.turnstile.render('.add-email-turnstile')
           } catch (e) {
             botJsError.value = true
-            console.log('人机验证js加载失败')
+            console.log('Failed to load the human-verification script')
           }
         } else {
           window.turnstile.reset('.add-email-turnstile')

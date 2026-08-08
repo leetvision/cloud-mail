@@ -104,9 +104,7 @@ import {useEmailStore} from "@/store/email.js";
 import {fileToBase64, formatBytes} from "@/utils/file-utils.js";
 import {getIconByName} from "@/utils/icon-utils.js";
 import sendPercent from "@/components/send-percent/index.vue"
-import {toOssDomain} from "@/utils/convert.js";
 import {formatDetailDate} from "@/utils/day.js";
-import {useSettingStore} from "@/store/setting.js";
 import {userDraftStore} from "@/store/draft.js";
 import {useWriterStore} from "@/store/writer.js";
 import db from "@/db/db.js";
@@ -125,7 +123,6 @@ defineExpose({
 const {t} = useI18n()
 const writerStore = useWriterStore();
 const draftStore = userDraftStore()
-const settingStore = useSettingStore()
 const emailStore = useEmailStore();
 const accountStore = useAccountStore()
 const editor = ref({})
@@ -341,7 +338,6 @@ async function sendEmail() {
 
   percentMessage = ElMessage({
     message: () => h(sendPercent, {value: percent.value, desc: t('sending')}),
-    dangerouslyUseHTMLString: true,
     plain: true,
     duration: 0,
     customClass: 'message-bottom'
@@ -387,7 +383,7 @@ async function sendEmail() {
       position: 'bottom-right'
     })
     if (e.code === 401) {
-      localStorage.removeItem('token');
+		localStorage.removeItem('authenticated');
       router.replace('/login');
     }
     show.value = true
@@ -469,8 +465,7 @@ function openReply(email) {
   form.subject = (
       email.subject.startsWith('Re:') ||
       email.subject.startsWith('Re：') ||
-      email.subject.startsWith('回复：') ||
-      email.subject.startsWith('回复:')) ? email.subject : 'Re: ' + email.subject
+      email.subject.startsWith('Re:')) ? email.subject : 'Re: ' + email.subject
   form.sendType = 'reply'
   form.emailId = email.emailId
 
@@ -502,8 +497,7 @@ function openReply(email) {
 
 function formatImage(content) {
   content = content || '';
-  const domain = settingStore.settings.r2Domain;
-  return content.replace(/{{domain}}/g, toOssDomain(domain) + '/');
+  return content.replace(/{{domain}}/g, '/api/oss/');
 }
 
 function open() {

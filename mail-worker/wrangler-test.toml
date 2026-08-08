@@ -1,45 +1,51 @@
 name = "test-mail"
 main = "src/index.js"
-compatibility_date = "2025-06-04"
-keep_vars = true
+compatibility_date = "2026-08-07"
+compatibility_flags = ["nodejs_compat"]
 
 [observability]
 enabled = true
 
 [[d1_databases]]
-binding = "db"			#d1数据库绑定名默认不可修改
-database_name = "test-email"		#d1数据库名字
-database_id = "e65f099d-796d-4eaa-8dff-529b368b20db"		#d1数据库id
+binding = "db"			# The D1 binding name must not be changed.
+database_name = "test-email"		# D1 database name.
+database_id = "00000000-0000-0000-0000-000000000000"		#local test placeholder
 
 [[kv_namespaces]]
-binding = "kv"			#kv绑定名默认不可修改
-id = "9be10cd058e04c55b526f8c0c116f50c"					#kv数据库id
+binding = "kv"			# The KV binding name must not be changed.
+id = "00000000000000000000000000000000"					#local test placeholder
 
-#(可选)
+# Optional
 #[[r2_buckets]]
-#binding = "r2"			#r2对象存储绑定名默认不可修改
-#bucket_name = "test-email"		#r2对象存储桶的名字
+#binding = "r2"			# The R2 object-storage binding name must not be changed.
+#bucket_name = "test-email"		# R2 bucket name.
 
-[ai]
-binding = "ai"
+[[ratelimits]]
+name = "AUTH_RATE_LIMITER"
+namespace_id = "1001"
+
+[ratelimits.simple]
+limit = 10
+period = 60
 
 [assets]
-binding = "assets"		#静态资源绑定名默认不可修改
-directory = "./dist"	#前端vue项目打包的静态资源存放位置,默认dist
+binding = "assets"		# The static-assets binding name must not be changed.
+directory = "./dist"	# Vue frontend build output; defaults to dist.
 not_found_handling = "single-page-application"
 run_worker_first = true
 
 [triggers]
-crons = ["0 16 * * *"]	#每天晚上12点执行每日任务,刷新分析缓存
+crons = ["0 16 * * *"]	# Run the daily task at midnight UTC+8 to refresh analytics caches.
 
 
 [vars]
-ai_model = ""			#ai模型,不填默认使用@cf/meta/llama-3.1-8b-instruct
-analysis_cache = false			#是否开启分析数据缓存
-orm_log = false			#是否sql日志
-domain = ["example.com"]				#邮件域名可可配置多个 示例: ["example1.com","example2.com"]
-admin = "admin@example.com"				#管理员的邮箱	示例: admin@example.com
-jwt_secret = "b7f29a1d-18e2-4d3b-941f-f6b2c97c02fd"			#jwt令牌的密钥,随便填一串字符串
+ai_model = ""			# Defaults to @cf/meta/llama-3.1-8b-instruct when omitted.
+analysis_cache = false			# Enable analytics-data caching.
+orm_log = false			# Enable SQL logging.
+domain = ["example.com"]				# Supports multiple domains, for example: ["example1.com", "example2.com"].
+admin = "admin@example.com"				# Administrator email, for example: admin@example.com.
+jwt_secret = "test-only-jwt-secret-not-for-deployment"
+init_secret = "test-only-init-secret-not-for-deployment"
 
 [build]
-command = "pnpm --prefix ../mail-vue install && pnpm --prefix ../mail-vue run build"
+command = "pnpm --prefix ../mail-vue install --frozen-lockfile && pnpm --prefix ../mail-vue run build"

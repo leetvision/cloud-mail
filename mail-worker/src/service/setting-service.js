@@ -28,7 +28,7 @@ const settingService = {
 		const setting = await c.env.kv.get(KvConst.SETTING, { type: 'json' });
 
 		if (!setting) {
-			throw new BizError('数据库未初始化 Database not initialized.');
+			throw new BizError('Database not initialized.');
 		}
 
 		let domainList = c.env.domain;
@@ -165,12 +165,33 @@ const settingService = {
 	async setBackground(c, params) {
 
 		let { background } = params
+		if (typeof background !== 'string') {
+			throw new BizError('Invalid background value.', 400);
+		}
+		if (background.startsWith('http')) {
+			let url;
+			try {
+				url = new URL(background);
+			} catch {
+				throw new BizError('Invalid background URL.', 400);
+			}
+			if (url.protocol !== 'https:' || background.length > 2048) {
+				throw new BizError('Background URLs must use HTTPS.', 400);
+			}
+		}
 
 		await this.deleteBackground(c);
 
 		if (background && !background.startsWith('http')) {
 
 			const file = fileUtils.base64ToFile(background)
+			const allowedTypes = new Set(['image/avif', 'image/gif', 'image/jpeg', 'image/png', 'image/webp']);
+			if (!allowedTypes.has(file.type.toLowerCase())) {
+				throw new BizError('Only AVIF, GIF, JPEG, PNG, and WebP backgrounds are allowed.', 400);
+			}
+			if (file.size > 5 * 1024 * 1024) {
+				throw new BizError('The background image must be 5 MB or smaller.', 400);
+			}
 
 			const arrayBuffer = await file.arrayBuffer();
 			background = constant.BACKGROUND_PREFIX + await fileUtils.getBuffHash(arrayBuffer) + fileUtils.getExtFileName(file.name);

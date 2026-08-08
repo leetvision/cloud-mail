@@ -229,9 +229,9 @@
       <div class="details">
         <div v-if="userDetails.username"><span class="details-item-title">LinuxDo:</span>
           <el-avatar :src="userDetails.avatar" :size="30" class="linuxdo-avatar"  />
-          <span style="margin: 0 10px">用户名：{{userDetails.username}}</span>
+          <span style="margin: 0 10px">Username: {{userDetails.username}}</span>
           <span>
-                    等级：<el-tag type="success">{{userDetails.trustLevel}}</el-tag>
+                    Trust level: <el-tag type="success">{{userDetails.trustLevel}}</el-tag>
                   </span>
         </div>
         <div v-if="!sendNumShow"><span
@@ -720,7 +720,7 @@ function submit() {
     return
   }
 
-  if (addForm.password.length < 6) {
+  if (addForm.password.length < 12) {
     ElMessage({
       message: t('pwdLengthMsg'),
       type: "error",
@@ -932,7 +932,7 @@ function updatePwd() {
     return
   }
 
-  if (userForm.password.length < 6) {
+  if (userForm.password.length < 12) {
     ElMessage({
       message: t('pwdLengthMsg'),
       type: 'error',
@@ -1275,7 +1275,7 @@ function adjustWidth() {
 
 :deep(.el-table) {
   @media (pointer: coarse) {
-    /* 触屏 */
+    /* Touch screens. */
     user-select: none;
   }
 }

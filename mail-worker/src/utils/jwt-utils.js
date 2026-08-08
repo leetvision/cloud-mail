@@ -1,6 +1,14 @@
 const encoder = new TextEncoder();
 const decoder = new TextDecoder();
 
+function getSecret(c) {
+	const secret = c.env.jwt_secret;
+	if (typeof secret !== 'string' || secret.length < 32) {
+		throw new Error('JWT secret is not configured securely');
+	}
+	return secret;
+}
+
 const base64url = (input) => {
 	const str = btoa(String.fromCharCode(...new Uint8Array(input)));
 	return str.replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
@@ -20,12 +28,17 @@ const jwtUtils = {
 		};
 
 		const now = Math.floor(Date.now() / 1000);
-		const exp = expiresInSeconds ? now + expiresInSeconds : undefined;
+		if (!Number.isSafeInteger(expiresInSeconds) || expiresInSeconds <= 0) {
+			throw new Error('A positive JWT expiration is required');
+		}
+		const exp = now + expiresInSeconds;
 
 		const fullPayload = {
 			...payload,
 			iat: now,
-			...(exp ? { exp } : {})
+			exp,
+			iss: 'cloud-mail',
+			aud: 'cloud-mail'
 		};
 
 		const headerStr = base64url(encoder.encode(JSON.stringify(header)));
@@ -34,7 +47,7 @@ const jwtUtils = {
 
 		const key = await crypto.subtle.importKey(
 			'raw',
-			encoder.encode(c.env.jwt_secret),
+			encoder.encode(getSecret(c)),
 			{ name: 'HMAC', hash: 'SHA-256' },
 			false,
 			['sign']
@@ -48,14 +61,20 @@ const jwtUtils = {
 
 	async verifyToken(c, token) {
 		try {
-			const [headerB64, payloadB64, signatureB64] = token.split('.');
+			if (typeof token !== 'string') return null;
+			const parts = token.split('.');
+			if (parts.length !== 3) return null;
+			const [headerB64, payloadB64, signatureB64] = parts;
 
 			if (!headerB64 || !payloadB64 || !signatureB64) return null;
+
+			const header = JSON.parse(decoder.decode(base64urlDecode(headerB64)));
+			if (header.alg !== 'HS256' || header.typ !== 'JWT') return null;
 
 			const data = `${headerB64}.${payloadB64}`;
 			const key = await crypto.subtle.importKey(
 				'raw',
-				encoder.encode(c.env.jwt_secret),
+				encoder.encode(getSecret(c)),
 				{ name: 'HMAC', hash: 'SHA-256' },
 				false,
 				['verify']
@@ -74,7 +93,8 @@ const jwtUtils = {
 			const payload = JSON.parse(payloadJson);
 
 			const now = Math.floor(Date.now() / 1000);
-			if (payload.exp && payload.exp < now) return null;
+			if (!Number.isSafeInteger(payload.exp) || payload.exp <= now) return null;
+			if (payload.iss !== 'cloud-mail' || payload.aud !== 'cloud-mail') return null;
 
 			return payload;
 

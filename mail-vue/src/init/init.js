@@ -14,21 +14,17 @@ export async function init() {
     const userStore = useUserStore();
     const accountStore = useAccountStore();
 
-    const token = localStorage.getItem('token');
-    if (!settingStore.lang) {
-        let lang = navigator.language.split('-')[0]
-        lang = lang === 'zh' ? lang : 'en'
-        settingStore.lang = lang
-    }
-
-    i18n.global.locale.value = settingStore.lang
+	const token = localStorage.getItem('authenticated');
+    settingStore.lang = 'en'
+    i18n.global.locale.value = 'en'
 
     let setting = null;
 
     if (token) {
-        const userPromise = loginUserInfo().catch(e => {
-            console.error(e);
-            return null;
+		const userPromise = loginUserInfo().catch(e => {
+			console.error(e);
+			localStorage.removeItem('authenticated');
+			return null;
         });
 
         const [s, user] = await Promise.all([websiteConfig(), userPromise]);
