@@ -63,3 +63,23 @@ curl --request POST \
 After deployment, configure Email Routing in the Cloudflare dashboard and route the destination domain to this Worker. When using Resend, set the webhook URL to `https://mail.example.com/api/webhooks` and configure the matching `RESEND_WEBHOOK_SECRET`.
 
 Keep attachments private by leaving public access disabled on the R2 bucket and avoiding public R2 or S3 attachment URLs. The application reads objects through `/api/oss/*`, which validates either an authenticated session or a short-lived email-view token.
+
+## leet.uz production
+
+- Application: https://mail.leet.uz
+- Mailbox domain: `leet.uz`
+- Administrator: `admin@leet.uz`
+- Worker, D1 database, and KV namespace: `cloud-mail`
+- Cloudflare Email Sending is enabled with the `email` binding.
+- Cloudflare Email Routing catch-all delivers incoming `@leet.uz` messages to `cloud-mail`.
+- Attachments use the application's KV fallback; no R2 bucket is provisioned.
+
+The production resource IDs and custom domain are also in `mail-worker/wrangler.jsonc`.
+GitHub Actions secrets contain the scoped deployment API token and separate JWT/init secrets;
+repository variables contain the non-secret deployment settings. Never commit credentials.
+The administrator account has been provisioned separately; use its securely stored credentials
+and change the initial password after signing in.
+
+Pushes to `main` or manual workflow runs deploy and initialize the application.
+The deployment token is scoped to the account's Workers scripts, KV, D1 and AI, plus
+Workers routes and zone read access for `leet.uz`.

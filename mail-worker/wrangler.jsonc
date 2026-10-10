@@ -13,22 +13,17 @@
     "required": ["jwt_secret", "init_secret"]
   },
 
-  // D1 binding. The `db` binding name must not be changed.
-  // "d1_databases": [
-  //   {
-  //     "binding": "db",
-  //     "database_name": "",
-  //     "database_id": ""
-  //   }
-  // ],
-
-  // KV binding. The `kv` binding name must not be changed.
-  // "kv_namespaces": [
-  //   {
-  //     "binding": "kv",
-  //     "id": ""
-  //   }
-  // ],
+  "account_id": "0b602a00e69c5e6260f892a9292825f0",
+  "routes": [{ "pattern": "mail.leet.uz", "custom_domain": true }],
+  "d1_databases": [{
+    "binding": "db",
+    "database_name": "cloud-mail",
+    "database_id": "a7e5bcb5-7fb1-434c-9515-51b35ca11ce8"
+  }],
+  "kv_namespaces": [{
+    "binding": "kv",
+    "id": "c0434207793249e3adcde169b21648a6"
+  }],
 
   // R2 binding. The `r2` binding name must not be changed.
   // "r2_buckets": [
@@ -38,12 +33,7 @@
   //   }
   // ],
 
-  // Cloudflare Email Sending binding. It takes priority when configured.
-  // "send_email": [
-  //   {
-  //     "name": "email"
-  //   }
-  // ],
+  "send_email": [{ "name": "email" }],
 
   "ai": {
     "binding": "ai"
@@ -78,8 +68,8 @@
     // "ai_model": "", // Defaults to @cf/meta/llama-3.1-8b-instruct-fast when omitted.
     // "analysis_cache": false, // Enables analytics-data caching.
     // "orm_log": false, // Enables SQL logging.
-    // "domain": [], // Supports multiple email domains, for example: ["example1.com", "example2.com"].
-    // "admin": "" // Administrator email, for example: admin@example.com.
+    "domain": ["leet.uz"],
+    "admin": "admin@leet.uz"
   },
 
   // Set jwt_secret, init_secret, resend_webhook_secret, and OAuth client secrets with `wrangler secret put`.
