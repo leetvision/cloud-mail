@@ -32,3 +32,5 @@ git-tools.js
 .env
 .env.*
 !.env.example
+
+.cloudflare/
