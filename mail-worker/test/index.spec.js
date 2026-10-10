@@ -1,5 +1,5 @@
 import { SELF } from 'cloudflare:test';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import cryptoUtils from '../src/utils/crypto-utils';
 import jwtUtils from '../src/utils/jwt-utils';
 import emailHtmlTemplate from '../src/template/email-html';
@@ -14,11 +14,27 @@ describe('credential security', () => {
 	it('hashes passwords with a salted, iterated format', async () => {
 		const { salt, hash } = await cryptoUtils.hashPassword('correct horse battery staple');
 
-		expect(hash).toMatch(/^pbkdf2_sha256\$210000\$/);
+		expect(hash).toMatch(/^pbkdf2_sha256\$100000\$/);
 		expect(await cryptoUtils.verifyPassword('correct horse battery staple', salt, hash)).toBe(true);
 		expect(await cryptoUtils.verifyPassword('incorrect', salt, hash)).toBe(false);
 		expect(cryptoUtils.needsRehash(hash)).toBe(false);
 	}, 20_000);
+
+	it('keeps password derivation within the production Workers iteration limit', async () => {
+		const deriveBits = crypto.subtle.deriveBits.bind(crypto.subtle);
+		const spy = vi.spyOn(crypto.subtle, 'deriveBits').mockImplementation((algorithm, ...args) => {
+			if (algorithm.name === 'PBKDF2' && algorithm.iterations > 100_000) {
+				throw new DOMException('PBKDF2 iteration limit exceeded', 'NotSupportedError');
+			}
+			return deriveBits(algorithm, ...args);
+		});
+		try {
+			const { salt, hash } = await cryptoUtils.hashPassword('production-compatible-password');
+			expect(await cryptoUtils.verifyPassword('production-compatible-password', salt, hash)).toBe(true);
+		} finally {
+			spy.mockRestore();
+		}
+	});
 
 	it('accepts a legacy hash only for migration', async () => {
 		const salt = cryptoUtils.generateSalt();

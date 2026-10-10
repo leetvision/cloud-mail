@@ -1,5 +1,6 @@
 const encoder = new TextEncoder();
-const PBKDF2_ITERATIONS = 210_000;
+// The deployed Workers runtime caps each PBKDF2 call at 100,000 iterations.
+const PBKDF2_ITERATIONS = 100_000;
 const PBKDF2_PREFIX = 'pbkdf2_sha256';
 
 function toBase64(bytes) {
