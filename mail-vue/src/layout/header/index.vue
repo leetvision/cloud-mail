@@ -1,20 +1,23 @@
 <template>
-  <div class="header" :class="!hasPerm('email:send') ? 'not-send' : ''">
-    <div class="header-btn">
-      <hanburger @click="changeAside"></hanburger>
-      <span class="breadcrumb-item">{{ $t(route.meta.title) }}</span>
+  <div class="header">
+    <div class="header-brand">
+      <button type="button" class="icon-item menu-toggle" :aria-label="$t('toggleNavigation')" :aria-expanded="uiStore.asideShow" aria-controls="mail-navigation" @click="changeAside"><Icon icon="material-symbols:menu-rounded" width="24" /></button>
+      <router-link to="/inbox" class="brand-link"><Icon icon="material-symbols:mail-outline-rounded" width="32" /><span>{{ settingStore.settings.title }}</span></router-link>
     </div>
-    <button type="button" :aria-label="$t('compose')" v-perm="'email:send'" class="writer-box" @click="openSend">
-      <div class="writer">
-        <Icon icon="material-symbols:edit-outline-sharp" width="22" height="22"/>
-      </div>
-    </button>
+    <form v-if="searchable" class="mail-search" role="search" @submit.prevent="searchMail">
+      <button type="submit" class="icon-item" :aria-label="$t('search')"><Icon icon="material-symbols:search-rounded" width="24" /></button>
+      <input ref="searchRef" v-model="searchText" type="search" maxlength="200" :placeholder="t('searchFolder', {folder: searchFolderLabel})" :aria-label="t('searchFolder', {folder: searchFolderLabel})" @keydown.esc.prevent="clearSearch" />
+      <button v-if="searchText" type="button" class="icon-item" :aria-label="$t('clearSearch')" @click="clearSearch"><Icon icon="material-symbols:close-rounded" width="22" /></button>
+    </form>
+    <h1 v-else class="page-title">{{ $t(route.meta.title) }}</h1>
+    <button type="button" :aria-label="$t('compose')" v-perm="'email:send'" class="mobile-compose" @click="openSend"><Icon icon="material-symbols:edit-outline-rounded" width="24" /><span>{{ $t('composeShort') }}</span></button>
     <div class="toolbar">
+      <button type="button" :aria-label="$t('settings')" class="icon-item header-settings" @click="router.push('/settings')"><Icon icon="material-symbols:settings-outline-rounded" width="24" /></button>
       <button type="button" :aria-label="$t('lightTheme')" v-if="uiStore.dark" class="sun-icon icon-item" @click="openDark($event)">
-        <Icon icon="mingcute:sun-fill"/>
+        <Icon icon="material-symbols:light-mode-outline-rounded"/>
       </button>
       <button type="button" :aria-label="$t('darkTheme')" v-else class="dark-icon icon-item" @click="openDark($event)">
-        <Icon icon="solar:moon-linear"/>
+        <Icon icon="material-symbols:dark-mode-outline-rounded"/>
       </button>
       <button type="button" :aria-label="$t('announcements')" class="notice icon-item" @click="openNotice">
         <Icon icon="streamline-plump:announcement-megaphone"/>
@@ -75,13 +78,12 @@
 <script setup>
 import {viewportPopperOptions} from '@/utils/overlay.js'
 import router from "@/router";
-import hanburger from '@/components/hamburger/index.vue'
 import {logout} from "@/request/login.js";
 import {Icon} from "@iconify/vue";
 import {useUiStore} from "@/store/ui.js";
 import {useUserStore} from "@/store/user.js";
 import {useRoute} from "vue-router";
-import {computed, ref} from "vue";
+import {computed, ref, watch, onMounted, onBeforeUnmount} from "vue";
 import {useSettingStore} from "@/store/setting.js";
 import {hasPerm} from "@/perm/perm.js"
 import {useI18n} from "vue-i18n";
@@ -92,6 +94,23 @@ const route = useRoute();
 const settingStore = useSettingStore();
 const userStore = useUserStore();
 const uiStore = useUiStore();
+const searchText = ref(uiStore.mailSearch);
+const searchRef = ref(null);
+const searchable = computed(() => ['email', 'send', 'star', 'draft', 'content'].includes(route.name));
+const searchFolderLabel = computed(() => t(({email:'inbox', send:'sent', star:'starred', draft:'drafts'})[route.name === 'content' ? uiStore.mailFolder : route.name] || 'inbox'));
+watch(() => uiStore.mailSearch, value => { searchText.value = value; });
+function searchMail() {
+  uiStore.mailSearch = searchText.value.trim();
+  if (route.name === 'content') router.push({name: uiStore.mailFolder});
+}
+function clearSearch() { searchText.value = ''; uiStore.mailSearch = ''; searchRef.value?.focus(); }
+function handleShortcut(event) {
+  if (event.defaultPrevented || event.ctrlKey || event.metaKey || event.altKey || uiStore.composerShow || event.target.closest?.('input, textarea, [contenteditable="true"], .el-dialog, .el-popper, .el-message-box')) return;
+  if (event.key === '/' && searchable.value) { event.preventDefault(); searchRef.value?.focus(); }
+  if (event.key === 'c' && hasPerm('email:send')) { event.preventDefault(); openSend(); }
+}
+onMounted(() => window.addEventListener('keydown', handleShortcut));
+onBeforeUnmount(() => window.removeEventListener('keydown', handleShortcut));
 const logoutLoading = ref(false)
 const userInfoShow = ref(false)
 const userinfoRef = ref({})
@@ -229,7 +248,7 @@ function switchDark(nextIsDark, root) {
   root.setAttribute('class', nextIsDark ? 'dark' : '')
   const metaTag = document.getElementById('theme-color-meta');
   const isMobile =  !window.matchMedia("(pointer: fine) and (hover: hover)").matches;
-  metaTag.setAttribute('content', nextIsDark ? (isMobile ? '#141414' : '#000000') : (isMobile ? '#191A23' : '#F1F1F1'));
+  metaTag?.setAttribute('content', nextIsDark ? '#202124' : '#f6f8fc');
   uiStore.dark = nextIsDark
 }
 
@@ -252,7 +271,7 @@ function clickLogout() {
 }
 
 function formatName(email) {
-  return email[0]?.toUpperCase() || ''
+  return email?.[0]?.toUpperCase() || ''
 }
 
 </script>
@@ -356,147 +375,40 @@ function formatName(email) {
 }
 
 
-.header {
-  text-align: right;
-  font-size: 12px;
-  display: grid;
-  height: 100%;
-  gap: 10px;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-}
-
-.header.not-send {
-  grid-template-columns: minmax(0, 1fr) auto;
-}
-
-.writer-box {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-left: 5px;
-
-  .writer {
-    width: 34px;
-    height: 34px;
-    border-radius: 50%;
-    color: #ffffff;
-    background: linear-gradient(135deg, #1890ff, #3a80dd);
-    transition: all 0.3s ease;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-
-    .writer-text {
-      margin-left: 15px;
-      font-size: 14px;
-      font-weight: bold;;
-    }
-  }
-}
-
-.header-btn {
-  display: inline-flex;
-  align-items: center;
-  height: 100%;
-  min-width: 0;
-}
-
-.breadcrumb-item {
-  font-weight: bold;
-  font-size: 14px;
-  color: var(--el-text-color-primary);
-  overflow: hidden;
-  white-space: nowrap;
-  text-overflow: ellipsis;
-}
-
-.toolbar {
-  display: flex;
-  justify-content: end;
-  gap: 15px;
-  @media (max-width: 767px) {
-    gap: var(--space-1);
-  }
-
-  .icon-item {
-    align-self: center;
-    width: var(--control-size);
-    height: var(--control-size);
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-  }
-
-  .icon-item:hover {
-    background: var(--base-fill);
-  }
-
-  .notice {
-    font-size: 22px;
-    margin-right: 4px;
-  }
-
-  .dark-icon {
-    font-size: 20px;
-  }
-
-  .sun-icon {
-    font-size: 24px;
-  }
-
-  .avatar {
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-
-    .avatar-text {
-      background: var(--el-bg-color);
-      color: var(--el-text-color-primary);
-      height: 30px;
-      width: 30px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      border-radius: 8px;
-      border: 1px solid var(--dark-border);
-    }
-
-    .setting-icon {
-      position: relative;
-      top: 0;
-      margin-right: 10px;
-      bottom: 10px;
-    }
-  }
-
-}
-
-
-
-.writer-box {
-  min-width: var(--control-size);
-  color: inherit;
-  border-radius: var(--control-radius);
-}
-.toolbar { align-items: center; gap: var(--space-2); }
-.toolbar .avatar { min-height: var(--control-size); }
-@media (max-width: 767px) {
-  .header { gap: var(--space-1); }
-  .toolbar { gap: 0; }
-  .toolbar .avatar .setting-icon { margin-right: var(--space-1); width: 16px; }
-}
-
-
+.header { display: grid; grid-template-columns: 240px minmax(160px, 720px) minmax(0, 1fr); align-items: center; gap: 16px; padding: 8px 16px 8px 12px; height: 100%; }
+.header-brand { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.brand-link { display: flex; align-items: center; gap: 12px; min-width: 0; color: var(--el-text-color-primary); text-decoration: none; font-size: 22px; font-weight: 400; }
+.brand-link svg { flex-shrink: 0; color: var(--el-color-primary); }
+.brand-link span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.icon-item { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; width: 40px; height: 40px; border-radius: 50%; color: var(--secondary-text-color); cursor: pointer; }
+.icon-item:hover { background: var(--mail-nav-hover); }
+.mail-search { display: flex; align-items: center; min-width: 0; height: 48px; border-radius: 24px; padding: 0 4px; background: var(--mail-search); }
+.mail-search:focus-within { background: var(--el-bg-color); box-shadow: 0 1px 6px rgb(0 0 0 / .2); }
+.mail-search input { width: 100%; min-width: 0; height: 100%; color: var(--el-text-color-primary); font-size: 16px; }
+.mail-search input:focus-visible { outline: none; }
+.mail-search input::placeholder { color: var(--secondary-text-color); opacity: 1; }
+.mail-search input::-webkit-search-cancel-button { display: none; }
+.page-title { font-size: 20px; font-weight: 400; text-align: left; }
+.toolbar { display: flex; align-items: center; justify-content: flex-end; gap: 4px; }
+.toolbar .notice { font-size: 20px; }
+.toolbar .sun-icon, .toolbar .dark-icon { font-size: 22px; }
+.avatar { display: flex; align-items: center; justify-content: center; min-width: 40px; min-height: 40px; cursor: pointer; border-radius: 50%; }
+.avatar-text { background: var(--mail-avatar); color: white; width: 32px; height: 32px; display: grid; place-items: center; border-radius: 50%; font-size: 16px; }
+.avatar .setting-icon { display: none; }
+.mobile-compose { display: none; }
 .user-details { max-width: var(--overlay-width); }
 .user-details .user-name, .user-details .detail-email { max-width: 100%; }
 .user-details .action-info { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding-inline: 10px; overflow-wrap: anywhere; }
 .user-details .action-info > div:last-child > div { flex-wrap: wrap; }
-@media (max-width: 767px), (pointer: coarse) {
-  .user-details .logout .el-button { min-height: 44px; }
-  .toolbar .avatar { min-width: 44px; justify-content: center; }
+@media (max-width: 1024px) {
+  .header { grid-template-columns: 44px minmax(0, 1fr) auto; gap: 8px; }
+  .brand-link { display: none; }
+  .mobile-compose { display: flex; align-items: center; gap: 12px; position: fixed; z-index: 20; right: 16px; bottom: max(24px, env(safe-area-inset-bottom)); height: 56px; padding: 0 20px; border-radius: 16px; background: var(--mail-compose); color: var(--mail-on-compose); box-shadow: 0 2px 8px rgb(0 0 0 / .18); cursor: pointer; font-weight: 500; }
 }
-
+@media (max-width: 767px) {
+  .header { padding: 8px; gap: 4px; }
+  .mail-search { height: 44px; }
+  .mail-search input { font-size: 14px; }
+  .header-settings, .toolbar .notice { display: none; }
+}
 </style>

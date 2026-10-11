@@ -158,12 +158,9 @@ router.afterEach((to) => {
     }
 
     const uiStore = useUiStore()
-    if (to.meta.menu) {
-        if (['content', 'email', 'send'].includes(to.meta.name)) {
-            uiStore.accountShow = window.innerWidth > 767;
-        } else {
-            uiStore.accountShow = false
-        }
+    if (['email', 'send', 'star', 'draft'].includes(to.name)) {
+        if (uiStore.mailFolder !== to.name) uiStore.mailSearch = '';
+        uiStore.mailFolder = to.name;
     }
 
     if (window.innerWidth < 1025) {

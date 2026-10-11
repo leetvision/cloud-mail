@@ -62,29 +62,25 @@ watch(() => draftStore.setDraft, async () => {
   deep: true
 })
 
-watch(() => draftStore.refreshList, async () => {
-  const {list} = await getEmailList();
-    scroll.value.emailList.length = 0
-    scroll.value.handleList(list);
-    scroll.value.emailList.push(...list)
-})
+watch(() => draftStore.refreshList, () => scroll.value.refreshList());
 
-function getEmailList() {
-  return new Promise((resolve, reject) => {
-    db.value.draft.orderBy('createTime').reverse().toArray().then(list => {
-      resolve({list})
-    })
-  })
+async function getEmailList() {
+  const rows = await db.value.draft.orderBy('createTime').reverse().toArray();
+  const query = uiStore.mailSearch.trim().toLowerCase();
+  const list = rows.filter(row => !query || [row.subject, row.text, ...(row.receiveEmail || [])].join(' ').toLowerCase().includes(query));
+  // Dexie returns the complete local result; the shared list must not request another page.
+  return {list, total: list.length, hasMore: false};
 }
 
 async function deleteDraft(draftIds) {
   await db.value.draft.bulkDelete(draftIds);
+  await db.value.att.bulkDelete(draftIds);
   draftStore.refreshList++
 }
 
 async function jumpContent(email) {
   const att = await db.value.att.get(email.draftId)
-  email.attachments = att.attachments
+  email.attachments = att?.attachments || []
   uiStore.writerRef.openDraft(email);
 }
 

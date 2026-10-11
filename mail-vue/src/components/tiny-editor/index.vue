@@ -28,12 +28,14 @@ const props = defineProps({
 });
 
 
-const emit = defineEmits(['change','focus']);
+const emit = defineEmits(['change','focus','send','escape']);
 const editor = shallowRef(null);
 const isInitialized = ref(false);
 const editorRef = ref(null);
 const showLoading = ref(false);
 const uiStore = useUiStore();
+let currentContent = props.defValue;
+let restoreEditorFocus = false;
 
 onMounted(() => {
   initTinyMCE();
@@ -44,17 +46,22 @@ onBeforeUnmount(() => {
 });
 
 watch(() => props.defValue, (newValue) => {
+  currentContent = newValue;
   if (editor.value && editor.value.getContent() !== newValue) {
     editor.value.setContent(newValue);
   }
 });
 
 watch(() => uiStore.dark, () => {
+  if (!editor.value || !isInitialized.value) return;
+  currentContent = editor.value.getContent();
+  restoreEditorFocus = editor.value.hasFocus();
   destroyEditor();
   initEditor();
 });
 
 function clearEditor() {
+  currentContent = '';
   if (editor.value) {
     editor.value.setContent('');
   }
@@ -78,7 +85,7 @@ function initEditor() {
     selector: `#${props.editorId}`,
     statusbar: false,
     height: "100%",
-    auto_focus: true,
+    auto_focus: false,
     //relative_urls: false,  // Prevent image URLs on the same domain from being converted to relative paths.
     //remove_script_host: false, // Preserve the domain in URLs.
     forced_root_block: 'div',
@@ -101,19 +108,32 @@ function initEditor() {
     setup: (ed) => {
       editor.value = ed;
       ed.on('init', () => {
-        ed.setContent(props.defValue);
+        ed.setContent(currentContent);
         isInitialized.value = true;
+        if (restoreEditorFocus) ed.focus();
+        restoreEditorFocus = false;
       });
       ed.on('input change', () => {
         const content = ed.getContent();
+        currentContent = content;
         const text = ed.getContent({format: 'text'});
         emit('change', content, text);
       });
       ed.on('focus', () => {
         emit('focus', focus);
       })
+      ed.on('keydown', event => {
+        if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+          event.preventDefault();
+          emit('send');
+        }
+        if (event.key === 'Escape' && !event.defaultPrevented && !ed.plugins.fullscreen?.isFullscreen() && ![...document.querySelectorAll('.tox-menu, .tox-dialog')].some(el => el.getClientRects().length)) {
+          event.preventDefault();
+          emit('escape');
+        }
+      })
     },
-    autofocus: true,
+    autofocus: false,
     branding: false,
     file_picker_types: 'image',
     image_dimensions: false,
@@ -152,11 +172,12 @@ function focus() {
 }
 
 function getContent() {
-  return editor.value.getContent()
+  return editor.value?.getContent() ?? currentContent;
 }
 
 
 function destroyEditor() {
+  isInitialized.value = false;
   if (editor.value) {
     editor.value.destroy();
     editor.value = null;

@@ -22,6 +22,7 @@
 </template>
 
 <script setup>
+import {useUiStore} from '@/store/ui';
 import IconAction from '@/components/icon-action/index.vue'
 import {useAccountStore} from "@/store/account.js";
 import {useEmailStore} from "@/store/email.js";
@@ -36,6 +37,7 @@ defineOptions({
 })
 
 const emailStore = useEmailStore();
+const uiStore = useUiStore();
 const accountStore = useAccountStore();
 const sendScroll = ref({})
 const params = reactive({
@@ -75,7 +77,7 @@ function getEmailList(emailId, size) {
   const accountId =  accountStore.currentAccountId;
   const allReceive = accountStore.currentAccount.allReceive;
   return emailStore.fetchList(full =>
-    emailList(accountId, allReceive, emailId, params.timeSort, size, 1, full)
+    emailList(accountId, allReceive, emailId, params.timeSort, size, 1, full, uiStore.mailSearch)
   ).then(data => {
     data.latestEmail.reqAccountId = accountId;
     data.latestEmail.allReceive = allReceive;

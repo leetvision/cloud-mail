@@ -2,10 +2,10 @@
   <div class="box">
     <div class="header-actions">
       <IconAction class="icon" icon="material-symbols-light:arrow-back-ios-new" width="20" height="20" @click="handleBack" :label="$t('back')"/>
-      <IconAction v-if="email.canManage !== 0" v-perm="'email:delete'" class="icon" icon="uiw:delete" width="16" height="16" @click="handleDelete" :label="$t('delete')"/>
+      <IconAction v-if="email.canManage !== 0" v-perm="'email:delete'" class="icon" icon="material-symbols:delete-outline-rounded" width="16" height="16" @click="handleDelete" :label="$t('delete')"/>
       <span class="star" v-if="emailStore.contentData.showStar">
-        <IconAction class="icon" @click="changeStar" v-if="email.isStar" icon="fluent-color:star-16" width="20" height="20" :label="$t('star')"/>
-        <IconAction class="icon" @click="changeStar" v-else icon="solar:star-line-duotone" width="18" height="18" :label="$t('star')"/>
+        <IconAction class="icon" @click="changeStar" v-if="email.isStar" icon="material-symbols:star-rounded" width="20" height="20" :label="$t('star')"/>
+        <IconAction class="icon" @click="changeStar" v-else icon="material-symbols:star-outline-rounded" width="18" height="18" :label="$t('star')"/>
       </span>
       <IconAction class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openReply()" icon="la:reply" width="21" height="21"  :label="$t('reply')"/>
       <IconAction class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openForward()" icon="iconoir:arrow-up-right" width="20" height="20"  :label="$t('forward')"/>
@@ -13,7 +13,7 @@
     <el-scrollbar class="scrollbar">
       <div class="container">
         <div class="email-title">
-          {{ email.subject }}
+          {{ email.subject || '(' + t('noSubject') + ')' }}
         </div>
         <p v-if="threadLoading" class="thread-status" role="status">{{ $t('threadLoading') }}</p>
         <div v-else-if="threadFailed" class="thread-status" role="alert">
@@ -23,6 +23,7 @@
         <p v-else-if="messages.length > 1" class="thread-status">{{ $t('threadMessageCount', messages.length) }}</p>
         <div class="content" v-for="message in messages" :key="message.emailId">
           <div class="email-info">
+            <div class="sender-avatar" aria-hidden="true">{{ (message.name || message.sendEmail || '?').charAt(0).toUpperCase() }}</div>
             <div>
               <div class="send"><span class="send-source">{{$t('from')}}</span>
                 <div class="send-name">
@@ -51,16 +52,16 @@
             <div class="att-box">
 
               <div class="att-item" v-for="att in message.attList" :key="att.attId">
-                <div class="att-icon" @click="showImage(att.key)">
+                <div class="att-icon" aria-hidden="true">
                   <Icon v-bind="getIconByName(att.filename)" />
                 </div>
-                <div class="att-name" @click="showImage(att.key)">
+                <div class="att-name">
                   {{ att.filename }}
                 </div>
                 <div class="att-size">{{ formatBytes(att.size) }}</div>
                 <div class="opt-icon att-icon">
-                  <Icon v-if="isImage(att.filename)" icon="hugeicons:view" width="22" height="22" @click="showImage(att.key)"/>
-                  <a :href="cvtR2Url(att.key)" download>
+                  <button type="button" v-if="isImage(att.filename)" :aria-label="t('previewAttachment', {filename: att.filename})" @click="showImage(att.key, att.filename)"><Icon icon="hugeicons:view" width="22" height="22" /></button>
+                  <a :href="cvtR2Url(att.key)" :download="att.filename" :aria-label="t('downloadAttachment', {filename: att.filename})">
                     <Icon icon="system-uicons:push-down" width="22" height="22"/>
                   </a>
                 </div>
@@ -188,7 +189,7 @@ onUnmounted(() => {
 })
 
 function handleKeyDown(event) {
-  if (event.key !== 'Escape') return;
+  if (event.defaultPrevented || event.key !== 'Escape' || event.target.closest?.('input, textarea, [contenteditable="true"], .el-dialog, .el-popper, .el-message-box, .el-image-viewer__wrapper') || (uiStore.asideShow && window.innerWidth < 1025)) return;
   if (showPreview.value) return;
   if (document.querySelector('.el-message-box')) return;
   const writeBox = document.querySelector('.write-box');
@@ -213,8 +214,8 @@ function formatImage(content) {
   return content.replace(/{{domain}}/g, '/api/oss/');
 }
 
-function showImage(key) {
-  if (!isImage(key)) return;
+function showImage(key, filename = key) {
+  if (!isImage(filename)) return;
   const url = cvtR2Url(key)
   srcList.length = 0
   srcList.push(url)
@@ -409,7 +410,6 @@ const handleDelete = () => {
       }
 
       .att-item {
-        cursor: pointer;
         div {
           align-self: center;
         }
@@ -450,10 +450,15 @@ const handleDelete = () => {
           display: flex;
           gap: 8px;
           cursor: pointer;
-          a {
+          a, button {
             color: var(--secondary-text-color);
             align-items: center;
-            display: flex;
+            display: inline-flex;
+            justify-content: center;
+            min-width: 36px;
+            min-height: 36px;
+            cursor: pointer;
+            border-radius: 50%;
           }
         }
       }
@@ -558,4 +563,20 @@ const handleDelete = () => {
   .container .content .att .att-item .opt-icon { grid-column: 3; grid-row: 1 / 3; padding-left: 0; gap: 0; }
 }
 
+
+.box .container .email-title { font-size: 24px; font-weight: 400; line-height: 1.4; margin: 24px 0 20px 48px; overflow-wrap: anywhere; }
+.container { padding: 0 32px 32px; }
+.content { margin-bottom: 20px; }
+.box .container .content .email-info { position: relative; padding-left: 48px; border: 0; margin-bottom: 0; }
+.sender-avatar { position: absolute; left: 0; top: 4px; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--mail-search); color: var(--el-text-color-primary); font-size: 16px; }
+.htm-scrollbar { padding: 20px 0 24px 48px; }
+.message-actions { padding-left: 48px; margin-block: 24px; display: flex; gap: 12px; }
+.message-actions .el-button { border-radius: 20px; height: 40px; padding: 0 24px; margin: 0; }
+.thread-status { margin-left: 48px; }
+@media (max-width: 767px) {
+  .container { padding: 0 16px 96px; }
+  .box .container .email-title { margin-left: 0; font-size: 22px; }
+  .htm-scrollbar { padding-left: 0; }
+  .message-actions, .thread-status { margin-left: 0; padding-left: 0; }
+}
 </style>

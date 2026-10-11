@@ -1,19 +1,16 @@
 <template>
-  <div class="send" v-show="show" :inert="!show" role="dialog" aria-modal="true" :aria-label="t('compose')" @keydown.tab="trapFocus">
+  <div class="send" :class="{'composer-modal': composerModal, 'composer-expanded': expanded}" v-show="show" :inert="!show" role="dialog" :aria-modal="composerModal" :aria-label="t('compose')" @keydown.tab="trapFocus">
     <div class="write-box">
       <div class="title">
-        <div class="title-left">
-          <span class="title-text">
-            <Icon icon="hugeicons:quill-write-01" width="28" height="28"/>
-          </span>
-          <span class="sender">{{ $t('sender') }}:</span>
-          <span class="sender-name">{{ form.name }}</span>
-          <span class="send-email"><{{ form.sendEmail }}></span>
+        <div class="title-left"><span>{{ t('newMessage') }}</span></div>
+        <div class="composer-window-actions">
+          <IconAction class="expand-composer" :label="t(expanded ? 'collapseComposer' : 'expandComposer')" @click="expanded = !expanded" :icon="expanded ? 'material-symbols:close-fullscreen-rounded' : 'material-symbols:open-in-full-rounded'" width="18" />
+          <IconAction :label="$t('closeComposer')" @click="close" icon="material-symbols:close-rounded" width="20" />
         </div>
-        <IconAction :label="$t('closeComposer')" @click="close" icon="material-symbols-light:close-rounded" width="22" height="22" />
       </div>
       <div class="container">
-        <el-input-tag  @add-tag="addTagChange" tag-type="primary" @input="inputChange" size="default" v-model="form.receiveEmail" >
+        <div class="from-line"><span>{{ t('from') }}</span><span>{{ form.sendEmail }}</span></div>
+        <el-input-tag  @add-tag="addTagChange" tag-type="primary" @input="inputChange" size="default" v-model="form.receiveEmail" :aria-label="t('recipient')" >
           <template #prefix>
             <div class="item-title" >{{ $t('recipient') }}</div>
             <el-select :popper-options="viewportPopperOptions"
@@ -41,9 +38,10 @@
             </div>
           </template>
         </el-input-tag>
-        <el-input v-model="form.subject" :placeholder="t('subject')" />
-        <tinyEditor :def-value="defValue" ref="editor" @change="change" @focus="focusChange" />
+        <el-input v-model="form.subject" :placeholder="t('subject')" :aria-label="t('subject')" />
+        <tinyEditor :def-value="defValue" ref="editor" @change="change" @focus="focusChange" @send="sendEmail" @escape="closeFromEditor" />
         <div class="button-item">
+          <div class="send-controls"><el-button type="primary" :loading="sending" @click="sendEmail">{{ t(form.sendType === 'reply' ? 'reply' : form.sendType === 'forward' ? 'forward' : 'send') }}</el-button></div>
           <button type="button" class="att-add" :aria-label="$t('addAttachment')" @click="chooseFile">
             <Icon icon="iconamoon:attachment-fill" width="24" height="24"/>
           </button>
@@ -59,11 +57,7 @@
                     width="22" height="22"/>
             </div>
           </div>
-          <div>
-            <el-button type="primary" @click="sendEmail" v-if="form.sendType === 'reply'">{{ $t('reply') }}</el-button>
-            <el-button type="primary" @click="sendEmail" v-else-if="form.sendType === 'forward'">{{ $t('forward') }}</el-button>
-            <el-button type="primary" @click="sendEmail" v-else>{{ $t('send') }}</el-button>
-          </div>
+
         </div>
       </div>
     </div>
@@ -130,7 +124,14 @@ const accountStore = useAccountStore()
 const editor = ref({})
 const userStore = useUserStore();
 const show = ref(false);
+const expanded = ref(false);
+const narrow = ref(window.innerWidth < 768);
+const composerModal = computed(() => show.value && (expanded.value || narrow.value));
+function resizeComposer() { narrow.value = window.innerWidth < 768; }
+onMounted(() => window.addEventListener('resize', resizeComposer));
+onUnmounted(() => window.removeEventListener('resize', resizeComposer));
 const uiStore = useUiStore();
+watch(composerModal, value => { uiStore.composerModal = value; });
 let previousFocus;
 watch(show, async visible => {
   if (visible) previousFocus = document.activeElement;
@@ -140,7 +141,7 @@ watch(show, async visible => {
   else previousFocus?.focus();
 });
 function trapFocus(event) {
-  if (event.target.closest('.el-dialog')) return;
+  if (!composerModal.value || event.target.closest('.el-dialog')) return;
   const controls = [...document.querySelectorAll('.send .write-box button:not(:disabled), .send .write-box input:not(:disabled), .send .write-box iframe, .send .write-box [tabindex="0"]')].filter(el => el.getClientRects().length && !el.closest('[inert]'));
   const first = controls[0], last = controls.at(-1);
   if (event.shiftKey && event.target === first) { event.preventDefault(); last?.focus(); }
@@ -148,7 +149,7 @@ function trapFocus(event) {
 }
 const percent = ref(0)
 let percentMessage = null
-let sending = false
+const sending = ref(false)
 const defValue = ref('')
 const contactsTabRef = ref({})
 const showContacts = ref(false)
@@ -345,7 +346,7 @@ async function sendEmail() {
     return
   }
 
-  if (sending) {
+  if (sending.value) {
     ElMessage({
       message: t('sendingErrorMsg'),
       type: 'error',
@@ -361,7 +362,7 @@ async function sendEmail() {
     customClass: 'message-bottom'
   })
 
-  sending = true
+  sending.value = true
 
   show.value = false
 
@@ -405,12 +406,13 @@ async function sendEmail() {
 		localStorage.removeItem('authenticated');
       router.replace('/login');
     }
+    expanded.value = false
     show.value = true
     addRecipientRecord();
   }).finally(() => {
     percentMessage.close()
     percent.value = 0
-    sending = false
+    sending.value = false
   })
 }
 
@@ -530,6 +532,7 @@ async function open(message) {
     form.sendEmail = mailbox.email;
     form.accountId = mailbox.accountId;
     form.name = mailbox.name;
+    expanded.value = false
     show.value = true;
     editor.value.focus();
   } catch { /* The request layer displays revoked access. */ }
@@ -539,16 +542,26 @@ function openDraft(draft) {
   Object.assign(form, {...draft})
   defValue.value = ''
   setTimeout(() => defValue.value = form.content)
+  expanded.value = false
   show.value = true;
   editor.value.focus()
 }
 
 const handleKeyDown = (event) => {
+  if (show.value && (event.ctrlKey || event.metaKey) && event.key === 'Enter' && event.target.closest?.('.write-box') && !event.target.closest('.el-popper')) {
+    event.preventDefault();
+    sendEmail();
+    return;
+  }
   if (event.defaultPrevented || event.target.closest?.('.el-dialog, .el-popper, .tox-dialog, .el-message-box')) return;
-  if (event.key === 'Escape' && show.value && !showContacts.value && !document.querySelector('.tox-dialog, .el-message-box, .el-select__popper:not([style*="display: none"])')) {
+  if (event.key === 'Escape' && (composerModal.value || event.target.closest?.('.send')) && show.value && !showContacts.value && !document.querySelector('.tox-dialog, .el-message-box, .el-select__popper:not([style*="display: none"])')) {
     close()
   }
 };
+
+function closeFromEditor() {
+  if (show.value && !showContacts.value && !document.querySelector('.tox-dialog, .el-message-box, .el-select__popper:not([style*="display: none"])')) close();
+}
 
 onMounted(() => {
   window.addEventListener('keydown', handleKeyDown);
@@ -636,7 +649,9 @@ function close() {
 <style scoped lang="scss">
 .send {
   z-index: var(--layer-composer);
-  background: rgb(0 0 0 / 0.32);
+  background: transparent;
+  pointer-events: none;
+  padding: 0 24px;
   position: fixed;
   top: 0;
   left: 0;
@@ -644,21 +659,23 @@ function close() {
   height: 100%;
   height: 100dvh;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: flex-end;
 
   .write-box {
     background: var(--el-bg-color);
-    width: min(1367px, calc(100% - 80px));
+    width: min(600px, calc(100vw - 48px));
+    height: min(580px, calc(100dvh - 80px));
+    pointer-events: auto;
     box-shadow: var(--el-box-shadow-light);
-    border: 1px solid var(--el-border-color-light);
+    border: none;
     transition: var(--el-transition-duration);
-    padding: 15px;
-    border-radius: 8px;
+    padding: 0;
+    border-radius: 12px 12px 0 0;
     display: grid;
     grid-template-rows: auto minmax(0, 1fr);
     overflow: hidden;
-    @media (max-width: 1024px) {
+    @media (max-width: 767px) {
       width: 100%;
       height: 100%;
       border-radius: 0;
@@ -666,14 +683,17 @@ function close() {
       padding-top: 10px;
     }
 
-    @media (min-width: 1025px) {
-      height: min(800px, calc(100dvh - 60px));
+    @media (min-width: 768px) {
+      height: min(580px, calc(100dvh - 80px));
     }
 
     .title {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 10px;
+      margin-bottom: 0;
+      background: var(--mail-read-row);
+      padding: 8px 12px;
+      font-weight: 500;
 
       .title-left {
         min-width: 0;
@@ -715,15 +735,16 @@ function close() {
       overflow-y: auto;
       height: 100%;
       display: grid;
-      grid-template-rows: auto auto minmax(120px, 1fr) auto;
-      gap: 15px;
+      grid-template-rows: auto auto auto minmax(120px, 1fr) auto;
+      gap: 0;
+      padding: 0 16px 12px;
 
       .item-title {
       }
 
       .button-item {
         display: grid;
-        grid-template-columns: auto auto minmax(0, 1fr) auto;
+        grid-template-columns: auto auto auto minmax(0, 1fr);
         align-items: center;
         gap: var(--space-2);
 
@@ -842,4 +863,23 @@ function close() {
   .send .write-box .title .send-email { grid-column: 2 / -1; margin-left: 8px; }
 }
 
+
+.from-line { display: flex; gap: 16px; align-items: center; min-height: 40px; font-size: 13px; color: var(--secondary-text-color); border-bottom: 1px solid var(--mail-row-border); overflow: hidden; }
+.from-line span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.composer-window-actions { display: flex; gap: 2px; }
+.send .write-box .container :deep(.el-input__wrapper), .send .write-box .container :deep(.el-input-tag) { border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--mail-row-border); min-height: 40px; padding-inline: 0; background: transparent; }
+.send-controls .el-button { border-radius: 20px; padding: 0 24px; height: 40px; }
+.send .write-box .container .button-item { padding-top: 12px; }
+.send .write-box .container .button-item .att-list { grid-column: 1 / -1; grid-row: 1; max-height: 90px; }
+.send .write-box .container .button-item .att-list:empty { display: none; }
+.send .write-box .container .button-item .send-controls { grid-column: 1; grid-row: 2; }
+.send .write-box .container .button-item .att-add { grid-column: 2; grid-row: 2; }
+.send .write-box .container .button-item .att-clear { grid-column: 3; grid-row: 2; }
+.send.composer-modal { background: rgb(0 0 0 / .32); pointer-events: auto; align-items: center; justify-content: center; }
+.send.composer-expanded .write-box { width: min(1100px, calc(100vw - 80px)); height: calc(100dvh - 80px); border-radius: 12px; }
+@media (max-width: 767px) {
+  .send { padding: 0; }
+  .send .write-box { width: 100%; height: 100dvh; border-radius: 0; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); }
+  .expand-composer { display: none; }
+}
 </style>

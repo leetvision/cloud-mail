@@ -6,39 +6,29 @@
     </div>
     <el-scrollbar class="scrollbar" ref="scrollbarRef">
       <div v-infinite-scroll="getAccountList" :infinite-scroll-distance="600" :infinite-scroll-immediate="false">
-        <el-card class="item" :class="itemBg(item.accountId)" v-for="(item, index) in accounts" :key="item.accountId"
-                 @click="changeAccount(item)">
-          <div class="account">
-            {{ item.email }}
+        <div class="item" :class="itemBg(item.accountId)" v-for="(item, index) in accounts" :key="item.accountId">
+          <button type="button" class="account account-choose" :aria-pressed="item.accountId === accountStore.currentAccountId" @click="changeAccount(item)">
+            <span>{{ item.email }}</span>
             <small v-if="item.accessRole && item.accessRole !== 'owner'" class="shared-label">{{ $t('mailboxShared', {role: roleLabel(item.accessRole)}) }}</small>
-          </div>
+          </button>
           <div class="opt">
-            <div class="send-email" @click.stop v-if="isOwner(item)">
-              <Icon @click="setAllReceive(item)" v-if="!item.allReceive" icon="eva:email-fill" width="22" height="22" color="#fccb1a"/>
-              <Icon @click="setAllReceive(item)" v-else icon="flat-color-icons:folder" width="22" height="22" color="#23c4f1" />
-            </div>
-            <div class="settings" @click.stop>
-              <Icon icon="fluent-color:clipboard-24" width="22" height="22" @click.stop="copyAccount(item.email)"/>
-              <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"
-                    v-if="showNullSetting(item)"/>
-              <el-dropdown :popper-options="viewportPopperOptions" v-else trigger="click">
-                <button type="button" class="mailbox-settings" :aria-label="$t('mailboxSettings', {email: item.email})">
-                  <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"/>
-                </button>
+            <IconAction v-if="isOwner(item)" :label="$t('toggleAllMail')" :icon="item.allReceive ? 'flat-color-icons:folder' : 'material-symbols:mail-outline-rounded'" @click="setAllReceive(item)" />
+            <div class="settings">
+              <IconAction icon="fluent-color:clipboard-24" :label="$t('copyMailbox')" @click="copyAccount(item.email)" />
+              <el-dropdown v-if="!showNullSetting(item)" :popper-options="viewportPopperOptions" trigger="click">
+                <button type="button" class="mailbox-settings" :aria-label="$t('mailboxSettings', {email: item.email})"><Icon icon="material-symbols:settings-outline-rounded" width="20" /></button>
                 <template #dropdown>
                   <el-dropdown-menu>
                     <el-dropdown-item v-if="canManage(item)" @click="openMembers(item)">{{ $t('mailboxMembers') }}</el-dropdown-item>
                     <el-dropdown-item v-if="canManage(item)" @click="openSetName(item)">{{ $t('rename') }}</el-dropdown-item>
                     <el-dropdown-item v-if="isOwner(item) && item.accountId !== userStore.user.account.accountId" @click="setAsTop(item, index)">{{ $t('pin') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="isOwner(item) && item.accountId !== userStore.user.account.accountId && hasPerm('account:delete')"
-                                      @click="remove(item)">{{ $t('delete') }}
-                    </el-dropdown-item>
+                    <el-dropdown-item v-if="isOwner(item) && item.accountId !== userStore.user.account.accountId && hasPerm('account:delete')" @click="remove(item)">{{ $t('delete') }}</el-dropdown-item>
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
             </div>
           </div>
-        </el-card>
+        </div>
 
         <!-- Initial Loading Skeleton -->
         <template v-if="loading">
@@ -150,6 +140,7 @@ import {useSettingStore} from "@/store/setting.js";
 import {useAccountStore} from "@/store/account.js";
 import {useEmailStore} from "@/store/email.js";
 import {useUserStore} from "@/store/user.js";
+import {useUiStore} from "@/store/ui.js";
 import {hasPerm} from "@/perm/perm.js"
 import {useI18n} from "vue-i18n";
 import {AccountAllReceiveEnum} from "@/enums/account-enum.js";
@@ -159,6 +150,7 @@ const userStore = useUserStore();
 const accountStore = useAccountStore();
 const settingStore = useSettingStore();
 const emailStore = useEmailStore();
+const uiStore = useUiStore();
 const membersMailbox = ref(null)
 const isOwner = item => !item.accessRole || item.accessRole === 'owner'
 const canManage = item => isOwner(item) || item.accessRole === 'manager'
@@ -357,6 +349,7 @@ function refresh() {
 function changeAccount(account) {
   accountStore.currentAccountId = account.accountId
   accountStore.currentAccount = account
+  if (window.innerWidth < 1025) uiStore.asideShow = false
 }
 
 function add() {
@@ -713,4 +706,16 @@ path[fill="#ffdda1"] {
 :deep(.el-input-group__append span) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 :deep(.el-input-group__append svg) { flex-shrink: 0; }
 
+
+.account-box { height: 280px; border: 0 !important; background: transparent; margin: 0 0 0 12px; }
+.account-box .head-opt { box-shadow: none; padding: 0 8px; min-height: 40px; gap: 4px; }
+.account-box .item { margin: 4px 8px 8px 0; border: 0; border-radius: 12px; box-shadow: none; background: transparent; padding: 8px; overflow: hidden; }
+.account-box .item.item-choose { background: var(--mail-selected); }
+.account-choose { display: block; width: 100%; padding: 4px 0; text-align: left; color: var(--el-text-color-primary); cursor: pointer; }
+.account-choose > span { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.account-box .item .opt { display: flex; justify-content: flex-end; padding: 0; margin: 0; }
+.account-box .item .opt .settings { display: flex; align-items: center; gap: 0; }
+.mailbox-settings { width: var(--control-size); height: var(--control-size); display: grid; place-items: center; border-radius: 50%; color: var(--secondary-text-color); cursor: pointer; }
+.mailbox-settings:hover { background: var(--mail-nav-hover); }
+.account-box .noLoading { display: none; }
 </style>

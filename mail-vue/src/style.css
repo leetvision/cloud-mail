@@ -27,7 +27,7 @@ html, body {
 }
 
 body {
-    font-family: Inter, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+    font-family: Arial, "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", sans-serif;
     line-height: 1.5;
     color: var(--el-text-color-primary);
     font-size: 14px;
@@ -90,15 +90,15 @@ button, input, select, textarea {
     --space-6: 24px;
     --space-8: 32px;
     --page-gutter: 32px;
-    --app-header-height: 60px;
+    --app-header-height: 64px;
     --mailbox-width: 260px;
     --toolbar-height: 48px;
     --control-size: 36px;
-    --control-radius: 6px;
+    --control-radius: 50%;
     --layer-composer: 200;
     --el-text-color-placeholder: #667080;
 
-    --el-color-primary: #0875d1;
+    --el-color-primary: #0b57d0;
     --el-color-primary-dark-2: #1064c0;
     --el-color-primary-light-3: #4dabff;
     --el-color-primary-light-5: #69c0ff;
@@ -253,4 +253,48 @@ input, textarea {
     ::view-transition-old(root), ::view-transition-new(root) {
         animation: none !important;
     }
+}
+
+/* Mail workspace surfaces and states. */
+:root {
+    --mail-shell: #f6f8fc;
+    --mail-search: #e9eef6;
+    --mail-compose: #c2e7ff;
+    --mail-on-compose: #001d35;
+    --mail-selected: #d3e3fd;
+    --mail-on-selected: #001d35;
+    --mail-nav-hover: #e4e7ec;
+    --mail-read-row: #f2f6fc;
+    --mail-unread-row: #ffffff;
+    --mail-avatar: #7b4f9d;
+    --mail-row-border: #e4e7eb;
+    --mail-checkbox-border: #747775;
+    --secondary-text-color: #5f6368;
+    --email-scroll-content-color: #5f6368;
+    --email-hover-background: #e8f0fe;
+    --el-text-color-primary: #202124;
+    --el-text-color-regular: #3c4043;
+}
+html.dark {
+    --mail-shell: #202124;
+    --mail-search: #303134;
+    --mail-compose: #004a77;
+    --mail-on-compose: #c2e7ff;
+    --mail-selected: #004a77;
+    --mail-on-selected: #c2e7ff;
+    --mail-nav-hover: #3c4043;
+    --mail-read-row: #292a2d;
+    --mail-unread-row: #202124;
+    --mail-avatar: #79509c;
+    --mail-row-border: #3c4043;
+    --mail-checkbox-border: #9aa0a6;
+    --el-text-color-primary: #e8eaed;
+    --el-text-color-regular: #e8eaed;
+    --secondary-text-color: #bdc1c6;
+    --email-scroll-content-color: #bdc1c6;
+    --email-hover-background: #353b45;
+}
+
+.el-checkbox__input:not(.is-disabled) .el-checkbox__inner {
+    border-color: var(--mail-checkbox-border);
 }

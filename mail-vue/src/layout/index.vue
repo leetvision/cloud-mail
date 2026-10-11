@@ -1,24 +1,15 @@
 <template>
-  <el-container class="layout" :inert="uiStore.composerShow">
-    <el-aside
-        class="aside"
-        :inert="!uiStore.asideShow"
-        :class="uiStore.asideShow ? 'aside-show' : 'el-aside-hide'">
-      <Aside />
-    </el-aside>
-    <div
-        :class="(uiStore.asideShow && isMobile)? 'overlay-show':'overlay-hide'"
-        @click="uiStore.asideShow = false"
-    ></div>
-    <el-container class="main-container" :inert="isMobile && uiStore.asideShow">
-      <el-main>
-        <el-header>
-            <Header />
-        </el-header>
-        <Main />
-      </el-main>
-    </el-container>
-  </el-container>
+  <div class="layout" :inert="uiStore.composerModal">
+    <header class="app-header" :inert="isMobile && uiStore.asideShow"><Header /></header>
+    <div class="workspace">
+      <el-aside id="mail-navigation" class="aside" :inert="isMobile && !uiStore.asideShow" :class="uiStore.asideShow ? 'aside-show' : 'aside-hide'" :role="isMobile && uiStore.asideShow ? 'dialog' : undefined" :aria-modal="isMobile && uiStore.asideShow ? true : undefined" :aria-label="$t('mailNavigation')">
+        <div v-if="isMobile && uiStore.asideShow" class="navigation-header"><span>{{ $t('mailNavigation') }}</span><button type="button" class="navigation-close" :aria-label="$t('closeNavigation')" @click="uiStore.asideShow = false"><Icon icon="material-symbols:close-rounded" width="24" /></button></div>
+        <Aside />
+      </el-aside>
+      <div v-if="uiStore.asideShow && isMobile" class="navigation-overlay" @click="uiStore.asideShow = false"></div>
+      <main id="mail-main" class="main-container" :inert="isMobile && uiStore.asideShow"><Main /></main>
+    </div>
+  </div>
   <writer ref="writerRef" />
 </template>
 
@@ -29,6 +20,7 @@ import Main from '@/layout/main/index.vue'
 import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {useUiStore} from "@/store/ui.js";
 import writer from '@/layout/write/index.vue'
+import { Icon } from '@iconify/vue';
 
 const uiStore = useUiStore();
 const writerRef = ref({})
@@ -58,12 +50,13 @@ watch(() => uiStore.asideShow, async visible => {
   if (!isMobile.value) return;
   if (visible) drawerFocus = document.activeElement;
   await nextTick();
-  if (visible) document.querySelector('.aside .el-menu-item')?.focus();
+  if (visible) document.querySelector('.aside button')?.focus();
   else drawerFocus?.focus();
 });
 function handleDrawerKey(event) {
+  if (event.defaultPrevented || event.target.closest?.('.el-dialog, .el-message-box, .el-popper')) return;
   if (!isMobile.value || !uiStore.asideShow || uiStore.composerShow) return;
-  if (event.key === 'Escape') { uiStore.asideShow = false; return; }
+  if (event.key === 'Escape') { event.preventDefault(); uiStore.asideShow = false; return; }
   if (event.key !== 'Tab') return;
   const items = [...document.querySelectorAll('.aside button, .aside .el-menu-item, .aside [tabindex="0"]')].filter(el => el.getClientRects().length);
   if (!items.length) return;
@@ -73,86 +66,22 @@ function handleDrawerKey(event) {
 }
 </script>
 
-<style lang="scss" scoped>
-.el-aside-hide {
-  position: fixed;
-  left: 0;
-  height: 100%;
-  z-index: 100;
-  transform: translateX(-100%);
-  transition: all 100ms ease;
+<style scoped>
+.layout { height: 100dvh; display: grid; grid-template-rows: var(--app-header-height) minmax(0, 1fr); background: var(--mail-shell); overflow: hidden; }
+.app-header { min-width: 0; }
+.workspace { display: flex; min-height: 0; position: relative; }
+.aside { flex: 0 0 256px; width: 256px; background: var(--mail-shell); display: flex; flex-direction: column; }
+.aside :deep(.navigation-scroll) { flex: 1; min-height: 0; height: auto; }
+.aside-hide { flex-basis: 72px; width: 72px; }
+.navigation-header { display: flex; align-items: center; justify-content: space-between; min-height: 56px; padding: 8px 12px 0 24px; font-weight: 500; }
+.navigation-close { width: 40px; height: 40px; display: grid; place-items: center; border-radius: 50%; color: var(--secondary-text-color); cursor: pointer; }
+.navigation-close:hover { background: var(--mail-nav-hover); }
+.main-container { flex: 1; min-width: 0; min-height: 0; margin: 0 16px 16px 0; background: var(--el-bg-color); border-radius: 16px; overflow: hidden; }
+.navigation-overlay { position: fixed; inset: 0; background: rgb(0 0 0 / .32); z-index: 99; }
+@media (max-width: 1024px) {
+  .aside-hide { position: absolute; transform: translateX(-100%); visibility: hidden; }
+  .aside-show { position: fixed; inset: 0 auto 0 0; z-index: 101; max-width: calc(100vw - 48px); box-shadow: 4px 0 24px rgb(0 0 0 / .16); }
+  .main-container { margin-left: 16px; }
 }
-
-.aside-show {
-  -webkit-box-shadow: var(--aside-right-border);
-  box-shadow: var(--aside-right-border);
-  transform: translateX(0);
-  transition: all 100ms ease;
-  z-index: 101;
-  @media (max-width: 1024px) {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 101;
-    height: 100%;
-    background: var(--el-bg-color);
-  }
-}
-
-.el-aside {
-  width: auto;
-  max-width: calc(100% - 44px);
-  transition: all 100ms ease;
-}
-
-.layout {
-  height: 100%;
-  height: 100dvh;
-  position: fixed;
-  width: 100%;
-  top: 0;
-  left: 0;
-  overflow: hidden;
-}
-
-.main-container {
-  min-width: 0;
-  min-height: 0;
-  height: 100%;
-  background: var(--el-bg-color);
-  overflow: hidden;
-  -webkit-overflow-scrolling: touch;
-}
-
-.el-main {
-  display: grid;
-  grid-template-rows: var(--app-header-height) minmax(0, 1fr);
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  padding: 0;
-}
-
-.el-header {
-  background: var(--el-bg-color);
-  border-bottom: solid 1px var(--el-border-color);
-  padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
-}
-
-.overlay-show {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100dvh;
-  background: rgba(0, 0, 0, 0.4);
-  z-index: 99;
-  transition: all 0.3s;
-}
-
-.overlay-hide {
-  display: flex;
-  pointer-events: none;
-  opacity: 0;
-}
+@media (max-width: 767px) { .main-container { margin: 0; border-radius: 0; } }
 </style>

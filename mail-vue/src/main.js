@@ -3,6 +3,7 @@ import App from './App.vue';
 import router from './router';
 import './style.css';
 import './responsive.css';
+import './icons/mail.js';
 import { init } from '@/init/init.js';
 import { createPinia } from 'pinia';
 import piniaPersistedState from 'pinia-plugin-persistedstate';
