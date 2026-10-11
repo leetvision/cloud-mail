@@ -1,3 +1,4 @@
+import { mailboxAccess, requireMailbox } from './mailbox-access';
 import orm from '../entity/orm';
 import email from '../entity/email';
 import { emailListColumns, emailBriefColumns, EMAIL_LIST_TEXT_LEN } from '../lib/email-list-columns';
@@ -60,10 +61,10 @@ const emailService = {
 			size = 50;
 		}
 
-		if (isNaN(allReceive)) {
-			let accountRow = await accountService.selectById(c, accountId);
-			allReceive = accountRow.allReceive;
-		}
+		const accessibleMailbox = await requireMailbox(c, accountId, userId);
+		if (isNaN(allReceive)) allReceive = accessibleMailbox.all_receive;
+		// A delegated inbox never expands into the owner's other mailboxes.
+		if (accessibleMailbox.accessRole !== 'owner') allReceive = 0;
 
 		const filters = this.emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort });
 		const countFilters = this.emailListFilters({ userId, accountId, type, allReceive, withCursor: false });
@@ -72,6 +73,8 @@ const emailService = {
 		const query = orm(c)
 			.select({
 				...columns,
+				canSend: mailboxAccess(email.accountId, userId, 'send'),
+				canManage: mailboxAccess(email.accountId, userId, 'manage'),
 				starId: star.starId
 			})
 			.from(email)
@@ -110,7 +113,7 @@ const emailService = {
 			userId: email.userId,
 		}).from(email).where(
 			and(
-				eq(email.userId, userId),
+				mailboxAccess(email.accountId, userId),
 				eq(email.type, type),
 				eq(email.isDel, isDel.NORMAL),
 				allReceive ? undefined : eq(email.accountId, accountId)
@@ -157,7 +160,7 @@ const emailService = {
 
 	emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort, withCursor = true }) {
 		const conditions = [
-			eq(email.userId, userId),
+			mailboxAccess(email.accountId, userId),
 			eq(email.type, type),
 			eq(email.isDel, isDel.NORMAL),
 			eq(account.isDel, isDel.NORMAL),
@@ -220,25 +223,20 @@ const emailService = {
 
 	async delete(c, params, userId) {
 		const { emailIds } = params;
-		const emailIdList = emailIds.split(',').map(Number);
+		const emailIdList = await this.requireEmails(c, emailIds, userId, 'manage');
 		const { syncDelete } = await settingService.query(c);
 
 		if (syncDelete === settingConst.syncDelete.OPEN) {
-			const owned = await orm(c).select({ emailId: email.emailId }).from(email)
-				.where(and(eq(email.userId, userId), inArray(email.emailId, emailIdList)))
-				.all();
-			const ownedIds = owned.map(row => row.emailId);
-			if (ownedIds.length) {
-				await this.physicsDelete(c, { emailIds: ownedIds.join(',') });
-			}
+			await this.physicsDelete(c, { emailIds: emailIdList.join(',') });
 			return;
 		}
 
-		await orm(c).update(email).set({ isDel: isDel.DELETE }).where(
-			and(
-				eq(email.userId, userId),
-				inArray(email.emailId, emailIdList)))
-			.run();
+		for (let offset = 0; offset < emailIdList.length; offset += 50) {
+			await orm(c).update(email).set({ isDel: isDel.DELETE }).where(and(
+				mailboxAccess(email.accountId, userId, 'manage'),
+				inArray(email.emailId, emailIdList.slice(offset, offset + 50))
+			)).run();
+		}
 	},
 
 	receive(c, params, cidAttList, r2domain) {
@@ -314,9 +312,7 @@ const emailService = {
 			throw new BizError(t('senderAccountNotExist'));
 		}
 
-		if (accountRow.userId !== userId) {
-			throw new BizError(t('sendEmailNotCurUser'));
-		}
+		await requireMailbox(c, accountId, userId, 'send');
 
 		if (c.env.admin !== userRow.email) {
 			// The user is not permitted to use this domain.
@@ -352,6 +348,7 @@ const emailService = {
 			if (!emailRow) {
 				throw new BizError(t('notExistEmailReply'));
 			}
+			await requireMailbox(c, emailRow.accountId, userId);
 
 		}
 
@@ -410,7 +407,7 @@ const emailService = {
 		emailData.accountId = accountId;
 		emailData.status = useCloudflareEmail ? emailConst.status.DELIVERED : emailConst.status.SENT;
 		emailData.type = emailConst.type.SEND;
-		emailData.userId = userId;
+		emailData.userId = accountRow.userId;
 		emailData.resendEmailId = data?.id;
 
 		const recipient = [];
@@ -439,7 +436,7 @@ const emailService = {
 			if (imageDataList.length > 10) {
 				throw new BizError(t('imageAttLimit'));
 			}
-			await attService.saveArticleAtt(c, imageDataList, userId, accountId, emailResult.emailId);
+			await attService.saveArticleAtt(c, imageDataList, accountRow.userId, accountId, emailResult.emailId);
 		}
 
 		// Save regular attachments.
@@ -447,7 +444,7 @@ const emailService = {
 			if (attachments.length > 10) {
 				throw new BizError(t('attLimit'));
 			}
-			await attService.saveSendAtt(c, attachments, userId, accountId, emailResult.emailId);
+			await attService.saveSendAtt(c, attachments, accountRow.userId, accountId, emailResult.emailId);
 		}
 
 		const attList = await attService.selectByEmailIds(c, [emailResult.emailId]);
@@ -828,12 +825,12 @@ const emailService = {
 		let { emailId, accountId, allReceive } = params;
 		allReceive = Number(allReceive);
 
-		if (isNaN(allReceive)) {
-			let accountRow = await accountService.selectById(c, accountId);
-			allReceive = accountRow.allReceive;
-		}
+		const accessibleMailbox = await requireMailbox(c, accountId, userId);
+		if (isNaN(allReceive)) allReceive = accessibleMailbox.all_receive;
+		// A delegated inbox never expands into the owner's other mailboxes.
+		if (accessibleMailbox.accessRole !== 'owner') allReceive = 0;
 
-		const list = await orm(c).select({ ...emailListColumns }).from(email)
+		const list = await orm(c).select({ ...emailListColumns, canSend: mailboxAccess(email.accountId, userId, 'send'), canManage: mailboxAccess(email.accountId, userId, 'manage') }).from(email)
 			.innerJoin(
 				account,
 				eq(account.accountId, email.accountId)
@@ -841,7 +838,7 @@ const emailService = {
 			.where(
 				and(
 					gt(email.emailId, emailId),
-					eq(email.userId, userId),
+					mailboxAccess(email.accountId, userId),
 					eq(email.isDel, isDel.NORMAL),
 					eq(account.isDel, isDel.NORMAL),
 					allReceive ? undefined : eq(email.accountId, accountId),
@@ -1141,9 +1138,27 @@ const emailService = {
 		await orm(c).delete(email).where(eq(email.accountId, accountId)).run();
 	},
 
+	async requireEmails(c, input, userId, permission = 'read') {
+		const ids = [...new Set((Array.isArray(input) ? input : String(input || '').split(',')).map(Number))];
+		if (!ids.length || ids.length > 95 || ids.some(id => !Number.isSafeInteger(id) || id < 1)) {
+			throw new BizError('Choose between 1 and 95 messages.', 400);
+		}
+		// D1 permits at most 100 bound parameters. Leave room for the ACL predicate.
+		for (let offset = 0; offset < ids.length; offset += 50) {
+			const batch = ids.slice(offset, offset + 50);
+			const rows = await orm(c).select({ id: email.emailId }).from(email).where(and(
+				inArray(email.emailId, batch), eq(email.isDel, isDel.NORMAL), mailboxAccess(email.accountId, userId, permission)
+			)).all();
+			if (rows.length !== batch.length) throw new BizError('You do not have access to these messages.', 403);
+		}
+		return ids;
+	},
+
 	async read(c, params, userId) {
-		const { emailIds } = params;
-		await orm(c).update(email).set({ unread: emailConst.unread.READ }).where(and(eq(email.userId, userId), inArray(email.emailId, emailIds)));
+		const emailIds = await this.requireEmails(c, params.emailIds, userId);
+		for (let offset = 0; offset < emailIds.length; offset += 50) {
+			await orm(c).update(email).set({ unread: emailConst.unread.READ }).where(and(mailboxAccess(email.accountId, userId), inArray(email.emailId, emailIds.slice(offset, offset + 50))));
+		}
 	}
 };
 

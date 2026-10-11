@@ -247,6 +247,10 @@ jobs:
           sed -i "s|\${D1_DATABASE_ID}|$D1_ID|g" "$CONFIG_FILE"
           echo "✅ Setup completed."
 
+      - name: Prepare shared mailbox schema
+        working-directory: ./mail-worker
+        run: pnpm exec wrangler d1 execute db --remote --config wrangler-action.toml --file migrations/001-shared-mailboxes.sql
+
       - name: 🚀 Start deployment
         id: deploy
         working-directory: ./mail-worker

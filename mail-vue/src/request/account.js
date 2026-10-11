@@ -23,3 +23,16 @@ export function accountSetAllReceive(accountId) {
 export function accountSetAsTop(accountId) {
     return http.put('/account/setAsTop', {accountId})
 }
+
+export function mailboxMembers(accountId) {
+    return http.get('/account/members', {params: {accountId}})
+}
+export function saveMailboxMember(accountId, email, role) {
+    return http.put('/account/members', {accountId, email, role})
+}
+export function removeMailboxMember(accountId, userId) {
+    return http.delete('/account/members', {params: {accountId, userId}})
+}
+export function mailboxAccess(accountId) {
+    return http.get('/account/access', {params: {accountId}})
+}

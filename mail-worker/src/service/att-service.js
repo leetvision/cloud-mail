@@ -1,3 +1,4 @@
+import { mailboxAccess } from './mailbox-access';
 import orm from '../entity/orm';
 import { att } from '../entity/att';
 import { and, eq, isNull, inArray, desc } from 'drizzle-orm';
@@ -39,7 +40,7 @@ const attService = {
 		return orm(c).select().from(att).where(
 			and(
 				eq(att.emailId, emailId),
-				eq(att.userId, userId),
+				mailboxAccess(att.accountId, userId),
 				eq(att.type, attConst.type.ATT),
 				isNull(att.contentId)
 			)

@@ -1,3 +1,7 @@
+import { mailboxAccess } from '../service/mailbox-access';
+import orm from '../entity/orm';
+import { att } from '../entity/att';
+import { and, eq } from 'drizzle-orm';
 import r2Service from '../service/r2-service';
 import app from '../hono/hono';
 import constant from '../const/constant';
@@ -33,10 +37,10 @@ app.get('/oss/*', async (c) => {
 		const emailId = c.get('emailAccessId');
 		if (!userId && !emailId) return c.notFound();
 
-		const query = userId
-			? c.env.db.prepare('SELECT filename, mime_type FROM attachments WHERE key = ? AND user_id = ? LIMIT 1').bind(key, userId)
-			: c.env.db.prepare('SELECT filename, mime_type FROM attachments WHERE key = ? AND email_id = ? LIMIT 1').bind(key, emailId);
-		attachment = await query.first();
+		attachment = userId
+			? await orm(c).select({ filename: att.filename, mime_type: att.mimeType }).from(att)
+				.where(and(eq(att.key, key), mailboxAccess(att.accountId, userId))).get()
+			: await c.env.db.prepare('SELECT filename, mime_type FROM attachments WHERE key = ? AND email_id = ? LIMIT 1').bind(key, emailId).first();
 		if (!attachment) return c.notFound();
 	}
 

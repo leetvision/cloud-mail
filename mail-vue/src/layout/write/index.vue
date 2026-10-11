@@ -93,6 +93,7 @@
   </div>
 </template>
 <script setup>
+import {mailboxAccess} from "@/request/account";
 import tinyEditor from '@/components/tiny-editor/index.vue'
 import {h, nextTick, onMounted, onUnmounted, reactive, ref, toRaw, computed} from "vue";
 import {Icon} from "@iconify/vue";
@@ -483,7 +484,7 @@ function openReply(email) {
           ${formatImage(email.content) || `<pre style="font-family: inherit;word-break: break-word;white-space: pre-wrap;margin: 0">${email.text}</pre>`}
       </article>
     </blockquote>`
-    open()
+    open(email)
 
     nextTick(() => {
       backReply.content = editor.value.getContent()
@@ -500,18 +501,20 @@ function formatImage(content) {
   return content.replace(/{{domain}}/g, '/api/oss/');
 }
 
-function open() {
-  if (!accountStore.currentAccount.email) {
-    form.sendEmail = userStore.user.email;
-    form.accountId = userStore.user.account.accountId;
-    form.name = userStore.user.name;
-  } else {
-    form.sendEmail = accountStore.currentAccount.email;
-    form.accountId = accountStore.currentAccount.accountId;
-    form.name = accountStore.currentAccount.name;
-  }
-  show.value = true;
-  editor.value.focus()
+async function open(message) {
+  const accountId = message?.accountId || accountStore.currentAccount.accountId || userStore.user.account.accountId;
+  try {
+    const mailbox = await mailboxAccess(accountId);
+    if (mailbox.accessRole === 'reader') {
+      ElMessage.error(t('mailboxReadOnly'));
+      return;
+    }
+    form.sendEmail = mailbox.email;
+    form.accountId = mailbox.accountId;
+    form.name = mailbox.name;
+    show.value = true;
+    editor.value.focus();
+  } catch { /* The request layer displays revoked access. */ }
 }
 
 function openDraft(draft) {

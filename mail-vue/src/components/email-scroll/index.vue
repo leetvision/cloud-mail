@@ -13,7 +13,7 @@
         <slot name="first"></slot>
         <Icon class="icon reload" icon="ion:reload" width="18" height="18" @click="refresh"/>
         <Icon v-perm="'email:delete'" class="icon delete" icon="uiw:delete" width="16" height="16"
-              v-if="getSelectedMailsIds().length > 0"
+              v-if="getSelectedMailsIds().length > 0 && emailList.filter(item => item.checked).every(item => item.canManage !== 0)"
               @click="handleDelete"/>
         <Icon v-perm="'email:delete'" class="icon delete" icon="fluent:mail-read-20-regular" width="21" height="21"
               v-if="getSelectedMailsIds().length > 0 && showUnread"
@@ -172,7 +172,7 @@
               </div>
             </template>
           </el-dropdown-item>
-          <el-dropdown-item v-if="['email','star'].includes(props.type)" @click="openReply(rightClickEmail)">
+          <el-dropdown-item v-if="['email','star'].includes(props.type) && rightClickEmail.canSend !== 0" @click="openReply(rightClickEmail)">
             <template #default>
               <div class="right-dropdown-item">
                 <Icon icon="la:reply" width="20" height="20"  />
@@ -220,7 +220,7 @@
               </div>
             </template>
           </el-dropdown-item>
-          <el-dropdown-item @click="rightDelete(rightClickEmail.emailId)">
+          <el-dropdown-item v-if="rightClickEmail.canManage !== 0" @click="rightDelete(rightClickEmail.emailId)">
             <template #default>
               <div class="right-dropdown-item">
                 <Icon icon="uiw:delete" width="16" height="20" style="margin-left: 1px;margin-right: 3px" />

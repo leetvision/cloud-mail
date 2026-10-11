@@ -1,3 +1,5 @@
+import { requireMailbox } from '../service/mailbox-access';
+import mailboxMembers from '../service/mailbox-member-service';
 import app from '../hono/hono';
 import accountService from '../service/account-service';
 import result from '../model/result';
@@ -31,4 +33,21 @@ app.put('/account/setAllReceive', async (c) => {
 app.put('/account/setAsTop', async (c) => {
 	await accountService.setAsTop(c, await c.req.json(), userContext.getUserId(c));
 	return c.json(result.ok());
+});
+
+app.get('/account/members', async (c) => {
+	return c.json(result.ok(await mailboxMembers.list(c, c.req.query('accountId'), userContext.getUserId(c))));
+});
+app.put('/account/members', async (c) => {
+	await mailboxMembers.save(c, await c.req.json(), userContext.getUserId(c));
+	return c.json(result.ok());
+});
+app.delete('/account/members', async (c) => {
+	await mailboxMembers.remove(c, c.req.query(), userContext.getUserId(c));
+	return c.json(result.ok());
+});
+
+app.get('/account/access', async (c) => {
+	const row = await requireMailbox(c, c.req.query('accountId'), userContext.getUserId(c));
+	return c.json(result.ok({ accountId: row.account_id, email: row.email, name: row.name, accessRole: row.accessRole }));
 });

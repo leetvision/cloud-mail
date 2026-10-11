@@ -21,6 +21,7 @@ export const emailListColumns = getTableColumns(email);
 /** Summary query for lists and detail headers; use text when available, otherwise read trimmed content without returning content. */
 export const emailBriefColumns = {
 	emailId: email.emailId,
+	accountId: email.accountId,
 	sendEmail: email.sendEmail,
 	name: email.name,
 	subject: email.subject,

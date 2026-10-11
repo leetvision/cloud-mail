@@ -1,3 +1,4 @@
+import { mailboxAccess, requireMailbox } from './mailbox-access';
 import orm from '../entity/orm';
 import { star } from '../entity/star';
 import emailService from './email-service';
@@ -16,9 +17,7 @@ const starService = {
 		if (!email) {
 			throw new BizError(t('starNotExistEmail'));
 		}
-		if (email.userId !== userId) {
-			throw new BizError(t('starNotExistEmail'));
-		}
+		await requireMailbox(c, email.accountId, userId);
 		const exist = await orm(c).select().from(star).where(
 			and(
 				eq(star.userId, userId),
@@ -51,13 +50,16 @@ const starService = {
 		const list = await orm(c).select({
 			isStar: sql`1`.as('isStar'),
 			starId: star.starId,
-			...columns
+			...columns,
+			canSend: mailboxAccess(email.accountId, userId, 'send'),
+			canManage: mailboxAccess(email.accountId, userId, 'manage')
 		}).from(star)
 			.leftJoin(email, eq(email.emailId, star.emailId))
 			.where(
 				and(
 					eq(star.userId, userId),
 					eq(email.isDel, isDel.NORMAL),
+					mailboxAccess(email.accountId, userId),
 					emailId ? lt(star.emailId, emailId) : undefined))
 			.orderBy(desc(star.emailId))
 			.limit(size)

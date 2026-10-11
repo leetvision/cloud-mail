@@ -1,3 +1,4 @@
+import { mailboxAccess, requireMailbox } from './mailbox-access';
 import BizError from '../error/biz-error';
 import verifyUtils from '../utils/verify-utils';
 import emailUtils from '../utils/email-utils';
@@ -5,7 +6,7 @@ import userService from './user-service';
 import emailService from './email-service';
 import orm from '../entity/orm';
 import account from '../entity/account';
-import { and, asc, eq, gt, inArray, count, sql, ne, or, lt, desc } from 'drizzle-orm';
+import { getTableColumns, and, asc, eq, gt, inArray, count, sql, ne, or, lt, desc } from 'drizzle-orm';
 import {accountConst, isDel, settingConst} from '../const/entity-const';
 import settingService from './setting-service';
 import turnstileService from './turnstile-service';
@@ -104,6 +105,7 @@ const accountService = {
 		}
 
 		accountRow.addVerifyOpen = addVerifyOpen
+		accountRow.accessRole = 'owner'
 		return accountRow;
 	},
 
@@ -131,9 +133,12 @@ const accountService = {
 			lastSort = 9999999999;
 		}
 
-		return orm(c).select().from(account).where(
+		return orm(c).select({ ...getTableColumns(account),
+			accessRole: sql`CASE WHEN ${account.userId} = ${userId} THEN 'owner' ELSE (SELECT role FROM mailbox_member WHERE account_id = ${account.accountId} AND user_id = ${userId}) END`,
+			allReceive: sql`CASE WHEN ${account.userId} = ${userId} THEN ${account.allReceive} ELSE 0 END`
+		}).from(account).where(
 			and(
-				eq(account.userId, userId),
+				mailboxAccess(account.accountId, userId),
 				eq(account.isDel, isDel.NORMAL),
 					or(
 						lt(account.sort, lastSort),
@@ -228,7 +233,8 @@ const accountService = {
 		if (name.length > 30) {
 			throw new BizError(t('usernameLengthLimit'));
 		}
-		await orm(c).update(account).set({name}).where(and(eq(account.userId, userId),eq(account.accountId, accountId))).run();
+		await requireMailbox(c, accountId, userId, 'manage');
+		await orm(c).update(account).set({name}).where(eq(account.accountId, accountId)).run();
 	},
 
 	async allAccount(c, params) {
@@ -264,8 +270,8 @@ const accountService = {
 		let a = null
 		const { accountId } = params;
 		const accountRow = await this.selectById(c, accountId);
-		if (accountRow.userId !== userId) {
-			return;
+		if (!accountRow || accountRow.userId !== userId) {
+			throw new BizError('Only the owner can change mailbox aggregation.', 403);
 		}
 		await orm(c).update(account).set({ allReceive: accountConst.allReceive.CLOSE }).where(eq(account.userId, userId)).run();
 		await orm(c).update(account).set({ allReceive: accountRow.allReceive ? 0 : 1 }).where(eq(account.accountId, accountId)).run();

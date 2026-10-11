@@ -10,9 +10,10 @@
                  @click="changeAccount(item)">
           <div class="account">
             {{ item.email }}
+            <small v-if="item.accessRole && item.accessRole !== 'owner'" class="shared-label">{{ $t('mailboxShared', {role: roleLabel(item.accessRole)}) }}</small>
           </div>
           <div class="opt">
-            <div class="send-email" @click.stop>
+            <div class="send-email" @click.stop v-if="isOwner(item)">
               <Icon @click="setAllReceive(item)" v-if="!item.allReceive" icon="eva:email-fill" width="22" height="22" color="#fccb1a"/>
               <Icon @click="setAllReceive(item)" v-else icon="flat-color-icons:folder" width="22" height="22" color="#23c4f1" />
             </div>
@@ -20,13 +21,16 @@
               <Icon icon="fluent-color:clipboard-24" width="22" height="22" @click.stop="copyAccount(item.email)"/>
               <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"
                     v-if="showNullSetting(item)"/>
-              <el-dropdown v-else>
-                <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"/>
+              <el-dropdown v-else trigger="click">
+                <button type="button" class="mailbox-settings" :aria-label="$t('mailboxSettings', {email: item.email})">
+                  <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"/>
+                </button>
                 <template #dropdown>
                   <el-dropdown-menu>
-                    <el-dropdown-item v-if="hasPerm('email:send')" @click="openSetName(item)">{{ $t('rename') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="item.accountId !== userStore.user.account.accountId" @click="setAsTop(item, index)">{{ $t('pin') }}</el-dropdown-item>
-                    <el-dropdown-item v-if="item.accountId !== userStore.user.account.accountId && hasPerm('account:delete')"
+                    <el-dropdown-item v-if="canManage(item)" @click="openMembers(item)">{{ $t('mailboxMembers') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="canManage(item)" @click="openSetName(item)">{{ $t('rename') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="isOwner(item) && item.accountId !== userStore.user.account.accountId" @click="setAsTop(item, index)">{{ $t('pin') }}</el-dropdown-item>
+                    <el-dropdown-item v-if="isOwner(item) && item.accountId !== userStore.user.account.accountId && hasPerm('account:delete')"
                                       @click="remove(item)">{{ $t('delete') }}
                     </el-dropdown-item>
                   </el-dropdown-menu>
@@ -75,6 +79,7 @@
       </div>
 
     </el-scrollbar>
+    <MailboxMembers v-if="membersMailbox" :mailbox="membersMailbox" @close="membersMailbox = null" />
     <el-dialog v-model="showAdd" :title="$t('addAccount')">
       <div class="container">
         <el-input v-model="addForm.email" ref="addRef" type="text" :placeholder="$t('emailAccount')" autocomplete="off" @keyup.enter="submit">
@@ -126,6 +131,7 @@
   </div>
 </template>
 <script setup>
+import MailboxMembers from "@/components/mailbox-members/index.vue";
 import {Icon} from "@iconify/vue";
 import {computed, nextTick, reactive, ref, watch} from "vue";
 import {
@@ -151,6 +157,11 @@ const userStore = useUserStore();
 const accountStore = useAccountStore();
 const settingStore = useSettingStore();
 const emailStore = useEmailStore();
+const membersMailbox = ref(null)
+const isOwner = item => !item.accessRole || item.accessRole === 'owner'
+const canManage = item => isOwner(item) || item.accessRole === 'manager'
+const roleLabel = role => t({reader: 'mailboxReader', sender: 'mailboxSender', manager: 'mailboxManager'}[role])
+const openMembers = item => { membersMailbox.value = item }
 const showAdd = ref(false)
 const addLoading = ref(false);
 const domainList = computed(() => settingStore.domainList)
@@ -295,8 +306,9 @@ function setAllReceive(account) {
 
 
 function showNullSetting(item) {
-  return !hasPerm('email:send') && !(item.accountId !== userStore.user.account.accountId && hasPerm('account:delete'))
+  return !canManage(item)
 }
+
 
 function itemBg(accountId) {
   return accountStore.currentAccountId === accountId ? 'item-choose' : ''
@@ -412,7 +424,8 @@ function getAccountList() {
       noLoading.value = true
     }
     if (accounts.length === 0) {
-      accountStore.currentAccount = list[0]
+      accountStore.currentAccount = list[0] || userStore.user.account
+      accountStore.currentAccountId = accountStore.currentAccount.accountId
     }
 
     accounts.push(...list)
@@ -520,6 +533,10 @@ path[fill="#ffdda1"] {
 }
 </style>
 <style scoped lang="scss">
+.mailbox-settings { border: 0; background: none; color: inherit; cursor: pointer; padding: 4px; display: flex; }
+.mailbox-settings:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 2px; }
+.shared-label { display: block; margin-top: 4px; color: var(--el-text-color-regular); font-size: 12px; }
+
 .account-box {
 
   border-right: 1px solid var(--el-border-color) !important;
