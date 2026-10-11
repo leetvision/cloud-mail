@@ -45,8 +45,8 @@
           <el-skeleton v-for="i in skeletonRows" :key="i" animated>
             <template #template>
               <el-card class="item">
-                <el-skeleton-item variant="p" style="width: 70%; height: 20px; margin-bottom: 25px"/>
-                <div style="display: flex; justify-content: space-between">
+                <el-skeleton-item variant="p" class="account-skeleton"/>
+                <div class="opt">
                   <el-skeleton-item variant="text" style="width: 20px"/>
                   <el-skeleton-item variant="text" style="width: 20px"/>
                 </div>
@@ -60,8 +60,8 @@
           <el-skeleton animated>
             <template #template>
               <el-card class="item">
-                <el-skeleton-item variant="p" style="width: 70%; height: 20px; margin-bottom: 20px"/>
-                <div style="display: flex; justify-content: space-between">
+                <el-skeleton-item variant="p" class="account-skeleton"/>
+                <div class="opt">
                   <el-skeleton-item variant="text" style="width: 20px"/>
                   <el-skeleton-item variant="text" style="width: 20px"/>
                 </div>
@@ -536,7 +536,7 @@ path[fill="#ffdda1"] {
 <style scoped lang="scss">
 .mailbox-settings { border: 0; background: none; color: inherit; cursor: pointer; padding: 4px; display: flex; }
 .mailbox-settings:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 2px; }
-.shared-label { display: block; margin-top: 4px; color: var(--el-text-color-regular); font-size: 12px; }
+.shared-label { display: block; margin-top: 2px; color: var(--el-text-color-regular); font-size: 12px; line-height: 16px; }
 
 .account-box {
   display: grid;
@@ -605,24 +605,34 @@ path[fill="#ffdda1"] {
   .item {
     background-color: var(--el-bg-color);
     border-radius: 8px;
-    padding: 10px;
-    margin-bottom: 11px;
+    padding: 8px;
+    margin-bottom: 8px;
     margin-left: 10px;
     margin-right: 10px;
     cursor: pointer;
 
     .account {
       font-weight: 400;
-      font-size: 15px;
-      margin-bottom: 20px;
+      font-size: 14px;
+      line-height: 20px;
+      margin-bottom: 4px;
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis;
     }
 
+    .account-skeleton {
+      display: block;
+      width: 70%;
+      height: 20px;
+      margin-bottom: 4px;
+    }
+
     .opt {
       display: flex;
+      align-items: center;
       justify-content: space-between;
+      min-height: 29px;
       font-size: 12px;
       color: #888;
 
