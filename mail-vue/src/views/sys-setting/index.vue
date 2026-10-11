@@ -1854,6 +1854,7 @@ function editSetting(settingForm, refreshStatus = true) {
 }
 
 .card-content {
+  min-width: 0;
   padding: 20px;
   display: flex;
   flex-direction: column;
@@ -1862,7 +1863,7 @@ function editSetting(settingForm, refreshStatus = true) {
 
 .setting-item {
   display: grid;
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 10px;
   font-weight: normal;
 
@@ -1873,8 +1874,9 @@ function editSetting(settingForm, refreshStatus = true) {
   }
 
   > div:last-child {
+    min-width: 0;
     display: grid;
-    grid-template-columns: 1fr auto;
+    grid-template-columns: minmax(0, 1fr) auto;
     justify-items: flex-end;
     font-weight: normal;
   }
@@ -2071,7 +2073,7 @@ function editSetting(settingForm, refreshStatus = true) {
 
 .bot-verify {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -2165,7 +2167,7 @@ function editSetting(settingForm, refreshStatus = true) {
 
 .r2domain {
   display: grid;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
 
   .storage-type {
@@ -2246,7 +2248,7 @@ function editSetting(settingForm, refreshStatus = true) {
   font-weight: normal !important;
   display: grid;
   gap: 10px;
-  grid-template-columns: 1fr auto;
+  grid-template-columns: minmax(0, 1fr) auto;
   align-items: center;
 
   span {
@@ -2288,9 +2290,25 @@ form .el-button {
   min-height: 28px;
 }
 
+.setting-item > div:first-child { min-width: 0; overflow-wrap: anywhere; }
+.setting-item > div:last-child { align-items: center; }
+.r2domain-item > div:last-child { min-width: 0; }
+@media (max-width: 600px) {
+  .card-title { padding: var(--space-4); }
+  .card-content { padding: var(--space-4); gap: var(--space-4); }
+  .setting-item { grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); }
+  .setting-item:has(.background), .r2domain-item, .concerning-item { grid-template-columns: minmax(0, 1fr); display: grid; }
+  .personalized > div:last-child { justify-content: start; }
+  .r2domain-item > div:last-child { text-align: left; }
+  .dialog-footer { flex-wrap: wrap; gap: var(--space-3); }
+  .webhook-footer-right { flex-wrap: wrap; }
+  .bot-verify { white-space: normal; }
+}
+
 </style>
 
 <style>
 .el-popper.is-dark {
 }
+
 </style>

@@ -6,24 +6,25 @@
           :indeterminate="isIndeterminate"
           :disabled="!emailList.length || loading"
           @change="handleCheckAllChange"
+          :aria-label="$t('selectAllMessages')"
       >
       </el-checkbox>
       <div class="header-left" :style="'padding-left:' + actionLeft">
 
         <slot name="first"></slot>
-        <Icon class="icon reload" icon="ion:reload" width="18" height="18" @click="refresh"/>
-        <Icon v-perm="'email:delete'" class="icon delete" icon="uiw:delete" width="16" height="16"
+        <IconAction class="icon reload" icon="ion:reload" width="18" height="18" @click="refresh" :label="$t('refresh')"/>
+        <IconAction :label="$t('delete')" v-perm="'email:delete'" class="icon delete" icon="uiw:delete" width="16" height="16"
               v-if="getSelectedMailsIds().length > 0 && emailList.filter(item => item.checked).every(item => item.canManage !== 0)"
               @click="handleDelete"/>
-        <Icon v-perm="'email:delete'" class="icon delete" icon="fluent:mail-read-20-regular" width="21" height="21"
+        <IconAction :label="$t('markAsRead')" v-perm="'email:delete'" class="icon delete" icon="fluent:mail-read-20-regular" width="21" height="21"
               v-if="getSelectedMailsIds().length > 0 && showUnread"
               @click="handleRead"/>
       </div>
 
       <div class="header-right">
         <span class="email-count" v-if="total">{{ $t('emailCount', {total: total}) }}</span>
-        <Icon v-if="showAccountIcon" class="more-icon icon" width="16" height="16" icon="akar-icons:dot-grid-fill"
-              @click="changeAccountShow"/>
+        <IconAction v-if="showAccountIcon" class="more-icon icon" width="16" height="16" icon="akar-icons:dot-grid-fill"
+              @click="changeAccountShow" :label="$t('selectEmail')"/>
       </div>
     </div>
 
@@ -41,6 +42,10 @@
             <div :class="['email-row', props.type, { 'right-checked': item.rightChecked }]"
                  :data-checked="item.checked"
                  @click="jumpDetails(item)"
+                 tabindex="0"
+                 role="link"
+                 :aria-label="[item.name, item.subject || $t('noSubject')].filter(Boolean).join(': ')"
+                 @keydown.enter.self="jumpDetails(item)"
                  v-if="!item.expand"
                  :key="item.emailId"
                  @contextmenu="handleContextmenu($event, item)"
@@ -48,6 +53,7 @@
               <el-checkbox :class=" props.type === 'all-email' ? 'all-email-checkbox' : 'checkbox'"
                            v-model="item.checked"
                            :disabled="!item.checked && isSelectMax"
+                           :aria-label="$t('selectMessage')"
                            @click.stop></el-checkbox>
               <div @click.stop="starChange(item)" class="pc-star" v-if="showStar">
                 <Icon v-if="item.isStar" icon="fluent-color:star-16" width="20" height="20"/>
@@ -235,6 +241,7 @@
 </template>
 
 <script setup>
+import IconAction from '@/components/icon-action/index.vue'
 import {Icon} from "@iconify/vue";
 import skeletonBlock from "@/components/email-scroll/skeleton/index.vue"
 import {computed, onActivated, reactive, ref, watch, nextTick, onMounted, onUnmounted } from "vue";
@@ -379,9 +386,11 @@ onUnmounted(() => {
 
 getEmailList()
 
-window.onresize = () => {
-  isMobile.value = innerWidth < 1367
+const handleResize = () => {
+  isMobile.value = window.innerWidth < 1367
 }
+onMounted(() => window.addEventListener('resize', handleResize))
+onUnmounted(() => window.removeEventListener('resize', handleResize))
 
 function onScroll(e) {
   scrollTop = e.target.scrollTop;
@@ -903,7 +912,7 @@ function loadData() {
 
 .email-container {
   display: grid;
-  grid-template-rows: auto 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
   padding: 0;
   font-size: 14px;
   color: var(--el-text-color-primary);
@@ -912,6 +921,8 @@ function loadData() {
 }
 
 .scroll {
+  min-height: 0;
+  min-width: 0;
   margin: 0;
   height: 100%;
   overflow: hidden;
@@ -1050,27 +1061,29 @@ function loadData() {
 
   .title-column {
     @media (max-width: 1366px) {
-      grid-template-columns: 1fr !important;
+      grid-template-columns: minmax(0, 1fr) !important;
       gap: 4px !important;
     }
   }
 
   .title {
+    min-width: 0;
     flex: 1;
     display: grid;
-    grid-template-columns: 240px 1fr;
+    grid-template-columns: minmax(0, 240px) minmax(0, 1fr);
     @media (max-width: 1366px) {
       padding-right: 15px;
     }
     @media (max-width: 1366px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 4px;
     }
 
     .email-sender {
+      min-width: 0;
       color: var(--el-text-color-primary);
       display: grid;
-      grid-template-columns: auto 1fr auto;
+      grid-template-columns: auto minmax(0, 1fr) auto;
 
       .email-status {
         display: flex;
@@ -1083,9 +1096,10 @@ function loadData() {
       }
 
       .name {
+        min-width: 0;
         display: grid;
         gap: 5px;
-        grid-template-columns: auto 1fr;
+        grid-template-columns: auto minmax(0, 1fr);
 
         > span:last-child {
           display: flex;
@@ -1093,7 +1107,7 @@ function loadData() {
         }
 
         @media (min-width: 1366px) {
-          grid-template-columns: 1fr;
+          grid-template-columns: minmax(0, 1fr);
           > span:last-child {
             display: none;
           }
@@ -1148,10 +1162,11 @@ function loadData() {
     }
 
     .email-text {
+      min-width: 0;
       display: grid;
-      grid-template-columns: auto 1fr;
+      grid-template-columns: auto minmax(0, 1fr);
       @media (max-width: 1366px) {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
       }
 
       .email-subject {
@@ -1269,7 +1284,7 @@ function loadData() {
 
 .header-actions {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 15px;
   padding: 3px 15px;
@@ -1280,7 +1295,8 @@ function loadData() {
     flex-wrap: wrap;
     align-items: center;
     position: relative;
-    column-gap: 20px;
+    min-width: 0;
+    column-gap: var(--space-2);
     row-gap: 8px;
     padding-left: 2px;
     color: var(--el-text-color-primary);;
@@ -1289,13 +1305,13 @@ function loadData() {
   .header-right {
     display: grid;
     grid-template-columns: auto auto;
-    align-items: start;
+    align-items: center;
     height: 100%;
     color: var(--el-text-color-primary);;
 
     .email-count {
       white-space: nowrap;
-      margin-top: 6px;
+      margin-top: 0;
     }
   }
 
@@ -1305,8 +1321,7 @@ function loadData() {
   }
 
   .more-icon {
-    margin-top: 8px;
-    margin-left: 15px;
+    margin-left: var(--space-2);
   }
 }
 

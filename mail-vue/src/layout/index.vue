@@ -2,6 +2,7 @@
   <el-container class="layout">
     <el-aside
         class="aside"
+        :inert="!uiStore.asideShow"
         :class="uiStore.asideShow ? 'aside-show' : 'el-aside-hide'">
       <Aside />
     </el-aside>
@@ -65,7 +66,7 @@ onBeforeUnmount(() => {
   transform: translateX(0);
   transition: all 100ms ease;
   z-index: 101;
-  @media (max-width: 1025px) {
+  @media (max-width: 1024px) {
     position: fixed;
     top: 0;
     left: 0;
@@ -90,13 +91,20 @@ onBeforeUnmount(() => {
 }
 
 .main-container {
-  min-height: 100%;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
   background: var(--el-bg-color);
-  overflow-y: auto;
+  overflow: hidden;
   -webkit-overflow-scrolling: touch;
 }
 
 .el-main {
+  display: grid;
+  grid-template-rows: var(--app-header-height) minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
   padding: 0;
 }
 

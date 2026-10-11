@@ -7,15 +7,15 @@
         <div>
           <span v-if="setNameShow" class="edit-name-input">
             <el-input v-model="accountName"  ></el-input>
-            <span class="edit-name" @click="setName">
+            <button type="button" class="edit-name" @click="setName">
              {{$t('save')}}
-            </span>
+            </button>
           </span>
           <span v-else class="user-name">
             <span >{{ userStore.user.name }}</span>
-            <span class="edit-name" @click="showSetName">
+            <button type="button" class="edit-name" @click="showSetName">
              {{$t('change')}}
-            </span>
+            </button>
           </span>
         </div>
       </div>
@@ -210,10 +210,12 @@ function submitPwd() {
 </script>
 <style scoped lang="scss">
 .box {
-  padding: 40px 40px;
+  padding: var(--page-gutter);
+  max-width: 880px;
+  width: 100%;
 
   @media (max-width: 767px) {
-    padding: 30px 30px;
+    padding: var(--space-6) var(--space-4);
   }
 
   .update-pwd {
@@ -235,12 +237,15 @@ function submitPwd() {
 
     .item {
       display: grid;
-      grid-template-columns: 50px 1fr;
-      gap: 140px;
+      grid-template-columns: minmax(100px, 140px) minmax(0, 1fr);
+      gap: var(--space-6);
+      align-items: center;
       position: relative;
       .user-name {
         display: grid;
-        grid-template-columns: auto 1fr;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: center;
+        min-width: 0;
         span:first-child {
           overflow: hidden;
           white-space: nowrap;
@@ -249,21 +254,27 @@ function submitPwd() {
       }
 
       .edit-name-input {
-        position: absolute;
-        bottom: -6px;
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        min-width: 0;
         .el-input {
-          width: min(200px,calc(100vw - 222px));
+          width: 100%;
+          min-width: 0;
+          max-width: 320px;
         }
       }
 
       .edit-name {
-        color: #4dabff;
+        color: var(--el-color-primary);
+        min-height: var(--control-size);
         padding-left: 10px;
         cursor: pointer;
       }
 
       @media (max-width: 767px) {
-        gap: 70px;
+        grid-template-columns: minmax(88px, 100px) minmax(0, 1fr);
+        gap: var(--space-4);
       }
 
       div:first-child {
@@ -271,9 +282,8 @@ function submitPwd() {
       }
 
       div:last-child {
-        overflow: hidden;
-        white-space: nowrap;
-        text-overflow: ellipsis;
+        min-width: 0;
+        overflow-wrap: anywhere;
       }
     }
   }

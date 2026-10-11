@@ -121,7 +121,7 @@
 <script setup>
 import {Icon} from "@iconify/vue";
 import {useTransition} from "@vueuse/core";
-import {defineOptions, onActivated, onDeactivated, onMounted, reactive, ref, watch, computed} from "vue";
+import {defineOptions, onActivated, onDeactivated, onMounted, reactive, ref, watch, computed, onUnmounted} from "vue";
 import echarts from "@/echarts/index.js";
 import dayjs from "dayjs";
 import {analysisEcharts} from "@/request/analysis.js";
@@ -272,10 +272,16 @@ onDeactivated(() => {
   leaveWidth = window.innerWidth
 })
 
-window.onresize = () => {
+const handleResize = () => {
   setStyle()
   widthChange()
 }
+onMounted(() => window.addEventListener('resize', handleResize))
+onUnmounted(() => {
+  window.removeEventListener('resize', handleResize)
+  widthChange.cancel()
+  ;[senderPie, increaseLine, emailColumn, sendGauge].forEach(chart => chart?.dispose())
+})
 
 watch(() => uiStore.dark, () => {
   if (route.name !== 'analysis') return
@@ -766,14 +772,14 @@ function createSendGauge() {
 
   .number {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
     gap: 20px;
     @media (max-width: 1366px) {
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 15px;
     }
     @media (max-width: 767px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .number-item {
@@ -853,10 +859,10 @@ function createSendGauge() {
 
   .picture {
     display: grid;
-    grid-template-columns: 500px 1fr;
+    grid-template-columns: minmax(0, 500px) minmax(0, 1fr);
     gap: 20px;
     @media (max-width: 1620px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
     @media (max-width: 1024px) {
       gap: 15px;
@@ -895,10 +901,10 @@ function createSendGauge() {
 
   .picture-cs {
     display: grid;
-    grid-template-columns: 1fr 500px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 500px);
     gap: 20px;
     @media (max-width: 1620px) {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
       gap: 15px;
     }
 

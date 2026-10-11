@@ -51,12 +51,12 @@
           <el-option key="4" :label="$t('selectDeleted')" value="delete"/>
           <el-option key="4" :label="$t('noRecipientTitle')" value="noone"/>
         </el-select>
-        <Icon class="icon" icon="iconoir:search" @click="search" width="20" height="20"/>
-        <Icon class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-down-outline"
-              v-if="params.timeSort === 0" width="28" height="28"/>
-        <Icon class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-up-outline" v-else
-              width="28" height="28"/>
-        <Icon class="icon clear" icon="fluent:broom-sparkle-16-regular" width="22" height="22" @click="openBathDelete"/>
+        <IconAction class="icon" icon="iconoir:search" @click="search" width="20" height="20" :label="$t('search')"/>
+        <IconAction class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-down-outline"
+              v-if="params.timeSort === 0" width="28" height="28" :label="$t('sortByTime')"/>
+        <IconAction class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-up-outline" v-else
+              width="28" height="28" :label="$t('sortByTime')"/>
+        <IconAction class="icon clear" icon="fluent:broom-sparkle-16-regular" width="22" height="22" @click="openBathDelete" :label="$t('clearEmail')"/>
       </template>
     </emailScroll>
     <el-dialog v-model="showBathDelete" :title="$t('clearEmail')" width="335"
@@ -88,6 +88,7 @@
 </template>
 
 <script setup>
+import IconAction from '@/components/icon-action/index.vue'
 import {starAdd, starCancel} from "@/request/star.js";
 import emailScroll from "@/components/email-scroll/index.vue"
 import {computed, defineOptions, reactive, ref, watch, onMounted} from "vue";
@@ -420,6 +421,10 @@ async function latest() {
 }
 
 :deep(.header-actions) {
+  @media (max-width: 767px) {
+    grid-template-columns: auto minmax(0, 1fr);
+    .header-right { grid-column: 2; justify-self: end; }
+  }
   padding-top: 8px;
   padding-bottom: 8px;
 }
@@ -427,6 +432,8 @@ async function latest() {
 .search-input {
   width: 100%;
   max-width: 280px;
+  flex: 1 1 220px;
+  min-width: 0;
   height: 28px;
 
   .setting-icon {
@@ -475,40 +482,12 @@ async function latest() {
 }
 
 :deep(.el-date-editor.el-input__wrapper) {
-  width: 303px;
+  width: 100%;
+  min-width: 0;
 }
 
 .icon {
   cursor: pointer;
 }
 
-.clear {
-  @media (max-width: 419px) {
-    position: absolute;
-    top: 41px;
-    left: 242px;
-  }
-}
-
-:deep(.reload) {
-  @media (max-width: 419px) {
-    position: absolute;
-    top: 42px;
-    left: 208px;
-  }
-}
-
-:deep(.delete) {
-  @media (max-width: 456px) {
-    position: absolute;
-    top: 43px;
-    left: 294px;
-  }
-
-  @media (max-width: 419px) {
-    position: absolute;
-    top: 43px;
-    left: 282px;
-  }
-}
 </style>

@@ -4,28 +4,28 @@
       <hanburger @click="changeAside"></hanburger>
       <span class="breadcrumb-item">{{ $t(route.meta.title) }}</span>
     </div>
-    <div v-perm="'email:send'" class="writer-box" @click="openSend">
+    <button type="button" :aria-label="$t('compose')" v-perm="'email:send'" class="writer-box" @click="openSend">
       <div class="writer">
         <Icon icon="material-symbols:edit-outline-sharp" width="22" height="22"/>
       </div>
-    </div>
+    </button>
     <div class="toolbar">
-      <div v-if="uiStore.dark" class="sun-icon icon-item" @click="openDark($event)">
+      <button type="button" :aria-label="$t('lightTheme')" v-if="uiStore.dark" class="sun-icon icon-item" @click="openDark($event)">
         <Icon icon="mingcute:sun-fill"/>
-      </div>
-      <div v-else class="dark-icon icon-item" @click="openDark($event)">
+      </button>
+      <button type="button" :aria-label="$t('darkTheme')" v-else class="dark-icon icon-item" @click="openDark($event)">
         <Icon icon="solar:moon-linear"/>
-      </div>
-      <div class="notice icon-item" @click="openNotice">
+      </button>
+      <button type="button" :aria-label="$t('announcements')" class="notice icon-item" @click="openNotice">
         <Icon icon="streamline-plump:announcement-megaphone"/>
-      </div>
+      </button>
       <el-dropdown ref="userinfoRef" @visible-change="e => userInfoShow = e" :teleported="false" popper-class="detail-dropdown">
-        <div class="avatar" @click="userInfoHide" >
+        <button type="button" :aria-label="$t('profile')" class="avatar" @click="userInfoHide" >
           <div class="avatar-text">
             <div>{{ formatName(userStore.user.email) }}</div>
           </div>
           <Icon class="setting-icon" icon="mingcute:down-small-fill" width="24" height="24"/>
-        </div>
+        </button>
         <template #dropdown>
           <div class="user-details">
             <div class="details-avatar">
@@ -196,7 +196,7 @@ function openDark(e) {
   const nextIsDark = !uiStore.dark
   const root = document.documentElement
 
-  if (!document.startViewTransition) {
+  if (!document.startViewTransition || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     switchDark(nextIsDark, root);
     return
   }
@@ -361,11 +361,11 @@ function formatName(email) {
   display: grid;
   height: 100%;
   gap: 10px;
-  grid-template-columns: auto auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto auto;
 }
 
 .header.not-send {
-  grid-template-columns: auto 1fr;
+  grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .writer-box {
@@ -415,13 +415,13 @@ function formatName(email) {
   justify-content: end;
   gap: 15px;
   @media (max-width: 767px) {
-    gap: 10px;
+    gap: var(--space-1);
   }
 
   .icon-item {
     align-self: center;
-    width: 30px;
-    height: 30px;
+    width: var(--control-size);
+    height: var(--control-size);
     border-radius: 4px;
     display: flex;
     align-items: center;
@@ -473,7 +473,19 @@ function formatName(email) {
 
 }
 
-.el-tooltip__trigger:first-child:focus-visible {
-  outline: unset;
+
+
+.writer-box {
+  min-width: var(--control-size);
+  color: inherit;
+  border-radius: var(--control-radius);
 }
+.toolbar { align-items: center; gap: var(--space-2); }
+.toolbar .avatar { min-height: var(--control-size); }
+@media (max-width: 767px) {
+  .header { gap: var(--space-1); }
+  .toolbar { gap: 0; }
+  .toolbar .avatar .setting-icon { margin-right: var(--space-1); width: 16px; }
+}
+
 </style>

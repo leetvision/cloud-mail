@@ -10,9 +10,7 @@
           <span class="sender-name">{{ form.name }}</span>
           <span class="send-email"><{{ form.sendEmail }}></span>
         </div>
-        <div @click="close" style="cursor: pointer;">
-          <Icon icon="material-symbols-light:close-rounded" width="22" height="22"/>
-        </div>
+        <IconAction :label="$t('closeComposer')" @click="close" icon="material-symbols-light:close-rounded" width="22" height="22" />
       </div>
       <div class="container">
         <el-input-tag  @add-tag="addTagChange" tag-type="primary" @input="inputChange" size="default" v-model="form.receiveEmail" >
@@ -46,12 +44,12 @@
         <el-input v-model="form.subject" :placeholder="t('subject')" />
         <tinyEditor :def-value="defValue" ref="editor" @change="change" @focus="focusChange" />
         <div class="button-item">
-          <div class="att-add" @click="chooseFile">
+          <button type="button" class="att-add" :aria-label="$t('addAttachment')" @click="chooseFile">
             <Icon icon="iconamoon:attachment-fill" width="24" height="24"/>
-          </div>
-          <div class="att-clear" @click="clearContent">
+          </button>
+          <button type="button" class="att-clear" :aria-label="$t('clearComposer')" @click="clearContent">
             <Icon icon="icon-park-outline:clear-format" width="24" height="24 "/>
-          </div>
+          </button>
           <div class="att-list">
             <div class="att-item" v-for="(item,index) in form.attachments" :key="index">
               <Icon v-bind="getIconByName(item.filename)"/>
@@ -94,6 +92,7 @@
 </template>
 <script setup>
 import {mailboxAccess} from "@/request/account";
+import IconAction from '@/components/icon-action/index.vue'
 import tinyEditor from '@/components/tiny-editor/index.vue'
 import {h, nextTick, onMounted, onUnmounted, reactive, ref, toRaw, computed} from "vue";
 import {Icon} from "@iconify/vue";
@@ -615,11 +614,14 @@ function close() {
 </style>
 <style scoped lang="scss">
 .send {
+  z-index: var(--layer-composer);
+  background: rgb(0 0 0 / 0.32);
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
+  height: 100dvh;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -633,7 +635,7 @@ function close() {
     padding: 15px;
     border-radius: 8px;
     display: grid;
-    grid-template-rows: auto 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
     overflow: hidden;
     @media (max-width: 1024px) {
       width: 100%;
@@ -653,9 +655,10 @@ function close() {
       margin-bottom: 10px;
 
       .title-left {
+        min-width: 0;
         align-items: center;
         display: grid;
-        grid-template-columns: auto auto auto 1fr;
+        grid-template-columns: auto auto auto minmax(0, 1fr);
       }
 
       .title-text {
@@ -686,9 +689,12 @@ function close() {
     }
 
     .container {
+      min-width: 0;
+      min-height: 0;
+      overflow-y: auto;
       height: 100%;
       display: grid;
-      grid-template-rows: auto auto 1fr auto;
+      grid-template-rows: auto auto minmax(120px, 1fr) auto;
       gap: 15px;
 
       .item-title {
@@ -696,32 +702,43 @@ function close() {
 
       .button-item {
         display: grid;
-        grid-template-columns: auto auto 1fr auto;
+        grid-template-columns: auto auto minmax(0, 1fr) auto;
+        align-items: center;
+        gap: var(--space-2);
 
         .att-add {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: var(--control-size);
+          height: var(--control-size);
           cursor: pointer;
         }
 
         .att-clear {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          width: var(--control-size);
+          height: var(--control-size);
           cursor: pointer;
-          margin-left: 10px;
         }
 
         .att-list {
           display: grid;
           gap: 5px;
-          grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+          grid-template-columns: repeat(auto-fill, minmax(min(100%, 230px), 1fr));
           padding-left: 10px;
           padding-right: 10px;
           max-height: 110px;
           overflow-y: auto;
           @media (max-width: 450px) {
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(min(100%, 140px), 1fr));
           }
 
           .att-item {
             display: grid;
-            grid-template-columns: auto 1fr auto auto;
+            grid-template-columns: auto minmax(0, 1fr) auto auto;
             gap: 5px;
             height: 32px;
             font-size: 14px;
@@ -782,4 +799,16 @@ function close() {
 .icon {
   cursor: pointer;
 }
+
+@media (max-width: 767px) {
+  .send .write-box {
+    padding: max(var(--space-3), env(safe-area-inset-top)) var(--space-3) max(var(--space-3), env(safe-area-inset-bottom));
+  }
+  .send .write-box .title .sender-name { max-width: 96px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .send .write-box .container .button-item { grid-template-columns: auto auto minmax(0, 1fr); }
+  .send .write-box .container .button-item > div:last-child { grid-column: 3; grid-row: 1; justify-self: end; }
+  .send .write-box .container .button-item .att-list { grid-column: 1 / -1; grid-row: 2; padding: 0; }
+  .send .write-box .container .button-item .att-list:empty { display: none; }
+}
+
 </style>

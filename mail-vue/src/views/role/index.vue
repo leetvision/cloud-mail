@@ -1,8 +1,8 @@
 <template>
   <div class="perm-box">
     <div class="header-actions">
-      <Icon class="icon" icon="ion:add-outline" width="23" height="23" @click="openAddRole"/>
-      <Icon class="icon" icon="ion:reload" width="18" height="18" @click="refresh"/>
+      <IconAction class="icon" icon="ion:add-outline" width="23" height="23" @click="openAddRole" :label="$t('addRole')"/>
+      <IconAction class="icon" icon="ion:reload" width="18" height="18" @click="refresh" :label="$t('refresh')"/>
     </div>
     <el-scrollbar class="perm-scrollbar">
       <div class="loading" :class="tableLoading ? 'loading-show' : 'loading-hide'"
@@ -143,8 +143,9 @@
   </div>
 </template>
 <script setup>
+import IconAction from '@/components/icon-action/index.vue'
 import {Icon} from "@iconify/vue";
-import {defineOptions, nextTick, reactive, ref} from "vue";
+import {defineOptions, nextTick, reactive, ref, onMounted, onUnmounted} from "vue";
 import {roleAdd, roleDelete, rolePermTree, roleRoleList, roleSet, roleSetDef} from "@/request/role.js";
 import loading from '@/components/loading/index.vue';
 import {useRoleStore} from "@/store/role.js";
@@ -408,20 +409,26 @@ function adjustWidth() {
 
 adjustWidth()
 
-window.onresize = () => {
-  adjustWidth()
-};
+onMounted(() => window.addEventListener('resize', adjustWidth))
+onUnmounted(() => window.removeEventListener('resize', adjustWidth))
 
 
 </script>
 <style scoped lang="scss">
 
 .perm-box {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  position: relative;
   height: 100%;
   overflow: hidden;
   width: 100%;
 
   .perm-scrollbar {
+    min-height: 0;
+    position: relative;
     height: 100%;
   }
 }
@@ -440,10 +447,10 @@ window.onresize = () => {
 }
 
 .header-actions {
-  padding: 9px 15px;
+  padding: var(--space-1) var(--space-3);
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: var(--space-2);
   box-shadow: var(--header-actions-border);
   font-size: 18px;
 
@@ -477,7 +484,8 @@ window.onresize = () => {
 }
 
 .loading {
-  height: calc(100% - 41px);
+  height: 100%;
+  inset: 0;
   width: 100%;
   display: flex;
   align-items: center;

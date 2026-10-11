@@ -1,7 +1,7 @@
 <template>
   <div class="reg-key">
     <div class="header-actions">
-      <Icon class="icon" icon="ion:add-outline" width="23" height="23" @click="openAdd"/>
+      <IconAction class="icon" icon="ion:add-outline" width="23" height="23" @click="openAdd" :label="$t('add')"/>
       <div class="search">
         <el-input
             v-model="params.code"
@@ -10,9 +10,9 @@
         >
         </el-input>
       </div>
-      <Icon class="icon" icon="iconoir:search" @click="search" width="20" height="20"/>
-      <Icon class="icon" icon="ion:reload" width="18" height="18" @click="refresh"/>
-      <Icon class="icon" icon="fluent:broom-sparkle-16-regular" width="22" height="22" @click="clearNotUse"/>
+      <IconAction class="icon" icon="iconoir:search" @click="search" width="20" height="20" :label="$t('search')"/>
+      <IconAction class="icon" icon="ion:reload" width="18" height="18" @click="refresh" :label="$t('refresh')"/>
+      <IconAction class="icon" icon="fluent:broom-sparkle-16-regular" width="22" height="22" @click="clearNotUse" :label="$t('clear')"/>
     </div>
 
     <el-scrollbar class="scrollbar">
@@ -64,7 +64,7 @@
       <div class="container">
         <el-input v-model="addForm.code" :placeholder="$t('regKey')" @keyup.enter="submit">
           <template #suffix>
-            <Icon @click.stop="genCode" class="gen-code" icon="bitcoin-icons:refresh-filled" width="24" height="24"/>
+            <IconAction @click.stop="genCode" class="gen-code" icon="bitcoin-icons:refresh-filled" width="24" height="24" :label="$t('generateCode')"/>
           </template>
         </el-input>
         <el-select v-model="addForm.roleId" :placeholder="$t('roleDesc')">
@@ -96,6 +96,7 @@
 </template>
 
 <script setup>
+import IconAction from '@/components/icon-action/index.vue'
 import {defineOptions, nextTick, reactive, ref, watch} from "vue"
 import {Icon} from "@iconify/vue";
 import loading from "@/components/loading/index.vue";
@@ -369,22 +370,25 @@ function openAdd() {
 
 <style scoped lang="scss">
 .reg-key {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  position: relative;
   height: 100%;
   overflow: hidden;
 }
 
 .scrollbar {
-  height: calc(100% - 48px);
+  height: 100%;
+  min-height: 0;
   position: relative;
   background: var(--settings-page-background);
-  @media (max-width: 372px) {
-    height: calc(100% - 85px);
-  }
 
   .code-box {
     padding: 15px 15px 25px 15px;
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
     gap: 15px;
 
     .code-item {
@@ -403,7 +407,9 @@ function openAdd() {
 
           .info-left-item {
             display: flex;
-            padding-top: 5px;
+            flex-wrap: wrap;
+            gap: var(--space-1);
+            padding-top: var(--space-1);
 
             .code {
               font-weight: bold;;
@@ -460,7 +466,7 @@ function openAdd() {
 }
 
 :deep(.el-scrollbar__view) {
-  height: calc(100% - 80px);
+  min-height: 100%;
 }
 
 .loading {
@@ -512,15 +518,15 @@ function openAdd() {
 }
 
 .header-actions {
-  padding: 9px 15px;
+  padding: var(--space-1) var(--space-3);
   display: flex;
-  gap: 18px;
+  gap: var(--space-2);
   flex-wrap: wrap;
   align-items: center;
   box-shadow: inset 0 -1px 0 0 rgba(100, 121, 143, 0.12);
   font-size: 18px;
   @media (max-width: 767px) {
-    gap: 15px;
+    gap: var(--space-2);
   }
 
   .search-input {

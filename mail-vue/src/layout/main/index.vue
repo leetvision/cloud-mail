@@ -1,7 +1,7 @@
 <template>
   <div :class="accountShow && hasPerm('account:query') ? 'main-box-show' : 'main-box-hide'">
     <div :class="accountShow && hasPerm('account:query') ? 'block-show' : 'block-hide'" @click="uiStore.accountShow = false"></div>
-    <account  :class="accountShow && hasPerm('account:query') ? 'show' : 'hide'" />
+    <account :inert="!(accountShow && hasPerm('account:query'))" :class="accountShow && hasPerm('account:query') ? 'show' : 'hide'" />
     <router-view class="main-view" v-slot="{ Component,route }">
       <keep-alive :include="['email','all-email','send','sys-setting','star','user','role','analysis','reg-key','draft']">
         <component :is="Component" :key="route.name"/>
@@ -95,7 +95,7 @@ const handleResize = () => {
   if (['content','email','send'].includes(route.meta.name)) {
     if (innerWidth !==  window.innerWidth) {
       innerWidth = window.innerWidth;
-      uiStore.accountShow = window.innerWidth >= 767;
+      uiStore.accountShow = window.innerWidth > 767;
     }
   }
 }
@@ -127,15 +127,18 @@ const handleResize = () => {
 .show {
   transition: all 100ms;
   @media (max-width: 767px) {
-    position: fixed;
+    position: absolute;
+    inset: 0 auto 0 0;
     z-index: 100;
-    width: 260px;
+    width: min(var(--mailbox-width), 100%);
   }
 }
 
 .hide {
   transition: all 100ms;
-  position: fixed;
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--mailbox-width);
   transform: translateX(-100%);
   opacity: 0;
   @media (max-width: 1024px) {
@@ -147,21 +150,32 @@ const handleResize = () => {
 
 .main-box-show {
   display: grid;
-  grid-template-columns: 260px  1fr;
-  height: calc(100% - 60px);
+  grid-template-columns: var(--mailbox-width) minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
   @media (max-width: 767px) {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
 .main-box-hide {
   display: grid;
-  grid-template-columns: 1fr;
-  height: calc(100% - 60px);
+  grid-template-columns: minmax(0, 1fr);
+  height: 100%;
+  min-height: 0;
+  min-width: 0;
+  position: relative;
+  overflow: hidden;
 }
 
 
 .main-view {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
   background: var(--el-bg-color);
 }
 

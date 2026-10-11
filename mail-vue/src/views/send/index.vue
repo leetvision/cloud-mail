@@ -13,15 +13,16 @@
                :type="'send'"
   >
     <template #first>
-      <Icon class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-down-outline"
-            v-if="params.timeSort === 0" width="28" height="28"/>
-      <Icon class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-up-outline" v-else
-            width="28" height="28"/>
+      <IconAction class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-down-outline"
+            v-if="params.timeSort === 0" width="28" height="28" :label="$t('sortByTime')"/>
+      <IconAction class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-up-outline" v-else
+            width="28" height="28" :label="$t('sortByTime')"/>
     </template>
   </emailScroll>
 </template>
 
 <script setup>
+import IconAction from '@/components/icon-action/index.vue'
 import {useAccountStore} from "@/store/account.js";
 import {useEmailStore} from "@/store/email.js";
 import emailScroll from "@/components/email-scroll/index.vue"
@@ -29,7 +30,6 @@ import {emailList, emailDelete} from "@/request/email.js";
 import {starAdd, starCancel} from "@/request/star.js";
 import {defineOptions, onMounted, reactive, ref, watch} from "vue";
 import router from "@/router/index.js";
-import {Icon} from "@iconify/vue";
 
 defineOptions({
   name: 'send'

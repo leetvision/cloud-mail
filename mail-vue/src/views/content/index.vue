@@ -1,16 +1,15 @@
 <template>
   <div class="box">
     <div class="header-actions">
-      <Icon class="icon" icon="material-symbols-light:arrow-back-ios-new" width="20" height="20" @click="handleBack"/>
-      <Icon v-if="email.canManage !== 0" v-perm="'email:delete'" class="icon" icon="uiw:delete" width="16" height="16" @click="handleDelete"/>
+      <IconAction class="icon" icon="material-symbols-light:arrow-back-ios-new" width="20" height="20" @click="handleBack" :label="$t('back')"/>
+      <IconAction v-if="email.canManage !== 0" v-perm="'email:delete'" class="icon" icon="uiw:delete" width="16" height="16" @click="handleDelete" :label="$t('delete')"/>
       <span class="star" v-if="emailStore.contentData.showStar">
-        <Icon class="icon" @click="changeStar" v-if="email.isStar" icon="fluent-color:star-16" width="20" height="20"/>
-        <Icon class="icon" @click="changeStar" v-else icon="solar:star-line-duotone" width="18" height="18"/>
+        <IconAction class="icon" @click="changeStar" v-if="email.isStar" icon="fluent-color:star-16" width="20" height="20" :label="$t('star')"/>
+        <IconAction class="icon" @click="changeStar" v-else icon="solar:star-line-duotone" width="18" height="18" :label="$t('star')"/>
       </span>
-      <Icon class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openReply" icon="la:reply" width="21" height="21" />
-      <Icon class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openForward" icon="iconoir:arrow-up-right" width="20" height="20" />
+      <IconAction class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openReply" icon="la:reply" width="21" height="21"  :label="$t('reply')"/>
+      <IconAction class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openForward" icon="iconoir:arrow-up-right" width="20" height="20"  :label="$t('forward')"/>
     </div>
-    <div></div>
     <el-scrollbar class="scrollbar">
       <div class="container">
         <div class="email-title">
@@ -74,6 +73,7 @@
   </div>
 </template>
 <script setup>
+import IconAction from '@/components/icon-action/index.vue'
 import ShadowHtml from '@/components/shadow-html/index.vue'
 import {computed, reactive, ref, watch, onMounted, onUnmounted} from "vue";
 import {useRouter} from 'vue-router'
@@ -264,15 +264,20 @@ const handleDelete = () => {
 </script>
 <style scoped lang="scss">
 .box {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  position: relative;
   height: 100%;
   overflow: hidden;
 }
 
 .header-actions {
-  padding: 9px 15px 8px;
+  padding: var(--space-1) var(--space-3);
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--space-2);
   box-shadow: var(--header-actions-border);
   font-size: 18px;
   .star {
@@ -288,7 +293,8 @@ const handleDelete = () => {
 
 
 .scrollbar {
-  height: calc(100% - 38px);
+  height: 100%;
+  min-height: 0;
   width: 100%;
 }
 
@@ -304,6 +310,7 @@ const handleDelete = () => {
 
   .email-title {
     font-size: 20px;
+    overflow-wrap: anywhere;
     font-weight: bold;
     margin-bottom: 10px;
   }
@@ -312,6 +319,8 @@ const handleDelete = () => {
   }
 
   .content {
+    min-width: 0;
+    overflow-wrap: anywhere;
     display: flex;
     flex-direction: column;
 
@@ -321,10 +330,12 @@ const handleDelete = () => {
       border: 1px solid var(--light-border-color);
       padding: 14px;
       border-radius: 6px;
-      width: fit-content;
+      width: 100%;
+      max-width: 640px;
+      min-width: 0;
       .att-box {
-        min-width: min(410px,calc(100vw - 60px));
-        max-width: 600px;
+        min-width: 0;
+        max-width: 100%;
         display: grid;
         gap: 12px;
         grid-template-rows: 1fr;
@@ -349,7 +360,7 @@ const handleDelete = () => {
         border-radius: 4px;
         align-self: start;
         display: grid;
-        grid-template-columns: auto 1fr auto auto;
+        grid-template-columns: auto minmax(0, 1fr) auto auto;
         .att-icon {
           display: grid;
         }
@@ -359,6 +370,7 @@ const handleDelete = () => {
         }
 
         .att-name {
+          min-width: 0;
           margin-left: 8px;
           margin-right: 8px;
           white-space: nowrap;

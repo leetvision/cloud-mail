@@ -103,10 +103,10 @@
           </el-button>
         </div>
         <template v-if="settingStore.settings.register === 0">
-          <div class="switch" @click="show = 'register'" v-if="show === 'login'">{{ $t('noAccount') }}
-            <span>{{ $t('regSwitch') }}</span></div>
-          <div class="switch" @click="show = 'login'" v-else>{{ $t('hasAccount') }} <span>{{ $t('loginSwitch') }}</span>
-          </div>
+          <button type="button" class="switch" @click="show = 'register'" v-if="show === 'login'">{{ $t('noAccount') }}
+            <span>{{ $t('regSwitch') }}</span></button>
+          <button type="button" class="switch" @click="show = 'login'" v-else>{{ $t('hasAccount') }} <span>{{ $t('loginSwitch') }}</span>
+          </button>
         </template>
       </div>
     </div>
@@ -612,10 +612,17 @@ function submitRegister() {
   position: fixed;
   right: 0;
   height: 100%;
+  height: 100dvh;
+  overflow-y: auto;
+  padding: 0;
+  @media (max-width: 767px) {
+    padding: max(var(--space-4), env(safe-area-inset-top)) 0 max(var(--space-4), env(safe-area-inset-bottom));
+  }
   z-index: 10;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   @media (max-width: 767px) {
     width: 100%;
   }
@@ -629,7 +636,9 @@ function submitRegister() {
   flex-direction: column;
   justify-content: center;
   width: 450px;
-  height: 100%;
+  min-height: 100%;
+  flex-shrink: 0;
+  margin-block: auto;
   border-left: 1px solid var(--login-border);
   box-shadow: var(--el-box-shadow-light);
   @media (max-width: 1024px) {
@@ -641,6 +650,7 @@ function submitRegister() {
     border: 1px solid var(--login-border);
     padding: 20px 18px;
     border-radius: 6px;
+    min-height: 0;
     height: fit-content;
     width: 100%;
     margin-right: 18px;
@@ -665,6 +675,9 @@ function submitRegister() {
   }
 
   .switch {
+    cursor: pointer;
+    min-height: var(--control-size);
+    color: inherit;
     margin-top: 20px;
     text-align: center;
 

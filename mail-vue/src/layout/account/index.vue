@@ -1,8 +1,8 @@
 <template>
   <div class="account-box">
     <div class="head-opt">
-      <Icon v-perm="'account:add'" class="icon add" icon="ion:add-outline" width="23" height="23" @click="add"/>
-      <Icon class="icon refresh" icon="ion:reload" width="18" height="18" @click="refresh"/>
+      <IconAction v-perm="'account:add'" class="icon add" icon="ion:add-outline" width="23" height="23" @click="add" :label="$t('addAccount')"/>
+      <IconAction class="icon refresh" icon="ion:reload" width="18" height="18" @click="refresh" :label="$t('refresh')"/>
     </div>
     <el-scrollbar class="scrollbar" ref="scrollbarRef">
       <div v-infinite-scroll="getAccountList" :infinite-scroll-distance="600" :infinite-scroll-immediate="false">
@@ -132,6 +132,7 @@
 </template>
 <script setup>
 import MailboxMembers from "@/components/mailbox-members/index.vue";
+import IconAction from '@/components/icon-action/index.vue'
 import {Icon} from "@iconify/vue";
 import {computed, nextTick, reactive, ref, watch} from "vue";
 import {
@@ -538,6 +539,10 @@ path[fill="#ffdda1"] {
 .shared-label { display: block; margin-top: 4px; color: var(--el-text-color-regular); font-size: 12px; }
 
 .account-box {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
 
   border-right: 1px solid var(--el-border-color) !important;
   background-color: var(--el-bg-color);
@@ -547,7 +552,8 @@ path[fill="#ffdda1"] {
   .head-opt {
     display: flex;
     align-items: center;
-    height: 38px;
+    min-height: var(--toolbar-height);
+    gap: var(--space-2);
     box-shadow: var(--header-actions-border);
     padding-left: 10px;
     padding-right: 10px;
@@ -571,11 +577,9 @@ path[fill="#ffdda1"] {
 
   .scrollbar {
     width: 100%;
-    height: calc(100% - 38px);
+    height: 100%;
+    min-height: 0;
     overflow: auto;
-    @media (max-width: 767px) {
-      height: calc(100% - 98px);
-    }
 
     .empty {
       display: flex;

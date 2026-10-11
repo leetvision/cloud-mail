@@ -1,7 +1,7 @@
 <template>
   <div class="user-box">
     <div class="header-actions">
-      <Icon class="icon" icon="ion:add-outline" width="23" height="23" @click="openAdd"/>
+      <IconAction class="icon" icon="ion:add-outline" width="23" height="23" @click="openAdd" :label="$t('add')"/>
       <div class="search">
         <el-input
             v-model="params.email"
@@ -17,13 +17,13 @@
         <el-option :key="1" :label="$t('banned')" :value="1"/>
         <el-option :key="-2" :label="$t('deleted')" :value="-2"/>
       </el-select>
-      <Icon class="icon" icon="iconoir:search" @click="search" width="20" height="20"/>
-      <Icon class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-down-outline"
-            v-if="params.timeSort === 1" width="28" height="28"/>
-      <Icon class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-up-outline" v-else width="28"
-            height="28"/>
-      <Icon class="icon" icon="ion:reload" width="18" height="18" @click="refresh"/>
-      <Icon class="icon" icon="uiw:delete" width="16" height="16" @click="delUser"/>
+      <IconAction class="icon" icon="iconoir:search" @click="search" width="20" height="20" :label="$t('search')"/>
+      <IconAction class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-down-outline"
+            v-if="params.timeSort === 1" width="28" height="28" :label="$t('sortByTime')"/>
+      <IconAction class="icon" @click="changeTimeSort" icon="material-symbols-light:timer-arrow-up-outline" v-else width="28"
+            height="28" :label="$t('sortByTime')"/>
+      <IconAction class="icon" icon="ion:reload" width="18" height="18" @click="refresh" :label="$t('refresh')"/>
+      <IconAction class="icon" icon="uiw:delete" width="16" height="16" @click="delUser" :label="$t('delete')"/>
     </div>
     <el-scrollbar ref="scrollbarRef" class="scrollbar">
       <div>
@@ -377,7 +377,8 @@
 </template>
 
 <script setup>
-import {defineOptions, h, reactive, ref, watch} from 'vue'
+import IconAction from '@/components/icon-action/index.vue'
+import {defineOptions, h, reactive, ref, watch, onMounted, onUnmounted} from 'vue'
 import {
   userList,
   userDelete,
@@ -1043,9 +1044,8 @@ function getUserList(loading = true) {
   })
 }
 
-window.onresize = () => {
-  adjustWidth()
-};
+onMounted(() => window.addEventListener('resize', adjustWidth))
+onUnmounted(() => window.removeEventListener('resize', adjustWidth))
 
 adjustWidth()
 
@@ -1088,6 +1088,11 @@ function adjustWidth() {
 }
 
 .user-box {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-width: 0;
+  min-height: 0;
+  position: relative;
   overflow: hidden;
   height: 100%;
 }
@@ -1111,9 +1116,9 @@ function adjustWidth() {
 }
 
 .header-actions {
-  padding: 9px 15px;
+  padding: var(--space-1) var(--space-3);
   display: flex;
-  gap: 15px;
+  gap: var(--space-2);
   flex-wrap: wrap;
   align-items: center;
   box-shadow: var(--header-actions-border);
@@ -1157,10 +1162,9 @@ function adjustWidth() {
 .scrollbar {
   width: 100%;
   overflow: auto;
-  height: calc(100% - 50px);
-  @media (max-width: 464px) {
-    height: calc(100% - 90px);
-  }
+  height: 100%;
+  min-height: 0;
+  position: relative;
 }
 
 .details {
