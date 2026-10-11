@@ -9,6 +9,7 @@ import { emailListColumns, emailBriefColumns } from '../lib/email-list-columns';
 import { isDel } from '../const/entity-const';
 import attService from "./att-service";
 import { t } from '../i18n/i18n'
+import { emailSearchFilter } from '../lib/email-search';
 const starService = {
 
 	async add(c, params, userId) {
@@ -60,6 +61,7 @@ const starService = {
 					eq(star.userId, userId),
 					eq(email.isDel, isDel.NORMAL),
 					mailboxAccess(email.accountId, userId),
+                    emailSearchFilter(params.query),
 					emailId ? lt(star.emailId, emailId) : undefined))
 			.orderBy(desc(star.emailId))
 			.limit(size)

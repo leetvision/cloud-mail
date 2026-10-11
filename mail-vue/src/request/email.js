@@ -4,8 +4,8 @@ export function emailThread(emailId) {
     return http.get('/email/thread', {params: {emailId}, timeout: 35 * 1000})
 }
 
-export function emailList(accountId, allReceive, emailId, timeSort, size, type, full) {
-    return http.get('/email/list', {params: {accountId, allReceive, emailId, timeSort, size, type, full}})
+export function emailList(accountId, allReceive, emailId, timeSort, size, type, full, query = '') {
+    return http.get('/email/list', {params: {accountId, allReceive, emailId, timeSort, size, type, full, query}})
 }
 
 export function emailDelete(emailIds) {

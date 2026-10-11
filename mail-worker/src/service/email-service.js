@@ -25,6 +25,7 @@ import account from "../entity/account";
 import { att } from '../entity/att';
 import telegramService from './telegram-service';
 import { replyReferences, threadEmailIds } from '../lib/email-thread';
+import { emailSearchFilter } from '../lib/email-search';
 
 const emailService = {
 
@@ -63,7 +64,7 @@ const emailService = {
 
 	async list(c, params, userId) {
 
-		let { emailId, type, accountId, size, timeSort, allReceive, full } = params;
+		let { emailId, type, accountId, size, timeSort, allReceive, full, query: searchQuery } = params;
 
 		size = Number(size);
 		type = Number(type);
@@ -100,8 +101,8 @@ const emailService = {
 		// A delegated inbox never expands into the owner's other mailboxes.
 		if (accessibleMailbox.accessRole !== 'owner') allReceive = 0;
 
-		const filters = this.emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort });
-		const countFilters = this.emailListFilters({ userId, accountId, type, allReceive, withCursor: false });
+		const filters = this.emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort, searchQuery });
+		const countFilters = this.emailListFilters({ userId, accountId, type, allReceive, withCursor: false, searchQuery });
 		const columns = full ? emailListColumns : emailBriefColumns;
 
 		const query = orm(c)
@@ -192,13 +193,14 @@ const emailService = {
 		return list;
 	},
 
-	emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort, withCursor = true }) {
+	emailListFilters({ userId, accountId, type, allReceive, emailId, timeSort, withCursor = true, searchQuery }) {
 		const conditions = [
 			mailboxAccess(email.accountId, userId),
 			eq(email.type, type),
 			eq(email.isDel, isDel.NORMAL),
 			eq(account.isDel, isDel.NORMAL),
 		];
+		conditions.push(emailSearchFilter(searchQuery));
 		if (!allReceive) {
 			conditions.push(eq(email.accountId, accountId));
 		}
