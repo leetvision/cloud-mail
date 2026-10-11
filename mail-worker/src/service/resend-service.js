@@ -8,6 +8,7 @@ const resendService = {
 
 		const params = {
 			resendEmailId: body.data.email_id,
+			messageId: body.data.message_id,
 			status: emailConst.status.SENT
 		}
 

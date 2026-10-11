@@ -1,4 +1,7 @@
 const en = {
+    threadLoading: 'Loading conversation…',
+    threadLoadFailed: 'Could not load the full conversation. Try again.',
+    threadMessageCount: '1 message | {count} messages',
     mailboxMembers: 'Mailbox access',
     mailboxEdit: 'Edit',
     mailboxRetry: 'Try again',

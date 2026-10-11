@@ -7,44 +7,50 @@
         <IconAction class="icon" @click="changeStar" v-if="email.isStar" icon="fluent-color:star-16" width="20" height="20" :label="$t('star')"/>
         <IconAction class="icon" @click="changeStar" v-else icon="solar:star-line-duotone" width="18" height="18" :label="$t('star')"/>
       </span>
-      <IconAction class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openReply" icon="la:reply" width="21" height="21"  :label="$t('reply')"/>
-      <IconAction class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openForward" icon="iconoir:arrow-up-right" width="20" height="20"  :label="$t('forward')"/>
+      <IconAction class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openReply()" icon="la:reply" width="21" height="21"  :label="$t('reply')"/>
+      <IconAction class="icon" v-if="emailStore.contentData.showReply && email.canSend !== 0" v-perm="'email:send'"  @click="openForward()" icon="iconoir:arrow-up-right" width="20" height="20"  :label="$t('forward')"/>
     </div>
     <el-scrollbar class="scrollbar">
       <div class="container">
         <div class="email-title">
           {{ email.subject }}
         </div>
-        <div class="content">
+        <p v-if="threadLoading" class="thread-status" role="status">{{ $t('threadLoading') }}</p>
+        <div v-else-if="threadFailed" class="thread-status" role="alert">
+          <span>{{ $t('threadLoadFailed') }}</span>
+          <el-button @click="loadThread">{{ $t('mailboxRetry') }}</el-button>
+        </div>
+        <p v-else-if="messages.length > 1" class="thread-status">{{ $t('threadMessageCount', messages.length) }}</p>
+        <div class="content" v-for="message in messages" :key="message.emailId">
           <div class="email-info">
             <div>
               <div class="send"><span class="send-source">{{$t('from')}}</span>
                 <div class="send-name">
-                  <span class="send-name-title">{{ email.name }}</span>
-                  <span><{{ email.sendEmail }}></span>
+                  <span class="send-name-title">{{ message.name }}</span>
+                  <span><{{ message.sendEmail }}></span>
                 </div>
               </div>
-              <div class="receive"><span class="source">{{$t('recipient')}}</span><span class="receive-email">{{  formateReceive(email.recipient) }}</span></div>
+              <div class="receive"><span class="source">{{$t('recipient')}}</span><span class="receive-email">{{  formateReceive(message.recipient) }}</span></div>
               <div class="date">
-                <div>{{ formatDetailDate(email.createTime) }}</div>
+                <div>{{ formatDetailDate(message.createTime) }}</div>
               </div>
             </div>
-            <el-alert v-if="email.status === 3" :closable="false" :title="toMessage(email.message)" class="email-msg" type="error" show-icon />
-            <el-alert v-if="email.status === 4" :closable="false" :title="$t('complained')" class="email-msg" type="warning" show-icon />
-            <el-alert v-if="email.status === 5" :closable="false" :title="$t('delayed')" class="email-msg" type="warning" show-icon />
+            <el-alert v-if="message.status === 3" :closable="false" :title="toMessage(message.message)" class="email-msg" type="error" show-icon />
+            <el-alert v-if="message.status === 4" :closable="false" :title="$t('complained')" class="email-msg" type="warning" show-icon />
+            <el-alert v-if="message.status === 5" :closable="false" :title="$t('delayed')" class="email-msg" type="warning" show-icon />
           </div>
-          <el-scrollbar class="htm-scrollbar" :class="!email.attList?.length ? 'bottom-distance' : ''">
-            <ShadowHtml class="shadow-html" :html="formatImage(email.content)" v-if="email.content" />
-            <pre v-else class="email-text" >{{email.text}}</pre>
-          </el-scrollbar>
-          <div class="att" v-if="email.attList?.length > 0">
+          <div class="htm-scrollbar" :class="!message.attList?.length ? 'bottom-distance' : ''">
+            <ShadowHtml class="shadow-html" :html="formatImage(message.content)" v-if="message.content" />
+            <pre v-else class="email-text" >{{message.text}}</pre>
+          </div>
+          <div class="att" v-if="message.attList?.length > 0">
             <div class="att-title">
               <span>{{$t('attachments')}}</span>
-              <span>{{$t('attCount',{total: email.attList.length})}}</span>
+              <span>{{$t('attCount',{total: message.attList.length})}}</span>
             </div>
             <div class="att-box">
 
-              <div class="att-item" v-for="att in email.attList" :key="att.attId">
+              <div class="att-item" v-for="att in message.attList" :key="att.attId">
                 <div class="att-icon" @click="showImage(att.key)">
                   <Icon v-bind="getIconByName(att.filename)" />
                 </div>
@@ -60,6 +66,10 @@
                 </div>
               </div>
             </div>
+          </div>
+          <div class="message-actions" v-if="emailStore.contentData.showReply && message.canSend !== 0">
+            <el-button v-if="message.type === 0" v-perm="'email:send'" @click="openReply(message)">{{ $t('reply') }}</el-button>
+            <el-button v-perm="'email:send'" @click="openForward(message)">{{ $t('forward') }}</el-button>
           </div>
         </div>
       </div>
@@ -78,7 +88,7 @@ import ShadowHtml from '@/components/shadow-html/index.vue'
 import {computed, reactive, ref, watch, onMounted, onUnmounted} from "vue";
 import {useRouter} from 'vue-router'
 import {ElMessage, ElMessageBox} from 'element-plus'
-import {emailDelete, emailRead} from "@/request/email.js";
+import {emailDelete, emailRead, emailThread} from "@/request/email.js";
 import {Icon} from "@iconify/vue";
 import {useEmailStore} from "@/store/email.js";
 import {useAccountStore} from "@/store/account.js";
@@ -103,6 +113,62 @@ const email = computed(() => emailStore.contentData.email || {
   text: '',
   recipient: '[]',
 })
+const threadMessages = ref([])
+const threadLoading = ref(false)
+const threadFailed = ref(false)
+const messages = computed(() => threadMessages.value.length ? threadMessages.value : (email.value.emailId ? [email.value] : []))
+const replyEmail = computed(() => messages.value.findLast(message => message.type === 0) || messages.value.at(-1) || email.value)
+let threadRequest = 0
+
+async function loadThread() {
+  const emailId = email.value.emailId
+  if (!emailId || emailStore.contentData.delType === 'physics') return
+  const request = ++threadRequest
+  threadLoading.value = true
+  threadFailed.value = false
+  try {
+    const list = await emailThread(emailId)
+    if (request !== threadRequest) return
+    emailStore.applyFullList(list)
+    threadMessages.value = list.map(item => emailStore.detailMap[item.emailId])
+    await markMessagesRead(threadMessages.value)
+  } catch (error) {
+    if (request === threadRequest) threadFailed.value = true
+    console.error(error)
+  } finally {
+    if (request === threadRequest) threadLoading.value = false
+  }
+}
+
+async function markMessagesRead(list) {
+  if (!emailStore.contentData.showUnread) return
+  const unread = list.filter(message => message.type === 0 && message.unread === EmailUnreadEnum.UNREAD)
+  if (!unread.length) return
+  try {
+    // The read endpoint accepts at most 95 IDs; conversations can be much longer.
+    for (let offset = 0; offset < unread.length; offset += 50) {
+      const batch = unread.slice(offset, offset + 50)
+      await emailRead(batch.map(message => message.emailId))
+      for (const message of batch) {
+        message.unread = EmailUnreadEnum.READ
+        if (emailStore.detailMap[message.emailId]) emailStore.detailMap[message.emailId].unread = EmailUnreadEnum.READ
+        if (email.value.emailId === message.emailId) email.value.unread = EmailUnreadEnum.READ
+        emailStore.markListRead(message.emailId)
+      }
+    }
+  } catch (error) {
+    console.error(error)
+  }
+}
+
+watch(() => email.value.emailId, () => {
+  threadRequest++
+  threadMessages.value = []
+  loadThread()
+}, { immediate: true })
+
+watch(() => emailStore.sentRevision, () => loadThread())
+
 const showPreview = ref(false)
 const srcList = reactive([])
 
@@ -111,49 +177,13 @@ watch(() => accountStore.currentAccountId, () => {
   handleBack()
 })
 
-let readRequesting = false
-
-function tryMarkRead() {
-  if (!emailStore.contentData.showUnread || readRequesting) return
-  const current = email.value
-  if (!current?.emailId || current.unread !== EmailUnreadEnum.UNREAD) return
-
-  // Mark as read only after the detail map or message body is ready.
-  const full = emailStore.detailMap[current.emailId]
-  const detailReady = !!full || !!(current.content || current.text)
-  if (!detailReady) return
-
-  readRequesting = true
-  const emailId = current.emailId
-  current.unread = EmailUnreadEnum.READ
-  if (emailStore.detailMap[emailId]) {
-    emailStore.detailMap[emailId].unread = EmailUnreadEnum.READ
-  }
-  emailStore.markListRead(emailId)
-  emailRead([emailId]).finally(() => {
-    readRequesting = false
-  })
-}
-
-watch(
-  () => [
-    email.value?.emailId,
-    email.value?.content,
-    email.value?.text,
-    emailStore.detailMap[email.value?.emailId]
-  ],
-  () => tryMarkRead(),
-  { flush: 'post' }
-)
-
 onMounted(() => {
-  tryMarkRead()
   window.addEventListener('keydown', handleKeyDown);
 })
 
 onUnmounted(() => {
   emailStore.contentData.showUnread = false;
-  readRequesting = false
+  threadRequest++
   window.removeEventListener('keydown', handleKeyDown);
 })
 
@@ -166,12 +196,12 @@ function handleKeyDown(event) {
   handleBack();
 }
 
-function openReply() {
-  uiStore.writerRef.openReply(email.value)
+function openReply(message = replyEmail.value) {
+  uiStore.writerRef.openReply(message)
 }
 
-function openForward() {
-  uiStore.writerRef.openForward(email.value)
+function openForward(message = replyEmail.value) {
+  uiStore.writerRef.openForward(message)
 }
 
 function toMessage(message) {
@@ -315,10 +345,38 @@ const handleDelete = () => {
     margin-bottom: 10px;
   }
 
+  .thread-status {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--secondary-text-color);
+    margin-bottom: var(--space-3);
+  }
+
+  .message-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-block: var(--space-3);
+
+    .el-button + .el-button {
+      margin-left: 0;
+    }
+  }
+
+  .content + .content {
+    border-top: 1px solid var(--light-border-color);
+    padding-top: var(--space-4);
+  }
+
   .htm-scrollbar {
+    width: 100%;
+    min-width: 0;
   }
 
   .content {
+    margin-bottom: var(--space-4);
     min-width: 0;
     overflow-wrap: anywhere;
     display: flex;

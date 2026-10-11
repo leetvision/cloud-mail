@@ -24,8 +24,42 @@ import domainUtils from '../utils/domain-uitls';
 import account from "../entity/account";
 import { att } from '../entity/att';
 import telegramService from './telegram-service';
+import { replyReferences, threadEmailIds } from '../lib/email-thread';
 
 const emailService = {
+
+	async thread(c, params, userId) {
+		const emailId = Number(params.emailId);
+		if (!Number.isSafeInteger(emailId) || emailId < 1) throw new BizError('Invalid message.', 400);
+		const selected = await this.selectById(c, emailId);
+		if (!selected) throw new BizError('Message not found.', 404);
+		await requireMailbox(c, selected.accountId, userId);
+		const scope = and(
+			eq(email.accountId, selected.accountId),
+			eq(email.isDel, isDel.NORMAL),
+			mailboxAccess(email.accountId, userId)
+		);
+		// Read only headers while finding the conversation; bodies are fetched for matches.
+		const headers = await orm(c).select({
+			emailId: email.emailId, messageId: email.messageId,
+			inReplyTo: email.inReplyTo, relation: email.relation
+		}).from(email).where(scope).all();
+		const ids = threadEmailIds(headers, emailId);
+		const list = [];
+		// Stay within D1's parameter limit, including conversations longer than a list page.
+		for (let offset = 0; offset < ids.length; offset += 50) {
+			const batch = await orm(c).select({
+				...emailListColumns,
+				canSend: mailboxAccess(email.accountId, userId, 'send'),
+				canManage: mailboxAccess(email.accountId, userId, 'manage'),
+				starId: star.starId
+			}).from(email).leftJoin(star, and(eq(star.emailId, email.emailId), eq(star.userId, userId)))
+				.where(and(scope, inArray(email.emailId, ids.slice(offset, offset + 50)))).all();
+			await this.emailAddAtt(c, batch);
+			list.push(...batch.map(item => ({ ...item, isStar: item.starId != null ? 1 : 0 })));
+		}
+		return list.sort((a, b) => a.createTime.localeCompare(b.createTime) || a.emailId - b.emailId);
+	},
 
 	async list(c, params, userId) {
 
@@ -367,7 +401,8 @@ const emailService = {
 					html,
 					attachments: [...imageDataList, ...attachments],
 					sendType,
-					messageId: emailRow.messageId
+					messageId: emailRow.messageId,
+					references: replyReferences(emailRow)
 				});
 			} else {
 				sendResult = await this.sendByResend(resendToken, {
@@ -379,7 +414,8 @@ const emailService = {
 					html,
 					attachments: [...imageDataList, ...attachments],
 					sendType,
-					messageId: emailRow.messageId
+					messageId: emailRow.messageId,
+					references: replyReferences(emailRow)
 				});
 			}
 
@@ -409,6 +445,7 @@ const emailService = {
 		emailData.type = emailConst.type.SEND;
 		emailData.userId = accountRow.userId;
 		emailData.resendEmailId = data?.id;
+		emailData.messageId = allInternal ? `<${crypto.randomUUID()}@${domain}>` : (data?.messageId || '');
 
 		const recipient = [];
 
@@ -420,7 +457,7 @@ const emailService = {
 
 		if (sendType === 'reply') {
 			emailData.inReplyTo = emailRow.messageId;
-			emailData.relation = emailRow.messageId;
+			emailData.relation = replyReferences(emailRow);
 		}
 
 		// Increment the user's send count when the role has a send limit.
@@ -492,7 +529,7 @@ const emailService = {
 		if (params.sendType === 'reply' && params.messageId) {
 			sendForm.headers = {
 				'in-reply-to': params.messageId,
-				'references': params.messageId
+				'references': params.references || params.messageId
 			};
 		}
 
@@ -500,7 +537,8 @@ const emailService = {
 
 		return {
 			data: {
-				id: result.messageId
+				id: result.messageId,
+				messageId: result.messageId
 			}
 		};
 	},
@@ -517,14 +555,24 @@ const emailService = {
 			attachments: await this.toResendAttachments(params.attachments)
 		};
 
-		if (params.sendType === 'reply') {
+		if (params.sendType === 'reply' && params.messageId) {
 			sendForm.headers = {
 				'in-reply-to': params.messageId,
-				'references': params.messageId
+				'references': params.references || params.messageId
 			};
 		}
 
-		return await resend.emails.send(sendForm);
+		const sent = await resend.emails.send(sendForm);
+		if (sent.data?.id && !sent.error) {
+			// Resend's API ID is different from the RFC Message-ID used by incoming replies.
+			try {
+				const detail = await resend.emails.get(sent.data.id);
+				sent.data.messageId = detail.data?.message_id || '';
+			} catch (error) {
+				console.warn('Could not retrieve sent Message-ID:', error?.message);
+			}
+		}
+		return sent;
 	},
 
 	async toCloudflareAttachments(attachments) {
@@ -868,10 +916,11 @@ const emailService = {
 	},
 
 	updateEmailStatus(c, params) {
-		const { status, resendEmailId, message } = params;
+		const { status, resendEmailId, message, messageId } = params;
 		return orm(c).update(email).set({
 			status: status,
-			message: message
+			message: message,
+			messageId: messageId || undefined
 		}).where(eq(email.resendEmailId, resendEmailId)).returning().get();
 	},
 
