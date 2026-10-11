@@ -34,3 +34,8 @@ git-tools.js
 !.env.example
 
 .cloudflare/
+
+# Browser test output and local design review captures
+mail-vue/test-results/
+mail-vue/playwright-report/
+mail-vue/.impeccable/review/

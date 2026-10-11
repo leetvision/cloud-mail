@@ -1,0 +1,734 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-10-11T17:54:49.655943+00:00",
+  "title": "Design System: Cloud Mail",
+  "extensions": {
+    "colorMeta": {
+      "primary": {
+        "role": "primary",
+        "displayName": "Primary",
+        "tonalRamp": [
+          "oklch(15% 0.19916 260.60)",
+          "oklch(25% 0.19916 260.60)",
+          "oklch(35% 0.19916 260.60)",
+          "oklch(45% 0.19916 260.60)",
+          "oklch(55% 0.19916 260.60)",
+          "oklch(65% 0.19916 260.60)",
+          "oklch(80% 0.19916 260.60)",
+          "oklch(95% 0.19916 260.60)"
+        ]
+      },
+      "primary-dark": {
+        "role": "primary",
+        "displayName": "Primary Dark",
+        "tonalRamp": [
+          "oklch(15% 0.16786 252.18)",
+          "oklch(25% 0.16786 252.18)",
+          "oklch(35% 0.16786 252.18)",
+          "oklch(45% 0.16786 252.18)",
+          "oklch(55% 0.16786 252.18)",
+          "oklch(65% 0.16786 252.18)",
+          "oklch(80% 0.16786 252.18)",
+          "oklch(95% 0.16786 252.18)"
+        ]
+      },
+      "mail-shell": {
+        "role": "neutral",
+        "displayName": "Mail Shell",
+        "tonalRamp": [
+          "oklch(15% 0.00574 264.53)",
+          "oklch(25% 0.00574 264.53)",
+          "oklch(35% 0.00574 264.53)",
+          "oklch(45% 0.00574 264.53)",
+          "oklch(55% 0.00574 264.53)",
+          "oklch(65% 0.00574 264.53)",
+          "oklch(80% 0.00574 264.53)",
+          "oklch(95% 0.00574 264.53)"
+        ]
+      },
+      "mail-shell-dark": {
+        "role": "neutral",
+        "displayName": "Mail Shell Dark",
+        "tonalRamp": [
+          "oklch(15% 0.00585 271.18)",
+          "oklch(25% 0.00585 271.18)",
+          "oklch(35% 0.00585 271.18)",
+          "oklch(45% 0.00585 271.18)",
+          "oklch(55% 0.00585 271.18)",
+          "oklch(65% 0.00585 271.18)",
+          "oklch(80% 0.00585 271.18)",
+          "oklch(95% 0.00585 271.18)"
+        ]
+      },
+      "mail-surface": {
+        "role": "neutral",
+        "displayName": "Mail Surface",
+        "tonalRamp": [
+          "oklch(15% 0.00000 0.00)",
+          "oklch(25% 0.00000 0.00)",
+          "oklch(35% 0.00000 0.00)",
+          "oklch(45% 0.00000 0.00)",
+          "oklch(55% 0.00000 0.00)",
+          "oklch(65% 0.00000 0.00)",
+          "oklch(80% 0.00000 0.00)",
+          "oklch(95% 0.00000 0.00)"
+        ]
+      },
+      "mail-surface-dark": {
+        "role": "neutral",
+        "displayName": "Mail Surface Dark",
+        "tonalRamp": [
+          "oklch(15% 0.00000 0.00)",
+          "oklch(25% 0.00000 0.00)",
+          "oklch(35% 0.00000 0.00)",
+          "oklch(45% 0.00000 0.00)",
+          "oklch(55% 0.00000 0.00)",
+          "oklch(65% 0.00000 0.00)",
+          "oklch(80% 0.00000 0.00)",
+          "oklch(95% 0.00000 0.00)"
+        ]
+      },
+      "mail-search": {
+        "role": "neutral",
+        "displayName": "Mail Search",
+        "tonalRamp": [
+          "oklch(15% 0.01203 259.82)",
+          "oklch(25% 0.01203 259.82)",
+          "oklch(35% 0.01203 259.82)",
+          "oklch(45% 0.01203 259.82)",
+          "oklch(55% 0.01203 259.82)",
+          "oklch(65% 0.01203 259.82)",
+          "oklch(80% 0.01203 259.82)",
+          "oklch(95% 0.01203 259.82)"
+        ]
+      },
+      "mail-search-dark": {
+        "role": "neutral",
+        "displayName": "Mail Search Dark",
+        "tonalRamp": [
+          "oklch(15% 0.00551 271.24)",
+          "oklch(25% 0.00551 271.24)",
+          "oklch(35% 0.00551 271.24)",
+          "oklch(45% 0.00551 271.24)",
+          "oklch(55% 0.00551 271.24)",
+          "oklch(65% 0.00551 271.24)",
+          "oklch(80% 0.00551 271.24)",
+          "oklch(95% 0.00551 271.24)"
+        ]
+      },
+      "mail-compose": {
+        "role": "primary",
+        "displayName": "Mail Compose",
+        "tonalRamp": [
+          "oklch(15% 0.05083 236.57)",
+          "oklch(25% 0.05083 236.57)",
+          "oklch(35% 0.05083 236.57)",
+          "oklch(45% 0.05083 236.57)",
+          "oklch(55% 0.05083 236.57)",
+          "oklch(65% 0.05083 236.57)",
+          "oklch(80% 0.05083 236.57)",
+          "oklch(95% 0.05083 236.57)"
+        ]
+      },
+      "mail-compose-dark": {
+        "role": "primary",
+        "displayName": "Mail Compose Dark",
+        "tonalRamp": [
+          "oklch(15% 0.09858 244.61)",
+          "oklch(25% 0.09858 244.61)",
+          "oklch(35% 0.09858 244.61)",
+          "oklch(45% 0.09858 244.61)",
+          "oklch(55% 0.09858 244.61)",
+          "oklch(65% 0.09858 244.61)",
+          "oklch(80% 0.09858 244.61)",
+          "oklch(95% 0.09858 244.61)"
+        ]
+      },
+      "mail-on-accent": {
+        "role": "primary",
+        "displayName": "Mail On Accent",
+        "tonalRamp": [
+          "oklch(15% 0.05859 246.72)",
+          "oklch(25% 0.05859 246.72)",
+          "oklch(35% 0.05859 246.72)",
+          "oklch(45% 0.05859 246.72)",
+          "oklch(55% 0.05859 246.72)",
+          "oklch(65% 0.05859 246.72)",
+          "oklch(80% 0.05859 246.72)",
+          "oklch(95% 0.05859 246.72)"
+        ]
+      },
+      "mail-on-accent-dark": {
+        "role": "primary",
+        "displayName": "Mail On Accent Dark",
+        "tonalRamp": [
+          "oklch(15% 0.05083 236.57)",
+          "oklch(25% 0.05083 236.57)",
+          "oklch(35% 0.05083 236.57)",
+          "oklch(45% 0.05083 236.57)",
+          "oklch(55% 0.05083 236.57)",
+          "oklch(65% 0.05083 236.57)",
+          "oklch(80% 0.05083 236.57)",
+          "oklch(95% 0.05083 236.57)"
+        ]
+      },
+      "mail-selected": {
+        "role": "primary",
+        "displayName": "Mail Selected",
+        "tonalRamp": [
+          "oklch(15% 0.03956 260.15)",
+          "oklch(25% 0.03956 260.15)",
+          "oklch(35% 0.03956 260.15)",
+          "oklch(45% 0.03956 260.15)",
+          "oklch(55% 0.03956 260.15)",
+          "oklch(65% 0.03956 260.15)",
+          "oklch(80% 0.03956 260.15)",
+          "oklch(95% 0.03956 260.15)"
+        ]
+      },
+      "mail-selected-dark": {
+        "role": "primary",
+        "displayName": "Mail Selected Dark",
+        "tonalRamp": [
+          "oklch(15% 0.09858 244.61)",
+          "oklch(25% 0.09858 244.61)",
+          "oklch(35% 0.09858 244.61)",
+          "oklch(45% 0.09858 244.61)",
+          "oklch(55% 0.09858 244.61)",
+          "oklch(65% 0.09858 244.61)",
+          "oklch(80% 0.09858 244.61)",
+          "oklch(95% 0.09858 244.61)"
+        ]
+      },
+      "mail-nav-hover": {
+        "role": "neutral",
+        "displayName": "Mail Nav Hover",
+        "tonalRamp": [
+          "oklch(15% 0.00749 260.73)",
+          "oklch(25% 0.00749 260.73)",
+          "oklch(35% 0.00749 260.73)",
+          "oklch(45% 0.00749 260.73)",
+          "oklch(55% 0.00749 260.73)",
+          "oklch(65% 0.00749 260.73)",
+          "oklch(80% 0.00749 260.73)",
+          "oklch(95% 0.00749 260.73)"
+        ]
+      },
+      "mail-nav-hover-dark": {
+        "role": "neutral",
+        "displayName": "Mail Nav Hover Dark",
+        "tonalRamp": [
+          "oklch(15% 0.00745 240.02)",
+          "oklch(25% 0.00745 240.02)",
+          "oklch(35% 0.00745 240.02)",
+          "oklch(45% 0.00745 240.02)",
+          "oklch(55% 0.00745 240.02)",
+          "oklch(65% 0.00745 240.02)",
+          "oklch(80% 0.00745 240.02)",
+          "oklch(95% 0.00745 240.02)"
+        ]
+      },
+      "mail-read-row": {
+        "role": "neutral",
+        "displayName": "Mail Read Row",
+        "tonalRamp": [
+          "oklch(15% 0.00909 258.34)",
+          "oklch(25% 0.00909 258.34)",
+          "oklch(35% 0.00909 258.34)",
+          "oklch(45% 0.00909 258.34)",
+          "oklch(55% 0.00909 258.34)",
+          "oklch(65% 0.00909 258.34)",
+          "oklch(80% 0.00909 258.34)",
+          "oklch(95% 0.00909 258.34)"
+        ]
+      },
+      "mail-read-row-dark": {
+        "role": "neutral",
+        "displayName": "Mail Read Row Dark",
+        "tonalRamp": [
+          "oklch(15% 0.00564 271.22)",
+          "oklch(25% 0.00564 271.22)",
+          "oklch(35% 0.00564 271.22)",
+          "oklch(45% 0.00564 271.22)",
+          "oklch(55% 0.00564 271.22)",
+          "oklch(65% 0.00564 271.22)",
+          "oklch(80% 0.00564 271.22)",
+          "oklch(95% 0.00564 271.22)"
+        ]
+      },
+      "mail-avatar": {
+        "role": "secondary",
+        "displayName": "Mail Avatar",
+        "tonalRamp": [
+          "oklch(15% 0.12704 308.59)",
+          "oklch(25% 0.12704 308.59)",
+          "oklch(35% 0.12704 308.59)",
+          "oklch(45% 0.12704 308.59)",
+          "oklch(55% 0.12704 308.59)",
+          "oklch(65% 0.12704 308.59)",
+          "oklch(80% 0.12704 308.59)",
+          "oklch(95% 0.12704 308.59)"
+        ]
+      },
+      "mail-avatar-dark": {
+        "role": "secondary",
+        "displayName": "Mail Avatar Dark",
+        "tonalRamp": [
+          "oklch(15% 0.12337 307.47)",
+          "oklch(25% 0.12337 307.47)",
+          "oklch(35% 0.12337 307.47)",
+          "oklch(45% 0.12337 307.47)",
+          "oklch(55% 0.12337 307.47)",
+          "oklch(65% 0.12337 307.47)",
+          "oklch(80% 0.12337 307.47)",
+          "oklch(95% 0.12337 307.47)"
+        ]
+      },
+      "mail-row-border": {
+        "role": "neutral",
+        "displayName": "Mail Row Border",
+        "tonalRamp": [
+          "oklch(15% 0.00631 255.48)",
+          "oklch(25% 0.00631 255.48)",
+          "oklch(35% 0.00631 255.48)",
+          "oklch(45% 0.00631 255.48)",
+          "oklch(55% 0.00631 255.48)",
+          "oklch(65% 0.00631 255.48)",
+          "oklch(80% 0.00631 255.48)",
+          "oklch(95% 0.00631 255.48)"
+        ]
+      },
+      "mail-row-border-dark": {
+        "role": "neutral",
+        "displayName": "Mail Row Border Dark",
+        "tonalRamp": [
+          "oklch(15% 0.00745 240.02)",
+          "oklch(25% 0.00745 240.02)",
+          "oklch(35% 0.00745 240.02)",
+          "oklch(45% 0.00745 240.02)",
+          "oklch(55% 0.00745 240.02)",
+          "oklch(65% 0.00745 240.02)",
+          "oklch(80% 0.00745 240.02)",
+          "oklch(95% 0.00745 240.02)"
+        ]
+      },
+      "mail-checkbox-border": {
+        "role": "neutral",
+        "displayName": "Mail Checkbox Border",
+        "tonalRamp": [
+          "oklch(15% 0.00472 157.09)",
+          "oklch(25% 0.00472 157.09)",
+          "oklch(35% 0.00472 157.09)",
+          "oklch(45% 0.00472 157.09)",
+          "oklch(55% 0.00472 157.09)",
+          "oklch(65% 0.00472 157.09)",
+          "oklch(80% 0.00472 157.09)",
+          "oklch(95% 0.00472 157.09)"
+        ]
+      },
+      "mail-checkbox-border-dark": {
+        "role": "neutral",
+        "displayName": "Mail Checkbox Border Dark",
+        "tonalRamp": [
+          "oklch(15% 0.01114 247.99)",
+          "oklch(25% 0.01114 247.99)",
+          "oklch(35% 0.01114 247.99)",
+          "oklch(45% 0.01114 247.99)",
+          "oklch(55% 0.01114 247.99)",
+          "oklch(65% 0.01114 247.99)",
+          "oklch(80% 0.01114 247.99)",
+          "oklch(95% 0.01114 247.99)"
+        ]
+      },
+      "text-primary": {
+        "role": "neutral",
+        "displayName": "Text Primary",
+        "tonalRamp": [
+          "oklch(15% 0.00585 271.18)",
+          "oklch(25% 0.00585 271.18)",
+          "oklch(35% 0.00585 271.18)",
+          "oklch(45% 0.00585 271.18)",
+          "oklch(55% 0.00585 271.18)",
+          "oklch(65% 0.00585 271.18)",
+          "oklch(80% 0.00585 271.18)",
+          "oklch(95% 0.00585 271.18)"
+        ]
+      },
+      "text-primary-dark": {
+        "role": "neutral",
+        "displayName": "Text Primary Dark",
+        "tonalRamp": [
+          "oklch(15% 0.01329 262.38)",
+          "oklch(25% 0.01329 262.38)",
+          "oklch(35% 0.01329 262.38)",
+          "oklch(45% 0.01329 262.38)",
+          "oklch(55% 0.01329 262.38)",
+          "oklch(65% 0.01329 262.38)",
+          "oklch(80% 0.01329 262.38)",
+          "oklch(95% 0.01329 262.38)"
+        ]
+      },
+      "text-regular": {
+        "role": "neutral",
+        "displayName": "Text Regular",
+        "tonalRamp": [
+          "oklch(15% 0.00745 240.02)",
+          "oklch(25% 0.00745 240.02)",
+          "oklch(35% 0.00745 240.02)",
+          "oklch(45% 0.00745 240.02)",
+          "oklch(55% 0.00745 240.02)",
+          "oklch(65% 0.00745 240.02)",
+          "oklch(80% 0.00745 240.02)",
+          "oklch(95% 0.00745 240.02)"
+        ]
+      },
+      "text-regular-dark": {
+        "role": "neutral",
+        "displayName": "Text Regular Dark",
+        "tonalRamp": [
+          "oklch(15% 0.01314 266.69)",
+          "oklch(25% 0.01314 266.69)",
+          "oklch(35% 0.01314 266.69)",
+          "oklch(45% 0.01314 266.69)",
+          "oklch(55% 0.01314 266.69)",
+          "oklch(65% 0.01314 266.69)",
+          "oklch(80% 0.01314 266.69)",
+          "oklch(95% 0.01314 266.69)"
+        ]
+      },
+      "text-secondary": {
+        "role": "neutral",
+        "displayName": "Text Secondary",
+        "tonalRamp": [
+          "oklch(15% 0.00939 253.91)",
+          "oklch(25% 0.00939 253.91)",
+          "oklch(35% 0.00939 253.91)",
+          "oklch(45% 0.00939 253.91)",
+          "oklch(55% 0.00939 253.91)",
+          "oklch(65% 0.00939 253.91)",
+          "oklch(80% 0.00939 253.91)",
+          "oklch(95% 0.00939 253.91)"
+        ]
+      },
+      "text-secondary-dark": {
+        "role": "neutral",
+        "displayName": "Text Secondary Dark",
+        "tonalRamp": [
+          "oklch(15% 0.00831 253.87)",
+          "oklch(25% 0.00831 253.87)",
+          "oklch(35% 0.00831 253.87)",
+          "oklch(45% 0.00831 253.87)",
+          "oklch(55% 0.00831 253.87)",
+          "oklch(65% 0.00831 253.87)",
+          "oklch(80% 0.00831 253.87)",
+          "oklch(95% 0.00831 253.87)"
+        ]
+      },
+      "mail-row-hover": {
+        "role": "neutral",
+        "displayName": "Mail Row Hover",
+        "tonalRamp": [
+          "oklch(15% 0.02071 261.77)",
+          "oklch(25% 0.02071 261.77)",
+          "oklch(35% 0.02071 261.77)",
+          "oklch(45% 0.02071 261.77)",
+          "oklch(55% 0.02071 261.77)",
+          "oklch(65% 0.02071 261.77)",
+          "oklch(80% 0.02071 261.77)",
+          "oklch(95% 0.02071 261.77)"
+        ]
+      },
+      "mail-row-hover-dark": {
+        "role": "neutral",
+        "displayName": "Mail Row Hover Dark",
+        "tonalRamp": [
+          "oklch(15% 0.01926 260.66)",
+          "oklch(25% 0.01926 260.66)",
+          "oklch(35% 0.01926 260.66)",
+          "oklch(45% 0.01926 260.66)",
+          "oklch(55% 0.01926 260.66)",
+          "oklch(65% 0.01926 260.66)",
+          "oklch(80% 0.01926 260.66)",
+          "oklch(95% 0.01926 260.66)"
+        ]
+      },
+      "starred": {
+        "role": "secondary",
+        "displayName": "Starred",
+        "tonalRamp": [
+          "oklch(15% 0.13499 59.09)",
+          "oklch(25% 0.13499 59.09)",
+          "oklch(35% 0.13499 59.09)",
+          "oklch(45% 0.13499 59.09)",
+          "oklch(55% 0.13499 59.09)",
+          "oklch(65% 0.13499 59.09)",
+          "oklch(80% 0.13499 59.09)",
+          "oklch(95% 0.13499 59.09)"
+        ]
+      },
+      "starred-dark": {
+        "role": "secondary",
+        "displayName": "Starred Dark",
+        "tonalRamp": [
+          "oklch(15% 0.13939 90.56)",
+          "oklch(25% 0.13939 90.56)",
+          "oklch(35% 0.13939 90.56)",
+          "oklch(45% 0.13939 90.56)",
+          "oklch(55% 0.13939 90.56)",
+          "oklch(65% 0.13939 90.56)",
+          "oklch(80% 0.13939 90.56)",
+          "oklch(95% 0.13939 90.56)"
+        ]
+      },
+      "overlay-scrim": {
+        "role": "neutral",
+        "displayName": "Overlay Scrim"
+      }
+    },
+    "typographyMeta": {
+      "title": {
+        "displayName": "Title",
+        "purpose": "Reader subject on desktop."
+      },
+      "title-compact": {
+        "displayName": "Title Compact",
+        "purpose": "Reader subject on phones."
+      },
+      "page-title": {
+        "displayName": "Page Title",
+        "purpose": "Administrative page heading."
+      },
+      "state-title": {
+        "displayName": "State Title",
+        "purpose": "Recoverable state heading."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "Compact mail UI and message list."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Compose and navigation section labels."
+      },
+      "metadata": {
+        "displayName": "Metadata",
+        "purpose": "Secondary addresses and phone timestamps."
+      },
+      "search": {
+        "displayName": "Search",
+        "purpose": "Desktop search entry."
+      }
+    },
+    "shadows": [
+      {
+        "name": "compose-hover",
+        "value": "0 2px 6px rgb(0 0 0 / .18)",
+        "purpose": "Sidebar Compose hover."
+      },
+      {
+        "name": "floating-compose",
+        "value": "0 2px 8px rgb(0 0 0 / .18)",
+        "purpose": "Tablet and phone floating Compose."
+      },
+      {
+        "name": "search-focus",
+        "value": "0 1px 6px rgb(0 0 0 / .2)",
+        "purpose": "Focused search surface."
+      },
+      {
+        "name": "row-interaction",
+        "value": "inset 0 -1px var(--mail-row-border), 0 1px 3px rgb(0 0 0 / .18)",
+        "purpose": "Hovered or focused message row."
+      },
+      {
+        "name": "navigation-drawer",
+        "value": "4px 0 24px rgb(0 0 0 / .16)",
+        "purpose": "Fixed navigation drawer."
+      },
+      {
+        "name": "composer-light",
+        "value": "0px 0px 12px #0000001f",
+        "purpose": "Effective light Element Plus composer shadow."
+      },
+      {
+        "name": "composer-dark",
+        "value": "0px 0px 12px #000000b8",
+        "purpose": "Effective dark Element Plus composer shadow."
+      }
+    ],
+    "motion": [
+      {
+        "name": "action-feedback",
+        "value": "150ms ease",
+        "purpose": "Icon background and Compose hover lift."
+      },
+      {
+        "name": "row-feedback",
+        "value": "150ms ease-in-out",
+        "purpose": "Row background and shadow."
+      },
+      {
+        "name": "composer-transition",
+        "value": "300ms",
+        "purpose": "Inherited Element Plus transition duration."
+      },
+      {
+        "name": "theme-radial",
+        "value": "520ms ease-out",
+        "purpose": "Click-origin radial theme transition when supported; bypassed for reduced motion."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "0.01ms",
+        "purpose": "Global animation/transition reduction with one iteration and automatic scroll behavior."
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "desktop-navigation",
+        "value": "1025px"
+      },
+      {
+        "name": "drawer-and-floating-compose",
+        "value": "max-width: 1024px"
+      },
+      {
+        "name": "phone-rows-and-modal-compose",
+        "value": "max-width: 767px"
+      },
+      {
+        "name": "touch-controls",
+        "value": "pointer: coarse"
+      },
+      {
+        "name": "narrow-attachments",
+        "value": "max-width: 450px"
+      },
+      {
+        "name": "narrow-composer-header",
+        "value": "max-width: 380px"
+      },
+      {
+        "name": "short-composer",
+        "value": "max-height: 500px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Compose",
+      "kind": "button",
+      "refersTo": "button-compose",
+      "description": "Primary navigation action; sidebar or floating trigger.",
+      "html": "<button class=\"ds-compose\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M5 19h1.425L16.2 9.225L14.775 7.8L5 17.575zm-1 2q-.425 0-.712-.288T3 20v-2.425q0-.4.15-.763t.425-.637L16.2 3.575q.3-.275.663-.425t.762-.15t.775.15t.65.45L20.425 5q.3.275.437.65T21 6.4q0 .4-.138.763t-.437.662l-12.6 12.6q-.275.275-.638.425t-.762.15zM19 6.4L17.6 5zm-3.525 2.125l-.7-.725L16.2 9.225z\"/></svg><span>Compose</span></button>",
+      "css": ".ds-compose{display:flex;align-items:center;gap:16px;height:56px;padding:0 24px;border:0;border-radius:16px;background:var(--mail-compose, #c2e7ff);color:var(--mail-on-compose, #001d35);font:500 14px/1.5 Arial,sans-serif;cursor:pointer;transition:box-shadow 150ms ease;}.ds-compose:hover{box-shadow:0 2px 6px rgb(0 0 0 / .18);}.ds-compose:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}"
+    },
+    {
+      "name": "Send",
+      "kind": "button",
+      "refersTo": "button-send",
+      "description": "Solid primary pill with library interaction states.",
+      "html": "<button class=\"ds-send\">Send</button>",
+      "css": ".ds-send{height:40px;padding:0 24px;border:1px solid var(--el-color-primary, #0b57d0);border-radius:20px;background:var(--el-color-primary, #0b57d0);color:#fff;font:500 14px/1 Arial,sans-serif;cursor:pointer;transition:background-color var(--el-transition-duration, .3s);}.ds-send:hover{background:var(--el-color-primary-light-3, #4dabff);border-color:var(--el-color-primary-light-3, #4dabff);}.ds-send:active{background:var(--el-color-primary-dark-2, #1064c0);}.ds-send:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}.ds-send:disabled{cursor:not-allowed;background:var(--el-color-primary-light-5, #69c0ff);}@media(pointer:coarse),(max-width:767px){.ds-send{min-height:44px;}}"
+    },
+    {
+      "name": "Reply / Forward",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Outlined secondary action in a message.",
+      "html": "<button class=\"ds-secondary\">Reply</button>",
+      "css": ".ds-secondary{height:40px;padding:0 24px;border:1px solid var(--el-border-color, #dcdfe6);border-radius:20px;background:var(--el-bg-color, #fff);color:var(--el-text-color-regular, #3c4043);font:500 14px/1 Arial,sans-serif;cursor:pointer;transition:background-color var(--el-transition-duration, .3s);}.ds-secondary:hover{background:var(--el-color-primary-light-9, #e6f7ff);border-color:var(--el-color-primary-light-7, #91d5ff);color:var(--el-color-primary, #0b57d0);}.ds-secondary:active{border-color:var(--el-color-primary, #0b57d0);}.ds-secondary:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}@media(pointer:coarse),(max-width:767px){.ds-secondary{min-height:44px;}}"
+    },
+    {
+      "name": "Icon action",
+      "kind": "button",
+      "refersTo": "button-icon",
+      "description": "Labeled compact action with hover, active, and disabled feedback.",
+      "html": "<button class=\"ds-icon\" aria-label=\"Refresh\" title=\"Refresh\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M12 20q-3.35 0-5.675-2.325T4 12t2.325-5.675T12 4q1.725 0 3.3.712T18 6.75V5q0-.425.288-.712T19 4t.713.288T20 5v5q0 .425-.288.713T19 11h-5q-.425 0-.712-.288T13 10t.288-.712T14 9h3.2q-.8-1.4-2.187-2.2T12 6Q9.5 6 7.75 7.75T6 12t1.75 4.25T12 18q1.7 0 3.113-.862t2.187-2.313q.2-.35.563-.487t.737-.013q.4.125.575.525t-.025.75q-1.025 2-2.925 3.2T12 20\"/></svg></button>",
+      "css": ".ds-icon{display:inline-flex;align-items:center;justify-content:center;width:var(--control-size,36px);height:var(--control-size,36px);border:0;border-radius:var(--control-radius,50%);background:transparent;color:var(--el-text-color-primary,#202124);cursor:pointer;transition:background-color 150ms ease;}.ds-icon:hover{background:var(--el-fill-color-light,#f5f7fa);}.ds-icon:active{background:var(--el-fill-color,#f0f2f5);}.ds-icon:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}.ds-icon:disabled{color:var(--el-text-color-disabled,#c0c4cc);cursor:default;}@media(pointer:coarse),(max-width:767px){.ds-icon{min-width:44px;min-height:44px;}}"
+    },
+    {
+      "name": "Folder search",
+      "kind": "input",
+      "refersTo": "input-search",
+      "description": "Search-pill surface with clear action and focus lift.",
+      "html": "<form class=\"ds-search\" role=\"search\"><button class=\"ds-search-action\" aria-label=\"Search\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"24\" height=\"24\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M9.5 16q-2.725 0-4.612-1.888T3 9.5t1.888-4.612T9.5 3t4.613 1.888T16 9.5q0 1.1-.35 2.075T14.7 13.3l5.6 5.6q.275.275.275.7t-.275.7t-.7.275t-.7-.275l-5.6-5.6q-.75.6-1.725.95T9.5 16m0-2q1.875 0 3.188-1.312T14 9.5t-1.312-3.187T9.5 5T6.313 6.313T5 9.5t1.313 3.188T9.5 14\"/></svg></button><input type=\"search\" aria-label=\"Search Inbox\" placeholder=\"Search Inbox\" maxlength=\"200\"/><button type=\"button\" class=\"ds-search-action\" aria-label=\"Clear search\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"22\" height=\"22\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z\"/></svg></button></form>",
+      "css": ".ds-search{display:flex;align-items:center;width:100%;max-width:720px;height:48px;border-radius:24px;padding:0 4px;background:var(--mail-search,#e9eef6);}.ds-search:focus-within{background:var(--el-bg-color,#fff);box-shadow:0 1px 6px rgb(0 0 0 / .2);}.ds-search input{width:100%;min-width:0;height:100%;border:0;outline:0;background:transparent;color:var(--el-text-color-primary,#202124);font:400 16px/1.5 Arial,sans-serif;}.ds-search input::placeholder{color:var(--secondary-text-color,#5f6368);opacity:1;}.ds-search-action{display:grid;place-items:center;flex:none;width:40px;height:40px;border:0;border-radius:50%;background:transparent;color:var(--secondary-text-color,#5f6368);cursor:pointer;}.ds-search-action:hover{background:var(--mail-nav-hover,#e4e7ec);}.ds-search-action:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}@media(max-width:767px){.ds-search{height:44px;}.ds-search input{font-size:14px;}}"
+    },
+    {
+      "name": "Folder navigation",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "Continuous folders with selected tone and one-sided rounding.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Mail navigation\"><button class=\"ds-folder ds-folder-active\" aria-current=\"page\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M5 21q-.825 0-1.412-.587T3 19V5q0-.825.588-1.412T5 3h14q.825 0 1.413.588T21 5v14q0 .825-.587 1.413T19 21zm0-2h14v-3h-3q-.75.95-1.787 1.475T12 18t-2.212-.525T8 16H5zm7-3q.8 0 1.475-.413t1.1-1.087q.15-.225.375-.363t.5-.137H19V5H5v9h3.55q.275 0 .5.138t.375.362q.425.675 1.1 1.088T12 16m-7 3h14z\"/></svg><span>Inbox</span></button><button class=\"ds-folder\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm3.15.45l-4.15 2.5q-.275.175-.575.15t-.525-.2t-.35-.437t-.05-.588l1.1-4.725L3.775 10.8q-.25-.225-.312-.513t.037-.562t.3-.45t.55-.225l4.85-.425l1.875-4.45q.125-.3.388-.45t.537-.15t.537.15t.388.45l1.875 4.45l4.85.425q.35.05.55.225t.3.45t.038.563t-.313.512l-3.675 3.175l1.1 4.725q.075.325-.05.588t-.35.437t-.525.2t-.575-.15zm0-5.025\"/></svg><span>Starred</span></button><button class=\"ds-folder\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"m19.8 12.925l-15.4 6.5q-.5.2-.95-.088T3 18.5v-13q0-.55.45-.837t.95-.088l15.4 6.5q.625.275.625.925t-.625.925M5 17l11.85-5L5 7v3.5l6 1.5l-6 1.5zm0 0V7z\"/></svg><span>Sent</span></button></nav>",
+      "css": ".ds-nav{width:244px;}.ds-folder{display:flex;align-items:center;gap:18px;width:100%;height:36px;padding:0 24px;border:0;border-radius:0 20px 20px 0;background:transparent;color:var(--el-text-color-primary,#202124);font:400 14px/1.5 Arial,sans-serif;cursor:pointer;}.ds-folder:hover{background:var(--mail-nav-hover,#e4e7ec);}.ds-folder-active{background:var(--mail-selected,#d3e3fd);color:var(--mail-on-selected,#001d35);font-weight:600;}.ds-folder-active:hover{background:var(--mail-selected,#d3e3fd);}.ds-folder:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}@media(pointer:coarse){.ds-folder{height:44px;}}"
+    },
+    {
+      "name": "Selected mailbox",
+      "kind": "card",
+      "refersTo": "card-mailbox-selected",
+      "description": "Flat selected mailbox, address, and shared role.",
+      "html": "<button class=\"ds-mailbox\" aria-pressed=\"true\"><span class=\"ds-mailbox-name\">Team</span><span class=\"ds-mailbox-address\">team@example.com</span><span class=\"ds-mailbox-role\">Shared · Reader</span></button>",
+      "css": ".ds-mailbox{display:flex;flex-direction:column;width:220px;padding:8px;border:0;border-radius:12px;background:var(--mail-selected,#d3e3fd);color:var(--el-text-color-primary,#202124);text-align:left;font:400 14px/20px Arial,sans-serif;cursor:pointer;}.ds-mailbox-address{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100%;}.ds-mailbox-role{display:block;margin-top:2px;color:var(--el-text-color-regular,#3c4043);font-size:12px;line-height:16px;}.ds-mailbox:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}"
+    },
+    {
+      "name": "Recipient tag",
+      "kind": "chip",
+      "refersTo": "chip-recipient",
+      "description": "Element Plus primary tag with remove control.",
+      "html": "<span class=\"ds-tag\"><span>maya@example.com</span><button class=\"ds-tag-remove\" aria-label=\"Remove recipient\"><svg viewBox=\"0 0 24 24\" width=\"14\" height=\"14\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"m12 13.4l-4.9 4.9q-.275.275-.7.275t-.7-.275t-.275-.7t.275-.7l4.9-4.9l-4.9-4.9q-.275-.275-.275-.7t.275-.7t.7-.275t.7.275l4.9 4.9l4.9-4.9q.275-.275.7-.275t.7.275t.275.7t-.275.7L13.4 12l4.9 4.9q.275.275.275.7t-.275.7t-.7.275t-.7-.275z\"/></svg></button></span>",
+      "css": ".ds-tag{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 9px;border:1px solid var(--el-color-primary-light-8,#d9ecff);border-radius:4px;background:var(--el-color-primary-light-9,#e6f7ff);color:var(--el-color-primary,#0b57d0);font:400 12px/1 Arial,sans-serif;}.ds-tag-remove{display:grid;place-items:center;width:14px;height:14px;padding:0;border:0;border-radius:50%;background:transparent;color:var(--el-color-primary,#0b57d0);cursor:pointer;}.ds-tag-remove:hover{background:var(--el-color-primary,#0b57d0);color:#fff;}.ds-tag-remove:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}"
+    },
+    {
+      "name": "Unread message row",
+      "kind": "custom",
+      "refersTo": "row-unread",
+      "description": "Continuous sender, subject, preview, and time row; unread weight.",
+      "html": "<div class=\"ds-row\" role=\"link\" tabindex=\"0\" aria-label=\"Maya Chen: A few thoughts on the next release\"><input type=\"checkbox\" aria-label=\"Select message\"/><button class=\"ds-row-star\" aria-label=\"Star\"><svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 24 24\" width=\"20\" height=\"20\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"m8.85 16.825l3.15-1.9l3.15 1.925l-.825-3.6l2.775-2.4l-3.65-.325l-1.45-3.4l-1.45 3.375l-3.65.325l2.775 2.425zm3.15.45l-4.15 2.5q-.275.175-.575.15t-.525-.2t-.35-.437t-.05-.588l1.1-4.725L3.775 10.8q-.25-.225-.312-.513t.037-.562t.3-.45t.55-.225l4.85-.425l1.875-4.45q.125-.3.388-.45t.537-.15t.537.15t.388.45l1.875 4.45l4.85.425q.35.05.55.225t.3.45t.038.563t-.313.512l-3.675 3.175l1.1 4.725q.075.325-.05.588t-.35.437t-.525.2t-.575-.15zm0-5.025\"/></svg></button><strong class=\"ds-row-sender\">Maya Chen</strong><div class=\"ds-row-text\"><strong>A few thoughts on the next release</strong><span> – Hi Alex, here are the notes we discussed.</span></div><strong class=\"ds-row-time\">1:30 PM</strong></div>",
+      "css": ".ds-row{display:grid;grid-template-columns:20px 36px minmax(0,180px) minmax(0,1fr) auto;align-items:center;gap:12px;min-height:44px;padding:0 16px;background:var(--mail-unread-row,#fff);color:var(--el-text-color-primary,#202124);font:400 14px/1.5 Arial,sans-serif;cursor:pointer;transition:background .15s ease-in-out,box-shadow .15s ease-in-out;}.ds-row:hover,.ds-row:focus-within{background:var(--email-hover-background,#e8f0fe);box-shadow:inset 0 -1px var(--mail-row-border,#e4e7eb),0 1px 3px rgb(0 0 0 / .18);}.ds-row:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}.ds-row-star{display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:50%;background:transparent;color:var(--el-text-color-primary,#202124);cursor:pointer;}.ds-row-star:hover{background:var(--el-fill-color-light,#f5f7fa);}.ds-row-star:focus-visible{outline:2px solid var(--el-color-primary, #0b57d0);outline-offset:3px;}.ds-row-sender,.ds-row-text{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}.ds-row-text span{color:var(--secondary-text-color,#5f6368);}.ds-row-time{font-size:12px;white-space:nowrap;}@media(max-width:767px){.ds-row{grid-template-columns:20px minmax(0,1fr) auto;min-height:88px;gap:4px 12px;}.ds-row-star{display:none;}.ds-row-sender{grid-column:2;}.ds-row-time{grid-column:3;grid-row:1;}.ds-row-text{grid-column:2 / -1;display:flex;flex-direction:column;}}"
+    },
+    {
+      "name": "Main surface",
+      "kind": "card",
+      "refersTo": "card-main",
+      "description": "Flat rounded reading/list surface; square on phones.",
+      "html": "<section class=\"ds-main\" aria-label=\"Mail workspace\"><div class=\"ds-main-toolbar\">Inbox</div><p class=\"ds-main-content\">Read, find, and organize your mail.</p></section>",
+      "css": ".ds-main{min-width:0;overflow:hidden;border-radius:16px;background:var(--el-bg-color,#fff);color:var(--el-text-color-primary,#202124);font:400 14px/1.5 Arial,sans-serif;}.ds-main-toolbar{display:flex;align-items:center;min-height:48px;padding:3px 15px;box-shadow:var(--header-actions-border,inset 0 -1px 0 0 #ebeef5);}.ds-main-content{padding:24px 32px 32px;margin:0;}@media(max-width:767px){.ds-main{border-radius:0;}.ds-main-content{padding:24px 16px 96px;}}"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Familiar Mail Workspace",
+    "overview": "The Familiar Mail Workspace gives Cloud Mail the recognizable rhythm of Gmail: a cool shell, quiet folder navigation, a broad search field, and a continuous message surface. The configurable site title remains the product identity. Density supports repeated reading and organizing tasks; sender, subject, preview, and time establish the scan order.\n\nLight mode separates a pale shell from white message and reading surfaces. Dark mode uses charcoal and near-black surfaces with pale blue accents. Rounded controls and restrained feedback communicate actions and state. Shipping visuals are CSS and registered SVG icons; this build introduces no generated raster assets.",
+    "keyCharacteristics": [
+      "Cool tonal surfaces with blue compose and selection.",
+      "Compact sans typography and a continuous message list.",
+      "One navigation rail with a modal drawer on smaller screens.",
+      "Visible keyboard focus and permission-aware actions."
+    ],
+    "rules": [
+      {
+        "name": "The State Contrast Rule",
+        "body": "Use the defined read, unread, selected, and hover surfaces for their respective message states; unread sender, subject, and time also use bold weight.",
+        "section": "colors"
+      },
+      {
+        "name": "The Flat Workspace Rule",
+        "body": "Keep the main workspace flat at rest. Reserve shadows for focus, hover feedback, floating compose, drawers, and overlays.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do reuse semantic CSS custom properties so light and dark themes follow the effective cascade.",
+      "Do retain the single rail, continuous message list, and clear sender/subject/preview hierarchy.",
+      "Do use labeled native buttons, visible keyboard focus, and the existing permission gates.",
+      "Do let long mail subjects, filenames, and overlay content truncate or wrap according to their established contexts.",
+      "Do preserve local draft persistence and recoverable loading, empty, and error states."
+    ],
+    "donts": [
+      "Don't add archive, snooze, categories, or trash controls without supported product behavior.",
+      "Don't replace registered SVG icons with text glyphs or decorative images.",
+      "Don't add shadows to every row or mailbox card at rest.",
+      "Don't promote incidental legacy administration styles or sender-authored email styles into the mail workspace system."
+    ]
+  }
+}
