@@ -18,7 +18,7 @@
         <el-input v-model="email" type="email" autocomplete="off" :disabled="busy" />
       </el-form-item>
       <el-form-item :label="$t('mailboxAccessLevel')">
-        <el-select v-model="role" :disabled="busy" class="role-select">
+        <el-select :popper-options="viewportPopperOptions" v-model="role" :disabled="busy" class="role-select">
           <el-option v-for="value in roles" :key="value" :value="value" :label="roleLabel(value)" />
         </el-select>
       </el-form-item>
@@ -27,6 +27,7 @@
   </el-dialog>
 </template>
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import {onMounted, ref} from 'vue';
 import {useI18n} from 'vue-i18n';
 import {ElMessageBox} from 'element-plus';

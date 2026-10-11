@@ -64,11 +64,11 @@
 
                 <div class="email-sender" :style=" (showStatus ? 'gap: 10px;' : '') + ((item.unread === EmailUnreadEnum.UNREAD && showUnread)  ? 'font-weight: bold' : '')">
                   <div class="email-status" v-if="showStatus">
-                    <el-tooltip effect="dark" :content="item.statusIcon.content">
+                    <el-tooltip :popper-options="viewportPopperOptions" effect="dark" :content="item.statusIcon.content">
                       <Icon :icon="item.statusIcon.icon" :style="`color: ${item.statusIcon.color}`" width="20" height="20"/>
                     </el-tooltip>
                     <div class="del-status" v-if="item.isDel">
-                      <el-tooltip effect="dark" :content="item.isDelContent">
+                      <el-tooltip :popper-options="viewportPopperOptions" effect="dark" :content="item.isDelContent">
                         <Icon class="icon" icon="mdi:email-remove" width="20" height="20"/>
                       </el-tooltip>
                     </div>
@@ -154,7 +154,8 @@
         :virtual-ref="triggerRef"
         :show-arrow="false"
         :popper-options="{
-      modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
+      ...viewportPopperOptions,
+      modifiers: [...viewportPopperOptions.modifiers, { name: 'offset', options: { offset: [0, 0] } }],
     }"
         virtual-triggering
         trigger="contextmenu"
@@ -241,6 +242,7 @@
 </template>
 
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import IconAction from '@/components/icon-action/index.vue'
 import {Icon} from "@iconify/vue";
 import skeletonBlock from "@/components/email-scroll/skeleton/index.vue"
@@ -1369,6 +1371,17 @@ ul {
   list-style: none;
   padding: 0;
   margin: 0;
+}
+
+
+.header-actions { min-width: 0; }
+.header-actions .header-right { min-width: 0; }
+@media (max-width: 767px) {
+  .header-actions { gap: 8px; padding-inline: 12px; grid-template-columns: auto minmax(0, 1fr); }
+  .header-actions .header-right { grid-column: 2; justify-self: end; }
+  .header-actions .header-right .email-count { white-space: normal; overflow-wrap: anywhere; }
+  :deep(.email-row .email-sender .name) { grid-template-columns: minmax(0, 1fr) auto; }
+  :deep(.email-row .email-sender .phone-time) { max-width: 88px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
 
 </style>

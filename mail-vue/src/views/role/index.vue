@@ -33,7 +33,7 @@
         </el-table-column>
         <el-table-column :label="$t('tabSetting')" :width="settingWidth">
           <template #default="props">
-            <el-dropdown trigger="click">
+            <el-dropdown :popper-options="viewportPopperOptions" trigger="click">
               <el-button size="small" type="primary">{{ $t('action') }}</el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -47,16 +47,16 @@
         </el-table-column>
       </el-table>
     </el-scrollbar>
-    <el-dialog top="5vh" class="dialog" v-model="roleFormShow" @closed="resetForm">
+    <el-dialog width="460" append-to-body top="5vh" class="dialog" v-model="roleFormShow" @closed="resetForm">
       <template #header>
         <span style="font-size: 18px">{{ dialogType.title }}</span>
-        <el-popover
+        <el-popover :popper-options="viewportPopperOptions" trigger="click"
             width="340"
             :title="t('featDesc')"
             placement="bottom"
         >
           <template #reference>
-            <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+            <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
           </template>
           <div style="font-weight: bold;;margin-bottom: 2px;">{{ t('emailInterception') }}</div>
           <div>{{ t('emailInterceptionDesc') }}</div>
@@ -73,7 +73,7 @@
                   :placeholder="$t('description')" autocomplete="off" @keyup.enter="roleFormClick"/>
         <el-input-tag class="dialog-input" tag-type="warning" v-model="form.banEmail"
                       @add-tag="banEmailAddTag" type="text" :placeholder="$t('emailInterception')" autocomplete="off"/>
-        <el-select
+        <el-select :popper-options="viewportPopperOptions"
             class="dialog-input"
             v-model="form.availDomain"
             multiple
@@ -119,7 +119,7 @@
                 <el-input-number v-if="form.sendType === 'day' || form.sendType === 'count'" v-model="form.sendCount" controls-position="right" :min="0" :max="99999" size="small"
                                  :placeholder="$t('total')">
                 </el-input-number>
-                  <el-select v-model="form.sendType" placeholder="Select" size="small"
+                  <el-select :popper-options="viewportPopperOptions" v-model="form.sendType" placeholder="Select" size="small"
                              style="width: 85px; margin-left: 5px;">
                     <el-option :label="$t('total')" value="count"/>
                     <el-option :label="$t('daily')" value="day"/>
@@ -143,6 +143,7 @@
   </div>
 </template>
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import IconAction from '@/components/icon-action/index.vue'
 import {Icon} from "@iconify/vue";
 import {defineOptions, nextTick, reactive, ref, onMounted, onUnmounted} from "vue";
@@ -538,16 +539,7 @@ onUnmounted(() => window.removeEventListener('resize', adjustWidth))
 }
 
 
-:deep(.el-dialog) {
-  margin-bottom: 20px !important;
-  width: 460px !important;
-  @media (max-width: 500px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
 
-  }
-}
 
 :deep(.el-scrollbar__view) {
   height: 100%;
@@ -557,4 +549,10 @@ onUnmounted(() => window.removeEventListener('resize', adjustWidth))
   width: 100%;
   margin-top: 15px;
 }
+
+.dialog-box :deep(.el-tree-node__content) { height: auto; align-items: flex-start; padding-block: 6px; }
+.dialog-box :deep(.el-tree-node__content > div:last-child) { min-width: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 6px; white-space: normal; overflow-wrap: anywhere; }
+.dialog-box .send-num { display: inline-flex; flex-wrap: wrap; gap: 4px; margin-left: 0; }
+.dialog-box :deep(.el-tree-node__expand-icon) { flex-shrink: 0; }
+
 </style>

@@ -1,0 +1,202 @@
+/* Overlay limits apply to teleported surfaces as well as page-owned dialogs. */
+:root {
+    --overlay-gutter: 16px;
+    --overlay-width: calc(100vw - max(var(--overlay-gutter), env(safe-area-inset-left)) - max(var(--overlay-gutter), env(safe-area-inset-right)));
+    --overlay-height: calc(100dvh - max(var(--overlay-gutter), env(safe-area-inset-top)) - max(var(--overlay-gutter), env(safe-area-inset-bottom)));
+}
+
+.el-overlay-dialog {
+    display: flex;
+    align-items: safe center;
+    padding: max(var(--overlay-gutter), env(safe-area-inset-top)) max(var(--overlay-gutter), env(safe-area-inset-right)) max(var(--overlay-gutter), env(safe-area-inset-bottom)) max(var(--overlay-gutter), env(safe-area-inset-left));
+}
+
+.el-dialog {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0 !important;
+    max-width: 100%;
+    max-height: var(--overlay-height);
+    margin: 0 auto !important;
+    overflow: hidden;
+}
+
+.el-dialog__header, .el-dialog__footer {
+    flex: 0 0 auto;
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.el-dialog__header {
+    padding-right: 44px;
+}
+
+.el-dialog__headerbtn {
+    width: 44px;
+    height: 44px;
+}
+
+.el-dialog__body {
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    overflow-wrap: anywhere;
+}
+
+.el-dialog__footer .el-button + .el-button,
+.el-message-box__btns .el-button + .el-button {
+    margin-left: 0;
+}
+
+.el-dialog__footer, .el-message-box__btns {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.el-dialog__footer > * { max-width: 100%; }
+.el-dialog .el-input, .el-dialog .el-select, .el-dialog .el-input-number,
+.el-dialog .el-date-editor { max-width: 100%; min-width: 0; }
+
+.el-message-box {
+    display: flex;
+    flex-direction: column;
+    max-width: var(--overlay-width);
+    max-height: var(--overlay-height);
+}
+
+.el-message-box__header, .el-message-box__btns { flex: 0 0 auto; }
+.el-message-box__content { min-height: 0; overflow: auto; overflow-wrap: anywhere; }
+.el-message-box__message { min-width: 0; }
+.el-message-box__headerbtn { width: 44px; height: 44px; top: 0; right: 0; }
+.el-message-box__title { padding-right: 28px; overflow-wrap: anywhere; }
+
+.el-popper, .el-popover.el-popper {
+    max-width: var(--overlay-width);
+    overflow-wrap: anywhere;
+}
+
+.el-popover.el-popper, .el-dropdown__popper, .el-select__popper, .el-picker__popper, .el-table-filter {
+    max-height: var(--overlay-height);
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.el-select-dropdown { min-width: 0 !important; max-width: 100%; }
+.el-select-dropdown__item { max-width: 100%; }
+.el-dropdown-menu__item { white-space: normal; overflow-wrap: anywhere; }
+.el-notification {
+    max-width: var(--overlay-width);
+    max-height: var(--overlay-height);
+    overflow: auto;
+    overflow-wrap: anywhere;
+}
+.el-notification__group { min-width: 0; }
+.el-notification__title { padding-right: 20px; }
+.el-notification__closeBtn { width: 32px; height: 32px; top: 4px; right: 4px; }
+.el-message { max-height: var(--overlay-height); overflow: auto; }
+
+/* TinyMCE portals must not expand beyond short or narrow viewports. */
+.tox .tox-dialog {
+    width: min(600px, var(--overlay-width)) !important;
+    max-width: var(--overlay-width) !important;
+    max-height: var(--overlay-height) !important;
+}
+.tox .tox-dialog--width-lg { width: min(1200px, var(--overlay-width)) !important; height: min(850px, var(--overlay-height)) !important; }
+.tox .tox-dialog__body { min-height: 0; }
+.tox .tox-dialog__body-content { min-height: 0; max-height: none !important; overflow: auto !important; }
+.tox .tox-dialog__header, .tox .tox-dialog__footer { flex-shrink: 0; }
+.tox .tox-menu { max-width: var(--overlay-width) !important; max-height: var(--overlay-height) !important; overflow: auto; }
+.tox .tox-dialog__footer { flex-wrap: wrap; gap: 8px; }
+.tox .tox-dialog__footer-end { flex-wrap: wrap; }
+
+@media (max-width: 767px) {
+    .el-overlay-dialog .el-dialog { width: 100%; }
+    .el-input__inner, .el-textarea__inner, .el-input-tag__input { font-size: 16px; }
+    .el-dialog .el-date-editor { width: 100%; }
+    :root .el-picker__popper .el-date-picker, :root .el-picker__popper .el-date-range-picker { width: min(320px, var(--overlay-width)); }
+    :root .el-picker__popper .el-date-range-picker .el-picker-panel__body { min-width: 0; display: flex; flex-direction: column; }
+    :root .el-picker__popper .el-date-range-picker__content { width: 100%; min-width: 0; flex: none; }
+    :root .el-picker__popper .el-date-range-picker__content.is-left { border-right: 0; border-bottom: 1px solid var(--el-border-color-lighter); }
+    :root .el-picker__popper .el-picker-panel__body-wrapper { display: flex; flex-direction: column; }
+    :root .el-picker__popper .el-picker-panel__sidebar { position: static; width: 100%; border-right: 0; }
+    :root .el-picker__popper .el-picker-panel__sidebar + .el-picker-panel__body { margin-left: 0; }
+    :root .el-picker__popper .el-picker-panel__footer { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+    .el-pagination { max-width: 100%; flex-wrap: wrap; justify-content: flex-end; row-gap: 8px; }
+    .tox .tox-dialog__body { flex-direction: column; }
+    .tox .tox-dialog__body-nav { flex-direction: row; flex-wrap: wrap; width: 100%; padding: 8px; }
+    .tox .tox-dialog__body-nav-item { margin: 4px; }
+}
+
+@media (pointer: coarse), (max-width: 767px) {
+    .el-button { min-height: 44px; height: auto; white-space: normal; }
+    .el-button.is-link, .el-button.is-text { min-height: 44px; }
+    .el-input__wrapper, .el-select__wrapper, .el-input-tag__wrapper { min-height: 44px; }
+    .el-checkbox { min-height: 44px; }
+    .el-checkbox__input { padding: 8px 0; }
+    .el-dropdown-menu__item, .el-select-dropdown__item { min-height: 44px; height: auto; display: flex; align-items: center; }
+    .el-tree-node__content { min-height: 44px; }
+    .el-switch { min-height: 44px; }
+    .el-radio-button__inner { min-height: 44px; display: inline-flex; align-items: center; }
+    .tox .tox-tbtn { min-width: 44px; min-height: 44px; }
+}
+
+.el-dialog__close { color: var(--el-text-color-regular); }
+.custom-notice.el-notification {
+    --notice-space: clamp(16px, var(--notice-offset, 16px), max(16px, calc(100dvh - 160px)));
+    max-height: calc(100dvh - max(var(--notice-space), env(safe-area-inset-top), env(safe-area-inset-bottom)) - max(16px, env(safe-area-inset-top), env(safe-area-inset-bottom)));
+    overflow: hidden;
+}
+.custom-notice.notice-top { top: max(var(--notice-space), env(safe-area-inset-top)) !important; }
+.custom-notice.notice-bottom { bottom: max(var(--notice-space), env(safe-area-inset-bottom)) !important; }
+.custom-notice .el-notification__group { display: flex; flex-direction: column; min-height: 0; }
+.custom-notice .el-notification__title { flex-shrink: 0; }
+.custom-notice .el-notification__content { min-height: 0; overflow: auto; overscroll-behavior: contain; }
+@media (max-width: 767px) {
+    :root .el-picker__popper .el-date-picker .el-picker-panel__content { width: auto; }
+    .el-pager { display: flex; flex-wrap: wrap; justify-content: flex-end; max-width: 100%; }
+}
+@media (pointer: coarse), (max-width: 767px) {
+    .el-pagination .el-pager li, .el-pagination button { min-width: 44px; min-height: 44px; }
+    :root .el-input-number { min-height: 44px; }
+    :root .el-input-number__increase, :root .el-input-number__decrease { width: 44px; }
+    :root .el-input-number .el-input__wrapper { padding-inline: 48px; }
+    :root .el-input-number.is-controls-right .el-input__wrapper { padding-left: 8px; padding-right: 48px; }
+    .tox .tox-button, .tox .tox-button--icon { min-width: 44px; min-height: 44px; }
+    .tox .tox-collection__item { min-height: 44px; }
+}
+
+@media (pointer: coarse), (max-width: 767px) {
+    :root .el-input-number.is-controls-right {
+        display: inline-grid;
+        grid-template-columns: 44px minmax(0, 1fr) 44px;
+        min-width: 140px;
+    }
+    :root .el-input-number.is-controls-right .el-input { grid-column: 2; grid-row: 1; min-width: 0; }
+    :root .el-input-number.is-controls-right .el-input__wrapper { padding-inline: 4px; }
+    :root .el-input-number.is-controls-right .el-input-number__increase,
+    :root .el-input-number.is-controls-right .el-input-number__decrease {
+        position: static;
+        grid-row: 1;
+        width: 44px;
+        height: 44px;
+        border: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transform: none;
+    }
+    :root .el-input-number.is-controls-right .el-input-number__increase { grid-column: 3; }
+    :root .el-input-number.is-controls-right .el-input-number__decrease { grid-column: 1; }
+}
+
+.el-popper.is-dark { max-height: var(--overlay-height); overflow: auto; }
+.el-input-tag__inner, .el-select__selected-item { min-width: 0; }
+.el-input-tag .el-tag { max-width: 100%; }
+
+/* Select lists already own their scrollbar; keep their positioning arrow out of it. */
+:root .el-select__popper { overflow: visible; }
+:root .el-select__popper .el-select-dropdown__wrap { max-height: min(274px, calc(var(--overlay-height) - 16px)); }

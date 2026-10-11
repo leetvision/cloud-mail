@@ -32,7 +32,7 @@
     </div>
     <div class="language">
       <div class="title">{{$t('language')}}</div>
-      <el-select
+      <el-select :popper-options="viewportPopperOptions"
           :model-value="langSelect"
           class="language-select"
           placeholder="Select"
@@ -50,7 +50,7 @@
         <el-button type="primary" @click="deleteConfirm">{{$t('deleteUserBtn')}}</el-button>
       </div>
     </div>
-    <el-dialog v-model="pwdShow" :title="$t('changePassword')" width="340">
+    <el-dialog append-to-body v-model="pwdShow" :title="$t('changePassword')" width="340">
       <div class="update-pwd">
         <el-input type="password" :placeholder="$t('newPassword')" v-model="form.password" autocomplete="off" @keyup.enter="submitPwd"/>
         <el-input type="password" :placeholder="$t('confirmPassword')" v-model="form.newPwd" autocomplete="off" @keyup.enter="submitPwd"/>
@@ -60,6 +60,7 @@
   </div>
 </template>
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import {reactive, ref, defineOptions} from 'vue'
 import {resetPassword, userDelete} from "@/request/my.js";
 import {useUserStore} from "@/store/user.js";
@@ -306,4 +307,11 @@ function submitPwd() {
     gap: 20px;
   }
 }
+
+@media (max-width: 480px) {
+  .box .container .item { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .box .container .item .edit-name-input { flex-wrap: wrap; }
+  .box .container .item .edit-name-input .el-input { flex: 1 1 160px; }
+}
+
 </style>

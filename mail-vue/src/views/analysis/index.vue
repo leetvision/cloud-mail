@@ -930,6 +930,11 @@ function createSendGauge() {
   }
 }
 
+
+.analysis > *, .analysis .number-item, .analysis .picture-item, .analysis .picture-cs-item { min-width: 0; }
+.analysis .number .number-item .top { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
+.analysis .number .number-item .delete-ratio { display: flex; flex-wrap: wrap; gap: 8px 20px; }
+
 </style>
 
 

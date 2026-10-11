@@ -543,4 +543,19 @@ const handleDelete = () => {
 }
 
 
+
+.header-actions { flex-wrap: wrap; }
+.container .content .email-info .send-name, .container .content .email-info .receive-email { min-width: 0; }
+.container .content .att .att-title { flex-wrap: wrap; gap: 8px; }
+@media (max-width: 767px), (pointer: coarse) {
+  .container .content .att .att-item { min-height: 44px; }
+  .container .content .att .att-item .opt-icon a, .container .content .att .att-item .opt-icon > svg { min-width: 44px; min-height: 44px; }
+}
+@media (max-width: 380px) {
+  .container .content .att { padding: 10px; }
+  .container .content .att .att-item { grid-template-columns: auto minmax(0, 1fr) auto; }
+  .container .content .att .att-item .att-size { grid-column: 2; grid-row: 2; margin-left: 8px; }
+  .container .content .att .att-item .opt-icon { grid-column: 3; grid-row: 1 / 3; padding-left: 0; gap: 0; }
+}
+
 </style>

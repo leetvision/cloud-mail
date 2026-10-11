@@ -19,7 +19,7 @@
       <button type="button" :aria-label="$t('announcements')" class="notice icon-item" @click="openNotice">
         <Icon icon="streamline-plump:announcement-megaphone"/>
       </button>
-      <el-dropdown ref="userinfoRef" @visible-change="e => userInfoShow = e" :teleported="false" popper-class="detail-dropdown">
+      <el-dropdown :popper-options="viewportPopperOptions" ref="userinfoRef" @visible-change="e => userInfoShow = e" trigger="click" popper-class="detail-dropdown">
         <button type="button" :aria-label="$t('profile')" class="avatar" @click="userInfoHide" >
           <div class="avatar-text">
             <div>{{ formatName(userStore.user.email) }}</div>
@@ -73,6 +73,7 @@
 </template>
 
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import router from "@/router";
 import hanburger from '@/components/hamburger/index.vue'
 import {logout} from "@/request/login.js";
@@ -486,6 +487,16 @@ function formatName(email) {
   .header { gap: var(--space-1); }
   .toolbar { gap: 0; }
   .toolbar .avatar .setting-icon { margin-right: var(--space-1); width: 16px; }
+}
+
+
+.user-details { max-width: var(--overlay-width); }
+.user-details .user-name, .user-details .detail-email { max-width: 100%; }
+.user-details .action-info { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; padding-inline: 10px; overflow-wrap: anywhere; }
+.user-details .action-info > div:last-child > div { flex-wrap: wrap; }
+@media (max-width: 767px), (pointer: coarse) {
+  .user-details .logout .el-button { min-height: 44px; }
+  .toolbar .avatar { min-width: 44px; justify-content: center; }
 }
 
 </style>

@@ -17,8 +17,8 @@
           <el-input :class="!hideLoginDomain ? 'email-input' : ''" v-model="form.email"
                     type="text" :placeholder="$t('emailAccount')" autocomplete="off" @keyup.enter="submit">
             <template #append v-if="!hideLoginDomain">
-              <div @click.stop="openSelect">
-                <el-select
+              <div role="button" tabindex="0" @keydown.enter.prevent="openSelect" @keydown.space.prevent="openSelect" @click.stop="openSelect">
+                <el-select :popper-options="viewportPopperOptions"
                     v-if="show === 'login'"
                     ref="mySelect"
                     v-model="suffix"
@@ -54,8 +54,8 @@
           <el-input :class="!hideLoginDomain ? 'email-input' : ''" v-model="registerForm.email" type="text" :placeholder="$t('emailAccount')"
                     autocomplete="off" @keyup.enter="submitRegister">
             <template #append v-if="!hideLoginDomain">
-              <div @click.stop="openSelect">
-                <el-select
+              <div role="button" tabindex="0" @keydown.enter.prevent="openSelect" @keydown.space.prevent="openSelect" @click.stop="openSelect">
+                <el-select :popper-options="viewportPopperOptions"
                     v-if="show !== 'login'"
                     ref="mySelect"
                     v-model="suffix"
@@ -110,12 +110,12 @@
         </template>
       </div>
     </div>
-    <el-dialog class="bind-dialog" v-model="showBindForm" title="Register an email address">
+    <el-dialog width="400" append-to-body class="bind-dialog" v-model="showBindForm" title="Register an email address">
       <div class="bind-container">
         <el-input :class="!hideLoginDomain ? 'email-input' : ''" v-model="bindForm.email" type="text" :placeholder="$t('emailAccount')" autocomplete="off" @keyup.enter="bind">
           <template #append v-if="!hideLoginDomain">
-            <div @click.stop="openSelect">
-              <el-select
+            <div role="button" tabindex="0" @keydown.enter.prevent="openSelect" @keydown.space.prevent="openSelect" @click.stop="openSelect">
+              <el-select :popper-options="viewportPopperOptions"
                   ref="mySelect"
                   v-model="suffix"
                   :placeholder="$t('select')"
@@ -151,6 +151,7 @@
 </template>
 
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import router from "@/router";
 import {computed, nextTick, reactive, ref} from "vue";
 import {login} from "@/request/login.js";
@@ -712,14 +713,7 @@ function submitRegister() {
   padding: 0 10px;
 }
 
-:deep(.bind-dialog) {
-  width: 400px !important;
-  @media (max-width: 440px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
+
 
 .bind-container {
   display: grid;
@@ -868,5 +862,20 @@ function submitRegister() {
   right: 50px;
   top: -90px;
 }
+
+
+.form-title, .form-desc { overflow-wrap: anywhere; }
+.form-wrapper { max-width: 100%; }
+@media (max-width: 767px) {
+  .form-wrapper { padding-inline: max(16px, env(safe-area-inset-left)) max(16px, env(safe-area-inset-right)); }
+  .container { margin-inline: 0; max-width: 420px; }
+  .container .btn, .container .el-input { min-height: 44px; height: auto; }
+  .container :deep(.el-input__inner) { height: 42px; }
+  .github { bottom: max(8px, env(safe-area-inset-bottom)); right: max(8px, env(safe-area-inset-right)); }
+}
+:deep(.el-input-group__append) { max-width: 55%; }
+:deep(.el-input-group__append > div > div:last-child) { display: flex; align-items: center; min-width: 0; }
+:deep(.el-input-group__append span) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:deep(.el-input-group__append svg) { flex-shrink: 0; }
 
 </style>

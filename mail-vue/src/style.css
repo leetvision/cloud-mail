@@ -77,27 +77,6 @@ button, input, select, textarea {
     background-color: var(--el-bg-color) !important;
 }
 
-.tox .tox-dialog--width-lg {
-    height: 850px !important;
-    @media (max-width: 1024px) {
-        height: calc(100% - 40px) !important;
-    }
-}
-
-.tox .tox-dialog__body-content {
-    overflow: initial !important;
-    max-height: min(850px, calc(100vh - 110px)) !important;
-    @media (max-width: 1024px) {
-        box-sizing: initial !important;
-        max-height: min(850px, calc(100% - 40px)) !important;
-    }
-}
-
-.tox-dialog__body-content {
-    height: auto !important;
-    flex-basis: auto !important;
-}
-
 .tox .tox-collection--grid .tox-collection__group {
     max-height: 220px !important;
 }
@@ -251,12 +230,6 @@ input, textarea {
 
 .el-message__content {
     white-space: normal;
-}
-
-.el-dialog {
-    max-width: calc(100vw - 32px);
-    max-height: calc(100dvh - 32px);
-    overflow-y: auto;
 }
 
 .header-actions {

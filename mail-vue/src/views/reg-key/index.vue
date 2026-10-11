@@ -42,7 +42,7 @@
               </div>
             </div>
             <div class="info-right">
-              <el-dropdown class="setting">
+              <el-dropdown :popper-options="viewportPopperOptions" class="setting">
                 <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"/>
                 <template #dropdown>
                   <el-dropdown-menu>
@@ -60,17 +60,17 @@
         <el-empty v-if="!regKeyFirst" :image-size="isMobile ? 120 : null" :description="$t('noCodeFound')"/>
       </div>
     </el-scrollbar>
-    <el-dialog v-model="showAdd" :title="$t('addRegKey')">
+    <el-dialog width="400" append-to-body v-model="showAdd" :title="$t('addRegKey')">
       <div class="container">
         <el-input v-model="addForm.code" :placeholder="$t('regKey')" @keyup.enter="submit">
           <template #suffix>
             <IconAction @click.stop="genCode" class="gen-code" icon="bitcoin-icons:refresh-filled" width="24" height="24" :label="$t('generateCode')"/>
           </template>
         </el-input>
-        <el-select v-model="addForm.roleId" :placeholder="$t('roleDesc')">
+        <el-select :popper-options="viewportPopperOptions" v-model="addForm.roleId" :placeholder="$t('roleDesc')">
           <el-option v-for="item in roleList" :label="item.name" :value="item.roleId" :key="item.roleId"/>
         </el-select>
-        <el-date-picker
+        <el-date-picker :popper-options="viewportPopperOptions"
             v-model="addForm.expireTime"
             type="date"
             :placeholder="$t('validUntil')"
@@ -81,7 +81,7 @@
         </el-button>
       </div>
     </el-dialog>
-    <el-dialog class="history-list" v-model="showRegKeyHistory" :title="$t('useHistory')">
+    <el-dialog width="500" append-to-body class="history-list" v-model="showRegKeyHistory" :title="$t('useHistory')">
       <div class="loading" :class="historyLoading ? 'loading-show' : 'loading-hide'">
         <loading/>
       </div>
@@ -96,6 +96,7 @@
 </template>
 
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import IconAction from '@/components/icon-action/index.vue'
 import {defineOptions, nextTick, reactive, ref, watch} from "vue"
 import {Icon} from "@iconify/vue";
@@ -444,15 +445,7 @@ function openAdd() {
   height: 100%;
 }
 
-:deep(.history-list.el-dialog) {
-  min-height: 300px;
-  width: 500px !important;
-  @media (max-width: 540px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
+
 
 .history-list .loading {
   position: absolute;
@@ -499,14 +492,7 @@ function openAdd() {
   gap: 15px;
 }
 
-:deep(.el-dialog) {
-  width: 400px !important;
-  @media (max-width: 440px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
+
 
 .setting {
   cursor: pointer;
@@ -550,6 +536,12 @@ function openAdd() {
 
 :deep(.el-table__inner-wrapper:before) {
   background: var(--el-bg-color);
+}
+
+
+.scrollbar .code-box .code-item .code-info .info-left .info-left-item .code { min-width: 0; max-width: 100%; }
+@media (max-width: 767px), (pointer: coarse) {
+  .header-actions .search :deep(.el-input__inner), .header-actions .search :deep(.el-input-group) { height: 44px; }
 }
 
 </style>

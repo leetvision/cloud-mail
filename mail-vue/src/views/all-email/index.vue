@@ -26,7 +26,7 @@
         >
           <template #prefix>
             <div @click.stop="openSelect">
-              <el-select
+              <el-select :popper-options="viewportPopperOptions"
                   ref="mySelect"
                   v-model="params.searchType"
                   :placeholder="$t('select')"
@@ -44,7 +44,7 @@
             </div>
           </template>
         </el-input>
-        <el-select v-model="params.type" placeholder="Select" class="status-select" @change="typeSelectChange">
+        <el-select :popper-options="viewportPopperOptions" v-model="params.type" placeholder="Select" class="status-select" @change="typeSelectChange">
           <el-option key="1" :label="$t('all')" value="all"/>
           <el-option key="3" :label="$t('received')" value="receive"/>
           <el-option key="2" :label="$t('sent')" value="send"/>
@@ -59,23 +59,22 @@
         <IconAction class="icon clear" icon="fluent:broom-sparkle-16-regular" width="22" height="22" @click="openBathDelete" :label="$t('clearEmail')"/>
       </template>
     </emailScroll>
-    <el-dialog v-model="showBathDelete" :title="$t('clearEmail')" width="335"
+    <el-dialog append-to-body v-model="showBathDelete" :title="$t('clearEmail')" width="335"
                @closed="closedClear">
       <div class="clear-email">
         <el-input v-model="clearParams.sendName" :placeholder="$t('sender')" @keyup.enter="batchDelete"/>
         <el-input v-model="clearParams.subject" :placeholder="$t('subject')" @keyup.enter="batchDelete"/>
         <el-input v-model="clearParams.sendEmail" :placeholder="$t('sendEmailAddress')" @keyup.enter="batchDelete"/>
         <el-input v-model="clearParams.toEmail" :placeholder="$t('toEmail')" @keyup.enter="batchDelete"/>
-        <el-date-picker popper-class="my-date-picker"
+        <el-date-picker :popper-options="viewportPopperOptions" popper-class="my-date-picker"
                         v-model="clearTime"
                         type="daterange"
-                        :teleported="false"
                         unlink-panels
                         :range-separator="t('to')"
                         size="default"
         />
         <div class="clear-button">
-          <el-select v-model="clearParams.type" style="width: 200px">
+          <el-select :popper-options="viewportPopperOptions" v-model="clearParams.type" style="width: 200px">
             <el-option key="eq" :label="t('equal')" value="eq"/>
             <el-option key="left" :label="t('leading')" value="left"/>
             <el-option key="include" :label="t('include')" value="include"/>
@@ -88,6 +87,7 @@
 </template>
 
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import IconAction from '@/components/icon-action/index.vue'
 import {starAdd, starCancel} from "@/request/star.js";
 import emailScroll from "@/components/email-scroll/index.vue"
@@ -360,41 +360,7 @@ async function latest() {
 }
 
 </script>
-<style>
 
-@media (max-width: 767px) {
-  .el-date-range-picker .el-picker-panel__body {
-    min-width: auto;
-
-  }
-
-  .my-date-picker::after {
-    content: "";
-    position: absolute; /* Remove from document flow so it does not expand the layout. */
-    left: 0;
-    right: 0;
-    height: 20px;
-    background: transparent; /* Keep the visual effect visible. */
-  }
-
-  .el-date-range-picker__content {
-    width: 100%;
-  }
-
-  .el-date-range-picker {
-    width: 300px;
-  }
-
-  .el-tooltip .el-picker_popper {
-    padding-bottom: 200px;
-  }
-
-  .el-date-range-picker__content.is-left {
-    border-right: 0;
-  }
-}
-
-</style>
 <style scoped lang="scss">
 .email-list-box {
   height: 100%;
@@ -488,6 +454,15 @@ async function latest() {
 
 .icon {
   cursor: pointer;
+}
+
+
+.clear-button { flex-wrap: wrap; }
+.clear-button .el-select { flex: 1 1 150px; }
+.clear-button .el-button { flex: 1 1 80px; margin: 0; }
+@media (max-width: 767px), (pointer: coarse) {
+  .search-input { height: 44px; }
+  :deep(.el-select__wrapper), .status-select :deep(.el-select__wrapper) { min-height: 44px; }
 }
 
 </style>

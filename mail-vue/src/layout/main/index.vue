@@ -2,7 +2,7 @@
   <div :class="accountShow && hasPerm('account:query') ? 'main-box-show' : 'main-box-hide'">
     <div :class="accountShow && hasPerm('account:query') ? 'block-show' : 'block-hide'" @click="uiStore.accountShow = false"></div>
     <account :inert="!(accountShow && hasPerm('account:query'))" :class="accountShow && hasPerm('account:query') ? 'show' : 'hide'" />
-    <router-view class="main-view" v-slot="{ Component,route }">
+    <router-view :inert="mobileAccountOpen" class="main-view" v-slot="{ Component,route }">
       <keep-alive :include="['email','all-email','send','sys-setting','star','user','role','analysis','reg-key','draft']">
         <component :is="Component" :key="route.name"/>
       </keep-alive>
@@ -13,7 +13,7 @@
 import account from '@/layout/account/index.vue'
 import {useUiStore} from "@/store/ui.js";
 import {useSettingStore} from "@/store/setting.js";
-import {computed, onBeforeUnmount, onMounted, watch} from "vue";
+import {computed, onBeforeUnmount, onMounted, watch, ref, nextTick} from "vue";
 import { useRoute } from 'vue-router'
 import { hasPerm } from "@/perm/perm.js"
 
@@ -23,10 +23,31 @@ const route = useRoute()
 let  innerWidth =  window.innerWidth
 
 let elNotification = null
+let noticeStyle
 
 const accountShow = computed(() => {
   return uiStore.accountShow && settingStore.settings.manyEmail === 0
 })
+
+const isNarrow = ref(window.innerWidth < 768);
+const mobileAccountOpen = computed(() => isNarrow.value && accountShow.value && hasPerm('account:query'));
+let accountFocus;
+watch(mobileAccountOpen, async visible => {
+  if (visible) accountFocus = document.activeElement;
+  await nextTick();
+  if (visible) document.querySelector('.account-box button')?.focus();
+  else accountFocus?.focus();
+});
+function handleAccountKey(event) {
+  if (!mobileAccountOpen.value || uiStore.composerShow || event.target.closest?.('.el-dialog, .el-popper, .el-message-box')) return;
+  if (event.key === 'Escape') { uiStore.accountShow = false; return; }
+  if (event.key !== 'Tab') return;
+  const controls = [...document.querySelectorAll('.account-box button, .account-box [tabindex="0"]')].filter(el => el.getClientRects().length && !el.closest('[inert]'));
+  if (!controls.length) return;
+  const first = controls[0], last = controls.at(-1);
+  if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+  else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+}
 
 watch(() => uiStore.changeNotice, () => {
 
@@ -60,15 +81,17 @@ function showNotice(data) {
     elNotification.close()
   }
 
-  const style = document.createElement('style');
+  if (!noticeStyle) {
+    noticeStyle = document.createElement('style');
+    document.head.appendChild(noticeStyle);
+  }
   const noticeWidth = Math.min(Math.max(Number(data.noticeWidth) || 400, 240), 1200);
-  style.textContent = `
+  noticeStyle.textContent = `
   .custom-notice.el-notification {
-    --el-notification-width: min(${noticeWidth}px,calc(100% - 30px)) !important;
+    --el-notification-width: min(${noticeWidth}px, var(--overlay-width)) !important;
+    --notice-offset: ${Math.max(0, Number(data.noticeOffset) || 0)}px;
   }
   `;
-
-  document.head.appendChild(style);
 
   elNotification = ElNotification({
     title: data.noticeTitle,
@@ -78,26 +101,30 @@ function showNotice(data) {
     position: data.noticePosition,
     offset: data.noticeOffset,
     dangerouslyUseHTMLString: false,
-    customClass: 'custom-notice'
+    customClass: `custom-notice ${data.noticePosition?.startsWith('bottom') ? 'notice-bottom' : 'notice-top'}`
   })
 }
 
 onMounted(() => {
   window.addEventListener('resize', handleResize)
+  window.addEventListener('keydown', handleAccountKey)
   handleResize()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
+  window.removeEventListener('keydown', handleAccountKey)
+  elNotification?.close()
+  noticeStyle?.remove()
 })
 
 const handleResize = () => {
-  if (['content','email','send'].includes(route.meta.name)) {
-    if (innerWidth !==  window.innerWidth) {
-      innerWidth = window.innerWidth;
-      uiStore.accountShow = window.innerWidth > 767;
-    }
+  const width = window.innerWidth;
+  isNarrow.value = width < 768;
+  if (['content', 'email', 'send'].includes(route.meta.name) && (innerWidth > 767) !== (width > 767)) {
+    uiStore.accountShow = width > 767;
   }
+  innerWidth = width;
 }
 
 </script>
@@ -176,6 +203,7 @@ const handleResize = () => {
   min-width: 0;
   min-height: 0;
   overflow: auto;
+  padding-bottom: env(safe-area-inset-bottom);
   background: var(--el-bg-color);
 }
 

@@ -21,7 +21,7 @@
               <Icon icon="fluent-color:clipboard-24" width="22" height="22" @click.stop="copyAccount(item.email)"/>
               <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"
                     v-if="showNullSetting(item)"/>
-              <el-dropdown v-else trigger="click">
+              <el-dropdown :popper-options="viewportPopperOptions" v-else trigger="click">
                 <button type="button" class="mailbox-settings" :aria-label="$t('mailboxSettings', {email: item.email})">
                   <Icon icon="fluent:settings-24-filled" width="21" height="21" color="#909399"/>
                 </button>
@@ -80,12 +80,12 @@
 
     </el-scrollbar>
     <MailboxMembers v-if="membersMailbox" :mailbox="membersMailbox" @close="membersMailbox = null" />
-    <el-dialog v-model="showAdd" :title="$t('addAccount')">
+    <el-dialog width="400" append-to-body v-model="showAdd" :title="$t('addAccount')">
       <div class="container">
         <el-input v-model="addForm.email" ref="addRef" type="text" :placeholder="$t('emailAccount')" autocomplete="off" @keyup.enter="submit">
           <template #append>
-            <div @click.stop="openSelect">
-              <el-select
+            <div role="button" tabindex="0" @keydown.enter.prevent="openSelect" @keydown.space.prevent="openSelect" @click.stop="openSelect">
+              <el-select :popper-options="viewportPopperOptions"
                   ref="mySelect"
                   v-model="addForm.suffix"
                   :placeholder="$t('select')"
@@ -119,7 +119,7 @@
         <span style="font-size: 12px;color: #F56C6C" v-if="botJsError">{{ $t('verifyModuleFailed') }}</span>
       </div>
     </el-dialog>
-    <el-dialog v-model="setNameShow" :title="$t('changeUserName')">
+    <el-dialog width="400" append-to-body v-model="setNameShow" :title="$t('changeUserName')">
       <div class="container">
         <el-input v-model="accountName" type="text" :placeholder="$t('username')" autocomplete="off" @keyup.enter="setName">
         </el-input>
@@ -131,6 +131,7 @@
   </div>
 </template>
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import MailboxMembers from "@/components/mailbox-members/index.vue";
 import IconAction from '@/components/icon-action/index.vue'
 import {Icon} from "@iconify/vue";
@@ -674,14 +675,7 @@ path[fill="#ffdda1"] {
   background: var(--el-bg-color);
 }
 
-:deep(.el-dialog) {
-  width: 400px !important;
-  @media (max-width: 440px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
+
 
 .select {
   position: absolute;
@@ -709,5 +703,14 @@ path[fill="#ffdda1"] {
   pointer-events: none;
   position: fixed;
 }
+
+
+.account-box .head-opt { flex-wrap: wrap; padding-block: 4px; }
+.account-box .item .opt .settings { gap: 4px; }
+.mailbox-settings { min-width: var(--control-size); min-height: var(--control-size); align-items: center; justify-content: center; }
+:deep(.el-input-group__append) { max-width: 55%; }
+:deep(.el-input-group__append > div > div:last-child) { display: flex; align-items: center; min-width: 0; }
+:deep(.el-input-group__append span) { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+:deep(.el-input-group__append svg) { flex-shrink: 0; }
 
 </style>

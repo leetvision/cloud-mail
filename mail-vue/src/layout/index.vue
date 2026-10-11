@@ -1,5 +1,5 @@
 <template>
-  <el-container class="layout">
+  <el-container class="layout" :inert="uiStore.composerShow">
     <el-aside
         class="aside"
         :inert="!uiStore.asideShow"
@@ -10,7 +10,7 @@
         :class="(uiStore.asideShow && isMobile)? 'overlay-show':'overlay-hide'"
         @click="uiStore.asideShow = false"
     ></div>
-    <el-container class="main-container">
+    <el-container class="main-container" :inert="isMobile && uiStore.asideShow">
       <el-main>
         <el-header>
             <Header />
@@ -26,7 +26,7 @@
 import Aside from '@/layout/aside/index.vue'
 import Header from '@/layout/header/index.vue'
 import Main from '@/layout/main/index.vue'
-import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { ref, onMounted, onBeforeUnmount, watch, nextTick } from 'vue'
 import {useUiStore} from "@/store/ui.js";
 import writer from '@/layout/write/index.vue'
 
@@ -34,20 +34,43 @@ const uiStore = useUiStore();
 const writerRef = ref({})
 const isMobile = ref(window.innerWidth < 1025)
 const handleResize = () => {
-  isMobile.value = window.innerWidth < 1025
-  uiStore.asideShow = window.innerWidth > 1024;
+  const mobile = window.innerWidth < 1025;
+  if (mobile !== isMobile.value) uiStore.asideShow = !mobile;
+  isMobile.value = mobile;
 }
 
 onMounted(() => {
   uiStore.writerRef = writerRef
 
   window.addEventListener('resize', handleResize)
+  window.addEventListener('keydown', handleDrawerKey)
+  uiStore.asideShow = !isMobile.value;
   handleResize()
 })
 
 onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
+  window.removeEventListener('keydown', handleDrawerKey)
 })
+
+let drawerFocus;
+watch(() => uiStore.asideShow, async visible => {
+  if (!isMobile.value) return;
+  if (visible) drawerFocus = document.activeElement;
+  await nextTick();
+  if (visible) document.querySelector('.aside .el-menu-item')?.focus();
+  else drawerFocus?.focus();
+});
+function handleDrawerKey(event) {
+  if (!isMobile.value || !uiStore.asideShow || uiStore.composerShow) return;
+  if (event.key === 'Escape') { uiStore.asideShow = false; return; }
+  if (event.key !== 'Tab') return;
+  const items = [...document.querySelectorAll('.aside button, .aside .el-menu-item, .aside [tabindex="0"]')].filter(el => el.getClientRects().length);
+  if (!items.length) return;
+  const current = items.indexOf(document.activeElement);
+  event.preventDefault();
+  items[(current + (event.shiftKey ? -1 : 1) + items.length) % items.length]?.focus();
+}
 </script>
 
 <style lang="scss" scoped>
@@ -78,11 +101,13 @@ onBeforeUnmount(() => {
 
 .el-aside {
   width: auto;
+  max-width: calc(100% - 44px);
   transition: all 100ms ease;
 }
 
 .layout {
   height: 100%;
+  height: 100dvh;
   position: fixed;
   width: 100%;
   top: 0;
@@ -111,7 +136,7 @@ onBeforeUnmount(() => {
 .el-header {
   background: var(--el-bg-color);
   border-bottom: solid 1px var(--el-border-color);
-  padding: 0 0 0 0;
+  padding: 0 env(safe-area-inset-right) 0 env(safe-area-inset-left);
 }
 
 .overlay-show {
@@ -119,7 +144,7 @@ onBeforeUnmount(() => {
   top: 0;
   left: 0;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
   background: rgba(0, 0, 0, 0.4);
   z-index: 99;
   transition: all 0.3s;

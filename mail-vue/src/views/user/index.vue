@@ -10,7 +10,7 @@
         >
         </el-input>
       </div>
-      <el-select v-model="params.status" placeholder="Select" class="status-select"
+      <el-select :popper-options="viewportPopperOptions" v-model="params.status" placeholder="Select" class="status-select"
                  :style="`width: ${locale === 'en' ? 95 : 80 }px`">
         <el-option :key="-1" :label="$t('all')" :value="-1"/>
         <el-option :key="0" :label="$t('active')" :value="0"/>
@@ -94,7 +94,7 @@
           <el-table-column :label="$t('tabSetting')" :width="settingWidth">
             <template #default="props">
               <el-button size="small" type="primary" v-if="(props.row.type === 0 && userStore.user.type !== 0)" >{{ $t('action') }}</el-button>
-              <el-dropdown v-else >
+              <el-dropdown :popper-options="viewportPopperOptions" v-else >
                 <el-button size="small" type="primary">{{ $t('action') }}</el-button>
                 <template #dropdown>
                   <el-dropdown-menu>
@@ -143,7 +143,7 @@
         </div>
       </div>
     </el-scrollbar>
-    <el-dialog class="dialog" v-model="setPwdShow" :title="$t('changePassword')" @closed="resetUserForm">
+    <el-dialog width="400" append-to-body class="dialog" v-model="setPwdShow" :title="$t('changePassword')" @closed="resetUserForm">
       <div class="dialog-box">
         <el-input v-model="userForm.password" type="password" :placeholder="$t('newPassword')" autocomplete="off" @keyup.enter="updatePwd">
         </el-input>
@@ -152,10 +152,10 @@
         </el-button>
       </div>
     </el-dialog>
-    <el-dialog class="dialog" v-model="setTypeShow" :title="$t('changePerm')" @closed="resetUserForm">
+    <el-dialog width="400" append-to-body class="dialog" v-model="setTypeShow" :title="$t('changePerm')" @closed="resetUserForm">
       <div class="dialog-box">
         <el-input disabled :model-value="$t('admin')" v-if="userForm.type === 0"/>
-        <el-select v-else v-model="userForm.type" placeholder="Select">
+        <el-select :popper-options="viewportPopperOptions" v-else v-model="userForm.type" placeholder="Select">
           <el-option v-for="item in roleList" :label="item.name" :value="item.roleId" :key="item.roleId"/>
         </el-select>
         <el-button :disabled="userForm.type === 0" class="btn" :loading="settingLoading" type="primary" @click="setType"
@@ -163,13 +163,13 @@
         </el-button>
       </div>
     </el-dialog>
-    <el-dialog v-model="showAdd" :title="$t('addUser')" @closed="resetAddForm">
+    <el-dialog width="400" append-to-body v-model="showAdd" :title="$t('addUser')" @closed="resetAddForm">
       <div class="container">
         <el-input v-model="addForm.email" type="text" :placeholder="$t('emailAccount')" autocomplete="off" @keyup.enter="submit">
           <template #append>
-            <div @click.stop="openSelect">
+            <div role="button" tabindex="0" @keydown.enter.prevent="openSelect" @keydown.space.prevent="openSelect" @click.stop="openSelect">
               <div inert>
-                <el-select
+                <el-select :popper-options="viewportPopperOptions"
                     ref="mySelect"
                     v-model="addForm.suffix"
                     :placeholder="$t('select')"
@@ -191,7 +191,7 @@
           </template>
         </el-input>
         <el-input type="password" v-model="addForm.password" :placeholder="$t('password')" @keyup.enter="submit"/>
-        <el-select v-model="addForm.type" :placeholder="$t('perm')">
+        <el-select :popper-options="viewportPopperOptions" v-model="addForm.type" :placeholder="$t('perm')">
           <el-option v-for="item in roleList" :label="item.name" :value="item.roleId" :key="item.roleId"/>
         </el-select>
         <el-button class="btn" type="primary" @click="submit" :loading="addLoading"
@@ -199,7 +199,7 @@
         </el-button>
       </div>
     </el-dialog>
-    <el-dialog class="account-dialog" v-model="accountShow" :title="t('userAccount')" @closed="resetAccountList" >
+    <el-dialog width="500" append-to-body class="account-dialog" v-model="accountShow" :title="t('userAccount')" @closed="resetAccountList" >
       <el-table :data="accountList" style="height: 480px" v-loading="accountLoading" element-loading-background="transparent" :empty-text="accountLoading ? '' : null">
         <el-table-column property="email" :label="t('emailAccount')" >
           <template #default="props">
@@ -214,7 +214,7 @@
         </el-table-column>
         <el-table-column :label="t('action')" :width="locale === 'en' ? 75 : 65" >
           <template #default="props">
-            <el-dropdown trigger="click">
+            <el-dropdown :popper-options="viewportPopperOptions" trigger="click">
               <el-button type="primary" size="small">{{t('action')}}</el-button>
               <template #dropdown>
                 <el-dropdown-menu>
@@ -237,7 +237,7 @@
         />
       </div>
     </el-dialog>
-    <el-dialog class="account-dialog" v-model="detailsShow" :title="t('userDetails')"  >
+    <el-dialog width="500" append-to-body class="account-dialog" v-model="detailsShow" :title="t('userDetails')"  >
       <div class="details">
         <div v-if="userDetails.platform || userDetails.username" class="oauth-details">
           <el-avatar :src="userDetails.avatar" :size="30" class="oauth-avatar"/>
@@ -309,7 +309,8 @@
         :virtual-ref="triggerRef"
         :show-arrow="false"
         :popper-options="{
-      modifiers: [{ name: 'offset', options: { offset: [0, 0] } }],
+      ...viewportPopperOptions,
+      modifiers: [...viewportPopperOptions.modifiers, { name: 'offset', options: { offset: [0, 0] } }],
     }"
         virtual-triggering
         trigger="contextmenu"
@@ -377,6 +378,7 @@
 </template>
 
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import IconAction from '@/components/icon-action/index.vue'
 import {defineOptions, h, reactive, ref, watch, onMounted, onUnmounted} from 'vue'
 import {
@@ -1059,7 +1061,7 @@ function adjustWidth() {
   emailWidth.value = width > 480 ? 230 : null
   settingWidth.value = width < 480 ? (locale.value === 'en' ? 85 : 75) : null
   expandWidth.value = width < 480 ? 30 : 35
-  pagerCount.value = width < 768 ? 7 : 11
+  pagerCount.value = width < 480 ? 5 : width < 768 ? 7 : 11
   receiveWidth.value = width < 480 ? 90 : null
   layout.value = width < 768 ? 'pager' : 'prev, pager, next,sizes, total'
   phonePageShow.value = width < 768
@@ -1097,23 +1099,9 @@ function adjustWidth() {
   height: 100%;
 }
 
-:deep(.el-dialog) {
-  width: 400px !important;
-  @media (max-width: 440px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
 
-:deep(.account-dialog) {
-  width: 500px !important;
-  @media (max-width: 540px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
+
+
 
 .header-actions {
   padding: var(--space-1) var(--space-3);
@@ -1333,4 +1321,15 @@ function adjustWidth() {
 :deep(.el-message-box__container) {
   align-items: start;
 }
+
+.details { min-width: 0; overflow-wrap: anywhere; }
+.account-pagination { flex-wrap: wrap; }
+@media (max-width: 767px), (pointer: coarse) {
+  .header-actions .search :deep(.el-input__inner), .header-actions .search :deep(.el-input-group) { height: 44px; }
+  .status-select :deep(.el-select__wrapper) { min-height: 44px; }
+}
+@media (max-width: 380px) {
+  .pagination { padding-inline: 8px; }
+}
+
 </style>

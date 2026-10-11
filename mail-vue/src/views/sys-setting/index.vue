@@ -27,7 +27,7 @@
               <div class="setting-item">
                 <div><span>{{ $t('regKey') }}</span></div>
                 <div>
-                  <el-select
+                  <el-select :popper-options="viewportPopperOptions"
                       @change="change"
                       :style="`width: ${ locale === 'en' ?  100 : 80 }px;`"
                       v-model="setting.regKey"
@@ -52,8 +52,8 @@
               <div class="setting-item">
                 <div>
                   <span>{{ $t('multipleEmail') }}</span>
-                  <el-tooltip effect="dark" :content="$t('multipleEmailDesc')">
-                    <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+                  <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('multipleEmailDesc')">
+                    <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
                   </el-tooltip>
                 </div>
                 <div>
@@ -64,8 +64,8 @@
               <div class="setting-item">
                 <div>
                   <span>{{ $t('syncDelete') }}</span>
-                  <el-tooltip effect="dark" :content="$t('syncDeleteDesc')">
-                    <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+                  <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('syncDeleteDesc')">
+                    <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
                   </el-tooltip>
                 </div>
                 <div>
@@ -149,12 +149,12 @@
               <div class="setting-item">
                 <div>
                   <span>{{ $t('autoRefresh') }}</span>
-                  <el-tooltip effect="dark" :content="$t('autoRefreshDesc')">
-                    <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+                  <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('autoRefreshDesc')">
+                    <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
                   </el-tooltip>
                 </div>
                 <div>
-                  <el-select
+                  <el-select :popper-options="viewportPopperOptions"
                       @change="change"
                       :style="`width: ${ locale === 'en' ? 100 : 80 }px;`"
                       v-model="setting.autoRefresh"
@@ -179,8 +179,8 @@
               <div class="setting-item">
                 <div>
                   <span>{{ $t('noRecipientTitle') }}</span>
-                  <el-tooltip effect="dark" :content="$t('noRecipientDesc')">
-                    <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+                  <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('noRecipientDesc')">
+                    <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
                   </el-tooltip>
                 </div>
                 <div>
@@ -216,8 +216,8 @@
               <div class="setting-item">
                 <div>
                   <span>{{ $t('autoClean') }}</span>
-                  <el-tooltip effect="dark" :content="$t('autoCleanDesc')">
-                    <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+                  <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('autoCleanDesc')">
+                    <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
                   </el-tooltip>
                 </div>
                 <div class="forward">
@@ -280,8 +280,8 @@
               <div class="r2domain-item">
                 <div>
                   <span>{{ $t('osDomain') }}</span>
-                  <el-tooltip effect="dark" :content="$t('ossDomainDesc')">
-                    <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+                  <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('ossDomainDesc')">
+                    <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
                   </el-tooltip>
                 </div>
                 <div class="r2domain">
@@ -324,7 +324,7 @@
                   <el-button class="opt-button" size="small" type="primary" @click="openRegVerifyCount">
                     <Icon icon="fluent:settings-48-regular" width="18" height="18"/>
                   </el-button>
-                  <el-select
+                  <el-select :popper-options="viewportPopperOptions"
                       @change="change"
                       :style="`width: ${ locale === 'en' ? 100 : 80 }px;`"
                       v-model="setting.registerVerify"
@@ -343,7 +343,7 @@
                   <el-button class="opt-button" size="small" type="primary" @click="openAddVerifyCount">
                     <Icon icon="fluent:settings-48-regular" width="18" height="18"/>
                   </el-button>
-                  <el-select
+                  <el-select :popper-options="viewportPopperOptions"
                       @change="change"
                       :style="`width: ${ locale === 'en' ? 100 : 80 }px;`"
                       v-model="setting.addEmailVerify"
@@ -496,15 +496,15 @@
       </div>
 
       <!-- Dialogs remain the same -->
-      <el-dialog v-model="editTitleShow" :title="$t('changeTitle')" width="340" @closed="editTitle = setting.title">
+      <el-dialog append-to-body v-model="editTitleShow" :title="$t('changeTitle')" width="340" @closed="editTitle = setting.title">
         <form @submit.prevent>
           <el-input type="text" :placeholder="$t('websiteTitle')" v-model="editTitle" @keyup.enter="saveTitle"/>
           <el-button type="primary" :loading="settingLoading" @click="saveTitle">{{ $t('save') }}</el-button>
         </form>
       </el-dialog>
-      <el-dialog v-model="resendTokenFormShow" :title="$t('resendToken')" width="340" @closed="cleanResendTokenForm">
+      <el-dialog append-to-body v-model="resendTokenFormShow" :title="$t('resendToken')" width="340" @closed="cleanResendTokenForm">
         <form @submit.prevent>
-          <el-select style="margin-bottom: 15px" v-model="resendTokenForm.domain" placeholder="Select">
+          <el-select :popper-options="viewportPopperOptions" style="margin-bottom: 15px" v-model="resendTokenForm.domain" placeholder="Select">
             <el-option
                 v-for="item in settingStore.domainList"
                 :key="item"
@@ -516,14 +516,14 @@
           <el-button type="primary" :loading="settingLoading" @click="saveResendToken">{{ $t('save') }}</el-button>
         </form>
       </el-dialog>
-      <el-dialog v-model="r2DomainShow" :title="$t('addOsDomain')" width="340"
+      <el-dialog append-to-body v-model="r2DomainShow" :title="$t('addOsDomain')" width="340"
                  @closed="r2DomainInput = setting.r2Domain">
         <form @submit.prevent>
           <el-input type="text" :placeholder="$t('domainDesc')" v-model="r2DomainInput" @keyup.enter="saveR2domain"/>
           <el-button type="primary" :loading="settingLoading" @click="saveR2domain">{{ $t('save') }}</el-button>
         </form>
       </el-dialog>
-      <el-dialog v-model="turnstileShow" :title="$t('addTurnstileSecret')" width="340"
+      <el-dialog append-to-body v-model="turnstileShow" :title="$t('addTurnstileSecret')" width="340"
                  @closed="turnstileForm.secretKey = '';turnstileForm.siteKey = ''">
         <form @submit.prevent>
           <el-input type="text" placeholder="Site Key" v-model="turnstileForm.siteKey" @keyup.enter="saveTurnstileKey"/>
@@ -531,7 +531,7 @@
           <el-button type="primary" :loading="settingLoading" @click="saveTurnstileKey">{{ $t('save') }}</el-button>
         </form>
       </el-dialog>
-      <el-dialog v-model="oauthSettingShow" :title="$t('oauthSetting') + ' - ' + oauthForm.label" width="340"
+      <el-dialog append-to-body v-model="oauthSettingShow" :title="$t('oauthSetting') + ' - ' + oauthForm.label" width="340"
                  @closed="oauthForm.clientId = ''; oauthForm.clientSecret = ''; oauthForm.switch = 1">
         <div class="dialog-content">
           <el-input type="text" :placeholder="$t('clientId')" v-model="oauthForm.clientId"/>
@@ -545,7 +545,7 @@
           </div>
         </template>
       </el-dialog>
-      <el-dialog
+      <el-dialog width="737" append-to-body
           v-model="showSetBackground"
           class="cut-dialog"
           @closed="closedSetBackground"
@@ -553,11 +553,11 @@
         <template #header>
           <span style="font-size: 18px">
             {{ $t('backgroundTitle') }}
-            <el-tooltip>
+            <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']">
               <template #content>
                 <span>{{ $t('backgroundWarning') }}</span>
               </template>
-              <Icon class="title-icon  warning" icon="fe:warning" width="18" height="18"/>
+              <IconAction class="title-icon  warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
             </el-tooltip>
           </span>
         </template>
@@ -581,15 +581,15 @@
           <el-button type="primary" :loading="settingLoading" @click="saveBackground">{{ $t('save') }}</el-button>
         </div>
       </el-dialog>
-      <el-dialog
+      <el-dialog width="500" append-to-body
           v-model="tgSettingShow"
           class="forward-dialog"
       >
         <template #header>
           <div class="forward-head">
             <span class="forward-set-title">{{ $t('tgBot') }}</span>
-            <el-tooltip effect="dark" :content="$t('tgBotDesc')">
-              <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+            <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('tgBotDesc')">
+              <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
             </el-tooltip>
           </div>
         </template>
@@ -600,7 +600,7 @@
           <el-input tag-type="warning" :placeholder="$t('customDomainDesc')" v-model="customDomain" @keyup.enter="tgBotSave"></el-input>
           <div class="tg-msg-label">
             <span>{{t('from')}}</span>
-            <el-select  v-model="tgMsgFrom" >
+            <el-select :popper-options="viewportPopperOptions"  v-model="tgMsgFrom" >
               <el-option
                   v-for="item in tgMsgFromOption"
                   :key="item.value"
@@ -611,7 +611,7 @@
           </div>
           <div class="tg-msg-label">
             <span>{{t('recipient')}}</span>
-            <el-select  v-model="tgMsgTo" >
+            <el-select :popper-options="viewportPopperOptions"  v-model="tgMsgTo" >
               <el-option
                   v-for="item in tgMsgToOption"
                   :key="item.value"
@@ -622,7 +622,7 @@
           </div>
           <div class="tg-msg-label">
             <span>{{t('emailText')}}</span>
-            <el-select  v-model="tgMsgText" >
+            <el-select :popper-options="viewportPopperOptions"  v-model="tgMsgText" >
               <el-option
                   v-for="item in tgMsgTextOption"
                   :key="item.value"
@@ -642,15 +642,15 @@
           </div>
         </template>
       </el-dialog>
-      <el-dialog
+      <el-dialog width="500" append-to-body
           v-model="thirdEmailShow"
           class="forward-dialog"
       >
         <template #header>
           <div class="forward-head">
             <span class="forward-set-title">{{ $t('otherEmail') }}</span>
-            <el-tooltip effect="dark" :content="$t('otherEmailDesc')">
-              <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+            <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('otherEmailDesc')">
+              <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
             </el-tooltip>
           </div>
         </template>
@@ -668,7 +668,7 @@
           </div>
         </template>
       </el-dialog>
-      <el-dialog
+      <el-dialog width="500" append-to-body
           v-model="webhookShow"
           class="forward-dialog"
           @closed="webhookFormatShow = false"
@@ -676,8 +676,8 @@
         <template #header>
           <div class="forward-head">
             <span class="forward-set-title">{{ $t('webhook') }}</span>
-            <el-tooltip effect="dark" :content="$t('webhookDesc')">
-              <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+            <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('webhookDesc')">
+              <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
             </el-tooltip>
           </div>
         </template>
@@ -710,15 +710,15 @@ Authorization: &lt;secret&gt;</pre>
           </div>
         </template>
       </el-dialog>
-      <el-dialog
+      <el-dialog width="500" append-to-body
           v-model="forwardRulesShow"
           class="forward-dialog"
       >
         <template #header>
           <div class="forward-head">
             <span class="forward-set-title">{{ $t('forwardingRules') }}</span>
-            <el-tooltip effect="dark" :content="$t('forwardingRulesDesc')">
-              <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+            <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('forwardingRulesDesc')">
+              <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
             </el-tooltip>
           </div>
         </template>
@@ -738,7 +738,7 @@ Authorization: &lt;secret&gt;</pre>
           </div>
         </template>
       </el-dialog>
-      <el-dialog class="resend-table" v-model="showResendList" :title="$t('resendTokenList')">
+      <el-dialog width="500" append-to-body class="resend-table" v-model="showResendList" :title="$t('resendTokenList')">
         <el-table :data="resendList">
           <el-table-column :min-width="emailColumnWidth" property="key" :label="$t('domain')"
                            :show-overflow-tooltip="true"/>
@@ -746,7 +746,7 @@ Authorization: &lt;secret&gt;</pre>
                            :show-overflow-tooltip="true"/>
         </el-table>
       </el-dialog>
-      <el-dialog v-model="regVerifyCountShow" :title="$t('rulesVerifyTitle',{count: regVerifyCount})"
+      <el-dialog width="400" append-to-body v-model="regVerifyCountShow" :title="$t('rulesVerifyTitle',{count: regVerifyCount})"
                  @closed="regVerifyCount = setting.regVerifyCount">
         <form @submit.prevent>
           <el-input-number type="text" v-model="regVerifyCount" :min="1" @keyup.enter="saveRegVerifyCount">
@@ -754,19 +754,19 @@ Authorization: &lt;secret&gt;</pre>
           <el-button type="primary" :loading="settingLoading" @click="saveRegVerifyCount">{{ $t('save') }}</el-button>
         </form>
       </el-dialog>
-      <el-dialog v-model="addVerifyCountShow" :title="$t('rulesVerifyTitle',{count: addVerifyCount})"
+      <el-dialog width="400" append-to-body v-model="addVerifyCountShow" :title="$t('rulesVerifyTitle',{count: addVerifyCount})"
                  @closed="addVerifyCount = setting.addVerifyCount">
         <form @submit.prevent>
           <el-input-number type="text" v-model="addVerifyCount" :min="1" @keyup.enter="saveAddVerifyCount"/>
           <el-button type="primary" :loading="settingLoading" @click="saveAddVerifyCount">{{ $t('save') }}</el-button>
         </form>
       </el-dialog>
-      <el-dialog top="5vh" v-model="noticePopupShow" :title="$t('noticePopup')" class="notice-popup"
+      <el-dialog width="820" append-to-body top="5vh" v-model="noticePopupShow" :title="$t('noticePopup')" class="notice-popup"
                  @closed="resetNoticeForm">
         <form @submit.prevent>
           <el-input v-model="noticeForm.noticeTitle" :placeholder="t('titleDesc')" @keyup.enter="saveNoticePopup"/>
           <div class="notice-line-item">
-            <el-select v-model="noticeForm.noticeType">
+            <el-select :popper-options="viewportPopperOptions" v-model="noticeForm.noticeType">
               <template #prefix>
                 <span style="margin-right: 10px">{{ $t('icon') }}</span>
               </template>
@@ -776,7 +776,7 @@ Authorization: &lt;secret&gt;</pre>
               <el-option key="warning" label="Warning" value="warning"/>
               <el-option key="info" label="Info" value="info"/>
             </el-select>
-            <el-select v-model="noticeForm.noticePosition">
+            <el-select :popper-options="viewportPopperOptions" v-model="noticeForm.noticePosition">
               <template #prefix>
                 <span style="margin-right: 10px">{{ $t('position') }}</span>
               </template>
@@ -834,7 +834,7 @@ Authorization: &lt;secret&gt;</pre>
           </div>
         </template>
       </el-dialog>
-      <el-dialog v-model="addS3Show" :title="t('s3Configuration')" width="340" @closed="resetAddS3Form">
+      <el-dialog append-to-body v-model="addS3Show" :title="t('s3Configuration')" width="340" @closed="resetAddS3Form">
         <form @submit.prevent>
           <el-input class="dialog-input" type="text" placeholder="Bucket" v-model="s3.bucket" @keyup.enter="saveS3"/>
           <el-input class="dialog-input" type="text" placeholder="Endpoint" v-model="s3.endpoint" @keyup.enter="saveS3"/>
@@ -845,8 +845,8 @@ Authorization: &lt;secret&gt;</pre>
           <div class="force-path-style">
             <div class="force-path-style-left">
               <span>ForcePathStyle</span>
-              <el-tooltip effect="dark" :content="$t('forcePathStyleDesc')">
-                <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+              <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('forcePathStyleDesc')">
+                <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
               </el-tooltip>
             </div>
             <el-switch :before-change="beforeChange" :active-value="0" :inactive-value="1"
@@ -858,7 +858,7 @@ Authorization: &lt;secret&gt;</pre>
           </div>
         </form>
       </el-dialog>
-      <el-dialog v-model="emailPrefixShow" :title="t('emailPrefix')"  @closed="resetEmailPrefix"  >
+      <el-dialog width="400" append-to-body v-model="emailPrefixShow" :title="t('emailPrefix')"  @closed="resetEmailPrefix"  >
         <div class="email-prefix">
           <div>{{ t('atLeast') }}</div>
           <el-input-number v-model="minEmailPrefix" :min="1" :max="20" style="width: 150px" @keyup.enter="saveEmailPrefix" >
@@ -873,12 +873,12 @@ Authorization: &lt;secret&gt;</pre>
         </div>
         <el-button type="primary" style="width: 100%;" :loading="settingLoading" @click="saveEmailPrefix">{{ $t('save') }}</el-button>
       </el-dialog>
-      <el-dialog v-model="blackFormShow" class="forward-dialog" @closed="resetBlackList">
+      <el-dialog width="500" append-to-body v-model="blackFormShow" class="forward-dialog" @closed="resetBlackList">
         <template #header>
           <div class="forward-head">
             <span class="forward-set-title">{{ $t('blackList') }}</span>
-            <el-tooltip effect="dark" :content="$t('blackListDesc')">
-              <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+            <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('blackListDesc')">
+              <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
             </el-tooltip>
           </div>
         </template>
@@ -895,7 +895,7 @@ Authorization: &lt;secret&gt;</pre>
         </el-form>
         <el-button type="primary" style="width: 100%;" :loading="settingLoading" @click="saveBlackList">{{ $t('save') }}</el-button>
       </el-dialog>
-      <el-dialog v-model="autoCleanShow" :title="t('autoClean')" class="forward-dialog" @closed="resetAutoClean">
+      <el-dialog width="500" append-to-body v-model="autoCleanShow" :title="t('autoClean')" class="forward-dialog" @closed="resetAutoClean">
         <el-form>
           <el-form-item :label="t('autoCleanDays')" label-position="top">
             <el-input-number v-model="autoCleanDays" :min="0" :max="3650" style="width: 100%"/>
@@ -911,12 +911,12 @@ Authorization: &lt;secret&gt;</pre>
         </el-form>
         <el-button type="primary" style="width: 100%;" :loading="settingLoading" @click="saveAutoClean">{{ $t('save') }}</el-button>
       </el-dialog>
-      <el-dialog v-model="aiCodeFilterShow" class="forward-dialog" @closed="resetAiCodeFilter">
+      <el-dialog width="500" append-to-body v-model="aiCodeFilterShow" class="forward-dialog" @closed="resetAiCodeFilter">
         <template #header>
           <div class="forward-head">
             <span class="forward-set-title">{{ $t('codeRecognitionRules') }}</span>
-            <el-tooltip effect="dark" :content="$t('codeRecognitionRulesDesc')">
-              <Icon class="warning" icon="fe:warning" width="18" height="18"/>
+            <el-tooltip :popper-options="viewportPopperOptions" :trigger="['hover', 'focus', 'click']" effect="dark" :content="$t('codeRecognitionRulesDesc')">
+              <IconAction class="warning" icon="fe:warning" width="18" height="18" :label="t('featDesc')"/>
             </el-tooltip>
           </div>
         </template>
@@ -932,6 +932,7 @@ Authorization: &lt;secret&gt;</pre>
 </template>
 
 <script setup>
+import {viewportPopperOptions} from '@/utils/overlay.js'
 import {computed, defineOptions, nextTick, reactive, ref} from "vue";
 import {deleteBackground, setBackground, setBlackList, settingQuery, settingSet} from "@/request/setting.js";
 import {useSettingStore} from "@/store/setting.js";
@@ -1984,34 +1985,11 @@ function editSetting(settingForm, refreshStatus = true) {
 }
 
 
-:deep(.el-dialog) {
-  width: 400px !important;
-  @media (max-width: 440px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
 
-:deep(.resend-table.el-dialog) {
-  min-height: 300px;
-  width: 500px !important;
-  @media (max-width: 540px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
 
-:deep(.notice-popup.el-dialog) {
-  min-height: 300px;
-  width: 820px !important;
-  @media (max-width: 860px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
+
+
+
 
 :deep(.resend-table .el-dialog__header) {
   padding-bottom: 5px;
@@ -2021,20 +1999,10 @@ function editSetting(settingForm, refreshStatus = true) {
   background: var(--el-bg-color);
 }
 
-:deep(.cut-dialog.el-dialog) {
-  width: fit-content !important;
-  height: fit-content !important;
-}
 
 
-:deep(.forward-dialog.el-dialog) {
-  width: 500px !important;
-  @media (max-width: 540px) {
-    width: calc(100% - 40px) !important;
-    margin-right: 20px !important;
-    margin-left: 20px !important;
-  }
-}
+
+
 
 .forward-dialog {
   .forward-head {
@@ -2303,6 +2271,24 @@ form .el-button {
   .dialog-footer { flex-wrap: wrap; gap: var(--space-3); }
   .webhook-footer-right { flex-wrap: wrap; }
   .bot-verify { white-space: normal; }
+}
+
+
+.cropper { max-width: 100%; height: auto; aspect-ratio: 16 / 9; }
+.background-url { max-width: 100%; }
+.forward-set-body .tg-msg-label { flex-wrap: wrap; gap: 8px; }
+.email-prefix { flex-wrap: wrap; gap: 8px; }
+.setting-item > div:last-child, .r2domain-item > div:last-child { max-width: 100%; }
+@media (max-width: 480px) {
+  .setting-item { grid-template-columns: minmax(0, 1fr); }
+  .setting-item > div:last-child { justify-items: start; }
+  .setting-item .email-title, .setting-item .r2domain, .setting-item .bot-verify { width: 100%; }
+}
+@media (max-width: 767px), (pointer: coarse) {
+  :deep(.el-button--small) { height: auto; min-height: 44px; }
+  :deep(.el-select__wrapper) { min-height: 44px; }
+  .el-switch { height: 44px; }
+  .opt-button { min-width: 44px; }
 }
 
 </style>

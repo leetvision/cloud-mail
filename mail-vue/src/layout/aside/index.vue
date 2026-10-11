@@ -176,4 +176,11 @@ const route = useRoute();
 .scroll {
 
 }
+
+.el-menu { max-width: 100%; }
+.title { overflow-wrap: anywhere; }
+@media (max-width: 767px), (pointer: coarse) {
+  .el-menu-item { min-height: 44px; height: auto; white-space: normal; }
+}
+
 </style>
