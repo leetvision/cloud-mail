@@ -10,6 +10,8 @@ import { getAuthToken } from './auth-cookie';
 import { isDel, userConst } from '../const/entity-const';
 
 const exclude = [
+ '/gro/send',
+ '/gro/reconcile',
 	'/login',
 	'/register',
 	'/setting/websiteConfig',

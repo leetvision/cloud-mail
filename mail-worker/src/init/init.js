@@ -1,3 +1,4 @@
+import groMigration from '../lib/gro-migration';
 import settingService from '../service/setting-service';
 import emailUtils from '../utils/email-utils';
 import {emailConst} from "../const/entity-const";
@@ -36,10 +37,14 @@ const dbInit = {
 		await this.v3_3DB(c);
 		await this.v3_4DB(c);
 		await this.sharedMailboxes(c);
+ await this.groIntegration(c);
 		await settingService.refresh(c);
 		return c.text('success');
 	},
 
+ async groIntegration(c) {
+ await c.env.db.batch(groMigration.split(';').map(sql=>sql.trim()).filter(Boolean).map(sql=>c.env.db.prepare(sql)));
+ },
 	async sharedMailboxes(c) {
 		await c.env.db.batch([
 			c.env.db.prepare(`CREATE TABLE IF NOT EXISTS mailbox_member (

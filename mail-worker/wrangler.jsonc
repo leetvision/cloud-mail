@@ -61,14 +61,16 @@
 
   "triggers": {
     // Runs hourly; daily maintenance methods guard on the UTC hour themselves.
-    "crons": ["0 * * * *"]
+    "crons": ["0 * * * *", "*/5 * * * *"]
   },
 
   "vars": {
     // "ai_model": "", // Defaults to @cf/meta/llama-3.1-8b-instruct-fast when omitted.
     // "analysis_cache": false, // Enables analytics-data caching.
     // "orm_log": false, // Enables SQL logging.
-    "domain": ["leet.uz"],
+    "domain": ["leet.uz", "gro.uz"],
+    "GRO_MAIL_DOMAINS": ["gro.uz"],
+    "GRO_WEBHOOK_URL": "https://dev.gro.uz/api/webhooks/cloud-mail",
     "admin": "admin@leet.uz"
   },
 

@@ -1,3 +1,5 @@
+import { ensureGroMailbox } from '../service/gro-mailbox-service';
+import { enqueueGroEmail } from '../service/gro-webhook-service';
 import PostalMime from 'postal-mime';
 import emailService from '../service/email-service';
 import accountService from '../service/account-service';
@@ -70,6 +72,10 @@ export async function email(message, env, ctx) {
 				account = await accountService.selectByEmailIncludeDel({ env: env }, baseEmail);
 			}
 		}
+
+
+  const groMailbox=await ensureGroMailbox(env,message.to);
+  if(groMailbox)account=groMailbox;
 
 		if (!account && noRecipient === settingConst.noRecipient.CLOSE) {
 			message.setReject('Recipient not found');
@@ -158,6 +164,9 @@ export async function email(message, env, ctx) {
 
 		emailRow = await emailService.completeReceive({ env }, account ? emailConst.status.RECEIVE : emailConst.status.NOONE, emailRow.emailId);
 
+
+ // Store the Gro event before forwarding filters can return. Gro retries are durable.
+ await enqueueGroEmail(env,emailRow,attachments);
 
 		if (ruleType === settingConst.ruleType.RULE) {
 

@@ -249,7 +249,9 @@ jobs:
 
       - name: Prepare shared mailbox schema
         working-directory: ./mail-worker
-        run: pnpm exec wrangler d1 execute db --remote --config wrangler-action.toml --file migrations/001-shared-mailboxes.sql
+        run: |
+          pnpm exec wrangler d1 execute db --remote --config wrangler-action.toml --file migrations/001-shared-mailboxes.sql
+          pnpm exec wrangler d1 execute db --remote --config wrangler-action.toml --file migrations/002-gro-integration.sql
 
       - name: 🚀 Start deployment
         id: deploy

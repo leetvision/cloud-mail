@@ -46,7 +46,7 @@ const settingService = {
 			throw new BizError(t('noDomainVariable'));
 		}
 
-		domainList = domainList.map(item => '@' + item);
+		domainList = [...new Set([...domainList, ...(Array.isArray(c.env.GRO_MAIL_DOMAINS) ? c.env.GRO_MAIL_DOMAINS : [])])].map(item => '@' + item);
 		setting.domainList = domainList;
 
 		let projectLink = c.env.project_link;

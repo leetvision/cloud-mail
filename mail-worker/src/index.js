@@ -1,3 +1,4 @@
+import { flushGroWebhooks } from './service/gro-webhook-service';
 import app from './hono/webs';
 import { email } from './email/email';
 import userService from './service/user-service';
@@ -21,7 +22,9 @@ export default {
 	},
 	email: email,
 	async scheduled(c, env, ctx) {
-		if (c.cron === '*/30 * * * *') {
+ await flushGroWebhooks(env);
+ if(c.cron === '*/5 * * * *')return;
+			if (c.cron === '*/30 * * * *') {
 			await analysisService.refreshEchartsCache({ env })
 			return;
 		}

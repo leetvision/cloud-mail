@@ -1,3 +1,7 @@
+import { groAddressAllowed } from '../lib/gro-auth';
+import { ensureGroMailbox } from './gro-mailbox-service';
+import { enqueueGroEmail } from './gro-webhook-service';
+import r2Service from './r2-service';
 import { mailboxAccess, requireMailbox } from './mailbox-access';
 import orm from '../entity/orm';
 import email from '../entity/email';
@@ -281,7 +285,7 @@ const emailService = {
 	},
 
 	// Send an email.
-	async send(c, params, userId) {
+	async send(c, params, userId, trustedThread) {
 
 		let {
 			accountId, // Sender account ID.
@@ -289,6 +293,7 @@ const emailService = {
 			sendType, // Send type.
 			emailId, // Email ID, present when replying to an email.
 			receiveEmail, // Recipient email addresses.
+ cc = [],
 			text, // Plain-text email body.
 			content, // Email content.
 			subject, // Email subject.
@@ -308,7 +313,8 @@ const emailService = {
 		const roleRow = await roleService.selectById(c, userRow.type);
 
 		// Check whether all recipients are internal email addresses.
-		const allInternal = receiveEmail.every(email => {
+		const allRecipients = [...receiveEmail, ...cc];
+ const allInternal = allRecipients.every(email => {
 			const domain = '@' + emailUtils.getDomain(email);
 			return domainList.includes(domain);
 		});
@@ -335,7 +341,7 @@ const emailService = {
 				if (roleRow.sendType === 'count') throw new BizError(t('totalSendLimit'), 403);
 			}
 
-			if (userRow.sendCount + receiveEmail.length > roleRow.sendCount) {
+			if (userRow.sendCount + allRecipients.length > roleRow.sendCount) {
 				if (roleRow.sendType === 'day') throw new BizError(t('daySendLack'), 403);
 				if (roleRow.sendType === 'count') throw new BizError(t('totalSendLack'), 403);
 			}
@@ -377,7 +383,9 @@ const emailService = {
 		};
 
 		// Handle replies.
-		if (sendType === 'reply') {
+		if (trustedThread) {
+ emailRow = { messageId: trustedThread.inReplyTo, relation: trustedThread.references };
+ } else if (sendType === 'reply') {
 
 			emailRow = await this.selectById(c, emailId);
 
@@ -398,6 +406,7 @@ const emailService = {
 					name,
 					accountEmail: accountRow.email,
 					receiveEmail,
+ cc,
 					subject,
 					text,
 					html,
@@ -411,6 +420,7 @@ const emailService = {
 					name,
 					accountEmail: accountRow.email,
 					receiveEmail,
+ cc,
 					subject,
 					text,
 					html,
@@ -456,6 +466,7 @@ const emailService = {
 		});
 
 		emailData.recipient = JSON.stringify(recipient);
+ emailData.cc = JSON.stringify(cc.map(address=>({address,name:''})));
 
 		if (sendType === 'reply') {
 			emailData.inReplyTo = emailRow.messageId;
@@ -464,7 +475,7 @@ const emailService = {
 
 		// Increment the user's send count when the role has a send limit.
 		if (roleRow.sendCount && roleRow.sendType !== 'internal') {
-			await userService.incrUserSendCount(c, receiveEmail.length, userId);
+			await userService.incrUserSendCount(c, allRecipients.length, userId);
 		}
 
 		// Save to the database and return the result.
@@ -491,7 +502,7 @@ const emailService = {
 
 		// Store directly in the database when every recipient is internal.
 		if (allInternal) {
-			await this.HandleOnSiteEmail(c, receiveEmail, emailResult, attList);
+			await this.HandleOnSiteEmail(c, allRecipients, emailResult, attList);
 		}
 
 		const dateStr = dayjs().format('YYYY-MM-DD');
@@ -499,9 +510,9 @@ const emailService = {
 
 		// Record the daily sent-email count.
 		if (!daySendTotal) {
-			await c.env.kv.put(kvConst.SEND_DAY_COUNT + dateStr, JSON.stringify(receiveEmail.length), { expirationTtl: 60 * 60 * 24 });
+			await c.env.kv.put(kvConst.SEND_DAY_COUNT + dateStr, JSON.stringify(allRecipients.length), { expirationTtl: 60 * 60 * 24 });
 		} else  {
-			daySendTotal = Number(daySendTotal) + receiveEmail.length
+			daySendTotal = Number(daySendTotal) + allRecipients.length
 			await c.env.kv.put(kvConst.SEND_DAY_COUNT + dateStr, JSON.stringify(daySendTotal), { expirationTtl: 60 * 60 * 24 });
 		}
 
@@ -512,6 +523,7 @@ const emailService = {
 		const sendForm = {
 			from: { email: params.accountEmail, name: params.name },
 			to: [...params.receiveEmail],
+ ...(params.cc?.length ? {cc: params.cc} : {}),
 			subject: params.subject
 		};
 
@@ -551,6 +563,7 @@ const emailService = {
 		const sendForm = {
 			from: `${params.name} <${params.accountEmail}>`,
 			to: [...params.receiveEmail],
+ ...(params.cc?.length ? {cc: params.cc} : {}),
 			subject: params.subject,
 			text: params.text,
 			html: params.html,
@@ -689,6 +702,9 @@ const emailService = {
 
 		const { noRecipient  } = await settingService.query(c);
 
+		// Resolve explicitly bound aliases before internal delivery.
+ await Promise.all(receiveEmail.map(address=>ensureGroMailbox(c.env,address)));
+
 		// Query account information for all recipients.
 		let accountList = await orm(c).select().from(account).where(inArray(account.email, receiveEmail)).all();
 
@@ -802,6 +818,16 @@ const emailService = {
 				attValues.attId = null;
 				await orm(c).insert(att).values(attValues).run();
 			}
+
+   if(c.env.GRO_WEBHOOK_URL && groAddressAllowed(c.env,emailRow.toEmail)) {
+   const attachments=[];
+   for(const item of attList) {
+    const object=await r2Service.getObj(c,item.key);
+    if(!object)throw new Error('Internal email attachment is unavailable');
+    attachments.push({...item,content:new Uint8Array(await object.arrayBuffer())});
+   }
+   await enqueueGroEmail(c.env,emailRow,attachments);
+   }
 
 		}
 
