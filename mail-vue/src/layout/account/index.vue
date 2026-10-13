@@ -7,9 +7,9 @@
     <el-scrollbar class="scrollbar" ref="scrollbarRef">
       <div v-infinite-scroll="getAccountList" :infinite-scroll-distance="600" :infinite-scroll-immediate="false">
         <div class="item" :class="itemBg(item.accountId)" v-for="(item, index) in accounts" :key="item.accountId">
-          <button type="button" class="account account-choose" :aria-pressed="item.accountId === accountStore.currentAccountId" @click="changeAccount(item)">
+          <button type="button" class="account account-choose" :title="item.email" :aria-pressed="item.accountId === accountStore.currentAccountId" @click="changeAccount(item)">
             <span>{{ item.email }}</span>
-            <small v-if="item.accessRole && item.accessRole !== 'owner'" class="shared-label">{{ $t('mailboxShared', {role: roleLabel(item.accessRole)}) }}</small>
+            <small v-if="item.accessRole && item.accessRole !== 'owner'" class="shared-label" :title="$t('mailboxShared', {role: roleLabel(item.accessRole)})">{{ roleLabel(item.accessRole) }}</small>
           </button>
           <div class="opt">
             <IconAction v-if="isOwner(item)" :label="$t('toggleAllMail')" :icon="item.allReceive ? 'flat-color-icons:folder' : 'material-symbols:mail-outline-rounded'" @click="setAllReceive(item)" />
@@ -34,13 +34,13 @@
         <template v-if="loading">
           <el-skeleton v-for="i in skeletonRows" :key="i" animated>
             <template #template>
-              <el-card class="item">
+              <div class="item mailbox-skeleton" aria-hidden="true">
                 <el-skeleton-item variant="p" class="account-skeleton"/>
                 <div class="opt">
                   <el-skeleton-item variant="text" style="width: 20px"/>
                   <el-skeleton-item variant="text" style="width: 20px"/>
                 </div>
-              </el-card>
+              </div>
             </template>
           </el-skeleton>
         </template>
@@ -49,13 +49,13 @@
         <template v-if="accounts.length > 0 && !noLoading">
           <el-skeleton animated>
             <template #template>
-              <el-card class="item">
+              <div class="item mailbox-skeleton" aria-hidden="true">
                 <el-skeleton-item variant="p" class="account-skeleton"/>
                 <div class="opt">
                   <el-skeleton-item variant="text" style="width: 20px"/>
                   <el-skeleton-item variant="text" style="width: 20px"/>
                 </div>
-              </el-card>
+              </div>
             </template>
           </el-skeleton>
         </template>
@@ -530,7 +530,7 @@ path[fill="#ffdda1"] {
 <style scoped lang="scss">
 .mailbox-settings { border: 0; background: none; color: inherit; cursor: pointer; padding: 4px; display: flex; }
 .mailbox-settings:focus-visible { outline: 2px solid var(--el-color-primary); outline-offset: 2px; }
-.shared-label { display: block; margin-top: 2px; color: var(--el-text-color-regular); font-size: 12px; line-height: 16px; }
+.shared-label { flex-shrink: 0; color: var(--secondary-text-color); font-size: 12px; line-height: 16px; }
 
 .account-box {
   display: grid;
@@ -597,62 +597,48 @@ path[fill="#ffdda1"] {
   }
 
   .item {
-    background-color: var(--el-bg-color);
-    border-radius: 8px;
-    padding: 8px;
-    margin-bottom: 8px;
-    margin-left: 10px;
-    margin-right: 10px;
-    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    height: 44px;
+    margin: 2px 8px 2px 0;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 12px;
+    box-shadow: none;
+    background: transparent;
 
     .account {
       font-weight: 400;
       font-size: 14px;
       line-height: 20px;
-      margin-bottom: 4px;
-      overflow: hidden;
+      min-width: 0;
+      margin: 0;
       white-space: nowrap;
-      text-overflow: ellipsis;
     }
 
     .account-skeleton {
-      display: block;
-      width: 70%;
-      height: 20px;
-      margin-bottom: 4px;
+      flex: 1;
+      height: 16px;
     }
 
     .opt {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      min-height: 29px;
+      flex: 0 0 auto;
+      justify-content: flex-end;
+      padding: 0;
+      margin: 0;
       font-size: 12px;
-      color: #888;
+      color: var(--secondary-text-color);
 
       .settings {
         display: flex;
         align-items: center;
-        gap: 10px;
-      }
-
-      .send-email {
-        display: flex;
-        align-items: center;
+        gap: 0;
       }
     }
 
-    :deep(.el-card__body) {
-      padding: 0;
-    }
-  }
-
-  .item:first-child {
-    margin-top: 10px;
-  }
-
-  .item-choose {
-    background: var(--choose-account-background);
   }
 }
 
@@ -699,7 +685,6 @@ path[fill="#ffdda1"] {
 
 
 .account-box .head-opt { flex-wrap: wrap; padding-block: 4px; }
-.account-box .item .opt .settings { gap: 4px; }
 .mailbox-settings { min-width: var(--control-size); min-height: var(--control-size); align-items: center; justify-content: center; }
 :deep(.el-input-group__append) { max-width: 55%; }
 :deep(.el-input-group__append > div > div:last-child) { display: flex; align-items: center; min-width: 0; }
@@ -707,15 +692,18 @@ path[fill="#ffdda1"] {
 :deep(.el-input-group__append svg) { flex-shrink: 0; }
 
 
-.account-box { height: 280px; border: 0 !important; background: transparent; margin: 0 0 0 12px; }
+.account-box { --control-size: 32px; height: 280px; border: 0 !important; background: transparent; margin: 0 0 0 12px; }
 .account-box .head-opt { box-shadow: none; padding: 0 8px; min-height: 40px; gap: 4px; }
-.account-box .item { margin: 4px 8px 8px 0; border: 0; border-radius: 12px; box-shadow: none; background: transparent; padding: 8px; overflow: hidden; }
 .account-box .item.item-choose { background: var(--mail-selected); }
-.account-choose { display: block; width: 100%; padding: 4px 0; text-align: left; color: var(--el-text-color-primary); cursor: pointer; }
-.account-choose > span { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
-.account-box .item .opt { display: flex; justify-content: flex-end; padding: 0; margin: 0; }
-.account-box .item .opt .settings { display: flex; align-items: center; gap: 0; }
+.account-choose { display: flex; flex: 1; align-items: center; gap: 4px; min-width: 0; height: var(--control-size); padding: 0; text-align: left; color: var(--el-text-color-primary); cursor: pointer; }
+.account-choose > span { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.account-choose:focus-visible { outline-offset: -2px; }
+.mailbox-skeleton .opt { gap: 8px; }
 .mailbox-settings { width: var(--control-size); height: var(--control-size); display: grid; place-items: center; border-radius: 50%; color: var(--secondary-text-color); cursor: pointer; }
 .mailbox-settings:hover { background: var(--mail-nav-hover); }
 .account-box .noLoading { display: none; }
+@media (pointer: coarse), (max-width: 767px) {
+  .account-box { --control-size: 44px; }
+  .account-box .item { height: 48px; }
+}
 </style>
